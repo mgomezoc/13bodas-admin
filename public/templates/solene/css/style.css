@@ -1,0 +1,231 @@
+/* Solene — elegante, minimal, serif headings */
+:root{
+  --radius: 18px;
+  --shadow: 0 14px 40px rgba(0,0,0,.08);
+  --line: rgba(35,35,35,.12);
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body.solene{
+  background: var(--solene-bg);
+  color: var(--solene-text);
+  font-family: var(--solene-font-body), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+a{ color: inherit; text-decoration: none; }
+a:hover{ opacity: .85; }
+
+.solene-header{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--solene-bg) 85%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+
+.solene-nav{
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 14px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 16px;
+}
+
+.solene-brand{
+  font-family: var(--solene-font-heading), serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: 13px;
+  color: var(--solene-muted);
+}
+
+.solene-nav-links{
+  display:flex;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--solene-muted);
+}
+.solene-nav-links a{
+  padding: 8px 10px;
+  border-radius: 999px;
+}
+.solene-nav-links a:hover{
+  background: rgba(0,0,0,.04);
+  color: var(--solene-text);
+}
+
+.solene-container{
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+.solene-hero{
+  padding: 42px 0 24px;
+}
+.solene-hero-media{
+  height: 56vh;
+  min-height: 360px;
+  border-radius: calc(var(--radius) + 6px);
+  background: linear-gradient(135deg, rgba(176,141,87,.20), rgba(0,0,0,.02));
+  box-shadow: var(--shadow);
+  background-size: cover;
+  background-position: center;
+}
+.solene-hero-content{
+  max-width: 780px;
+  margin: -70px auto 0;
+  background: color-mix(in srgb, var(--solene-bg) 92%, white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px rgba(0,0,0,.05);
+  padding: 26px 22px;
+  text-align: center;
+}
+
+.solene-eyebrow{
+  margin: 0 0 8px;
+  color: var(--solene-muted);
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.solene-title{
+  margin: 0;
+  font-family: var(--solene-font-heading), serif;
+  font-weight: 500;
+  letter-spacing: .02em;
+  font-size: clamp(34px, 4vw, 54px);
+}
+
+.solene-meta{
+  margin-top: 10px;
+  display:flex;
+  gap: 10px;
+  justify-content:center;
+  align-items:center;
+  flex-wrap: wrap;
+  color: var(--solene-muted);
+  font-size: 14px;
+}
+.solene-dot{ opacity: .6; }
+
+.solene-subtitle{
+  margin: 14px auto 0;
+  max-width: 52ch;
+  color: var(--solene-text);
+  opacity: .92;
+}
+
+.solene-btn{
+  display:inline-block;
+  margin-top: 18px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--solene-primary) 55%, var(--line));
+  color: var(--solene-text);
+  background: color-mix(in srgb, var(--solene-bg) 70%, white);
+}
+.solene-btn:hover{
+  border-color: var(--solene-primary);
+}
+
+.solene-section{
+  padding: 70px 0;
+}
+.solene-h2{
+  margin: 0;
+  font-family: var(--solene-font-heading), serif;
+  font-weight: 500;
+  font-size: clamp(22px, 2.2vw, 30px);
+  letter-spacing: .02em;
+}
+.solene-h3{
+  margin: 0;
+  font-family: var(--solene-font-heading), serif;
+  font-weight: 500;
+  font-size: 18px;
+}
+.solene-text{ margin: 10px 0 0; }
+.solene-muted{ color: var(--solene-muted); }
+
+.solene-divider{
+  width: 68px;
+  height: 2px;
+  margin: 16px 0 0;
+  background: color-mix(in srgb, var(--solene-primary) 55%, transparent);
+}
+
+.solene-timeline{
+  margin-top: 26px;
+  border-left: 1px solid var(--line);
+  padding-left: 18px;
+  display:flex;
+  flex-direction:column;
+  gap: 18px;
+}
+
+.solene-timeline-item{
+  display:flex;
+  gap: 14px;
+  align-items:flex-start;
+}
+.solene-timeline-mark{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  margin-left: -24px;
+  margin-top: 6px;
+  background: var(--solene-primary);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--solene-primary) 12%, transparent);
+}
+.solene-timeline-body{
+  padding-bottom: 6px;
+}
+
+.solene-countdown{
+  background: color-mix(in srgb, var(--solene-bg) 85%, white);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.solene-countdown-grid{
+  margin-top: 22px;
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.solene-count-box{
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: white;
+  padding: 16px 12px;
+  text-align:center;
+}
+.solene-count{
+  font-family: var(--solene-font-heading), serif;
+  font-size: 34px;
+  letter-spacing: .02em;
+}
+.solene-label{
+  margin-top: 4px;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--solene-muted);
+}
+
+.solene-footer{
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 720px){
+  .solene-countdown-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .solene-hero-content{ margin-top: -48px; }
+}

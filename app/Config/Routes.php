@@ -18,7 +18,6 @@ $routes->get('gracias', 'Home::gracias');
 // RUTAS DE AUTENTICACIÓN (Admin)
 // =============================================================================
 $routes->group('admin', function ($routes) {
-    // Login/Logout (sin autenticación requerida)
     $routes->get('login', 'Admin\Auth::login');
     $routes->post('login', 'Admin\Auth::attemptLogin');
     $routes->get('logout', 'Admin\Auth::logout');
@@ -28,11 +27,11 @@ $routes->group('admin', function ($routes) {
 // RUTAS DEL PANEL DE ADMINISTRACIÓN (Protegidas)
 // =============================================================================
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
-    
+
     // Dashboard
     $routes->get('/', 'Admin\Dashboard::index');
     $routes->get('dashboard', 'Admin\Dashboard::index');
-    
+
     // ---------------------------------------------------------------------
     // USUARIOS (Solo admin/superadmin)
     // ---------------------------------------------------------------------
@@ -46,7 +45,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('toggle-status/(:segment)', 'Admin\Users::toggleStatus/$1');
         $routes->post('delete/(:segment)', 'Admin\Users::delete/$1');
     });
-    
+
     // ---------------------------------------------------------------------
     // CLIENTES
     // ---------------------------------------------------------------------
@@ -60,7 +59,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:segment)', 'Admin\Clients::update/$1');
         $routes->post('toggle-status/(:segment)', 'Admin\Clients::toggleStatus/$1');
     });
-    
+
     // ---------------------------------------------------------------------
     // EVENTOS
     // ---------------------------------------------------------------------
@@ -74,7 +73,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:segment)', 'Admin\Events::update/$1');
         $routes->post('check-slug', 'Admin\Events::checkSlug');
         $routes->get('preview/(:segment)', 'Admin\Events::preview/$1');
-        
+
         // Invitados del evento
         $routes->get('(:segment)/guests', 'Admin\Guests::index/$1');
         $routes->get('(:segment)/guests/list', 'Admin\Guests::list/$1');
@@ -86,44 +85,48 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('(:segment)/guests/import', 'Admin\Guests::import/$1');
         $routes->post('(:segment)/guests/process-import', 'Admin\Guests::processImport/$1');
         $routes->get('(:segment)/guests/export', 'Admin\Guests::export/$1');
-        
+
         // Grupos de invitados
         $routes->get('(:segment)/groups', 'Admin\GuestGroups::index/$1');
         $routes->get('(:segment)/groups/list', 'Admin\GuestGroups::list/$1');
         $routes->post('(:segment)/groups/store', 'Admin\GuestGroups::store/$1');
         $routes->post('(:segment)/groups/update/(:segment)', 'Admin\GuestGroups::update/$1/$2');
         $routes->post('(:segment)/groups/delete/(:segment)', 'Admin\GuestGroups::delete/$1/$2');
-        
+
         // RSVPs
         $routes->get('(:segment)/rsvp', 'Admin\Rsvp::index/$1');
         $routes->get('(:segment)/rsvp/list', 'Admin\Rsvp::list/$1');
         $routes->get('(:segment)/rsvp/export', 'Admin\Rsvp::export/$1');
-        
+        $routes->get('(:segment)/rsvp/export-meals', 'Admin\Rsvp::exportMeals/$1');
+        $routes->get('(:segment)/rsvp/export-songs', 'Admin\Rsvp::exportSongs/$1');
+        $routes->post('(:segment)/rsvp/update-status/(:segment)', 'Admin\Rsvp::updateStatus/$1/$2');
+
         // Galería
         $routes->get('(:segment)/gallery', 'Admin\Gallery::index/$1');
         $routes->post('(:segment)/gallery/upload', 'Admin\Gallery::upload/$1');
+        $routes->post('(:segment)/gallery/update/(:segment)', 'Admin\Gallery::update/$1/$2');
         $routes->post('(:segment)/gallery/delete/(:segment)', 'Admin\Gallery::delete/$1/$2');
         $routes->post('(:segment)/gallery/reorder', 'Admin\Gallery::reorder/$1');
-        
+
         // Lista de regalos
         $routes->get('(:segment)/registry', 'Admin\Registry::index/$1');
         $routes->post('(:segment)/registry/store', 'Admin\Registry::store/$1');
         $routes->post('(:segment)/registry/update/(:segment)', 'Admin\Registry::update/$1/$2');
         $routes->post('(:segment)/registry/delete/(:segment)', 'Admin\Registry::delete/$1/$2');
-        
+
         // Opciones de menú
         $routes->get('(:segment)/menu', 'Admin\MenuOptions::index/$1');
         $routes->post('(:segment)/menu/store', 'Admin\MenuOptions::store/$1');
         $routes->post('(:segment)/menu/update/(:segment)', 'Admin\MenuOptions::update/$1/$2');
         $routes->post('(:segment)/menu/delete/(:segment)', 'Admin\MenuOptions::delete/$1/$2');
-        
+
         // Cortejo nupcial
         $routes->get('(:segment)/party', 'Admin\WeddingParty::index/$1');
         $routes->post('(:segment)/party/store', 'Admin\WeddingParty::store/$1');
         $routes->post('(:segment)/party/update/(:segment)', 'Admin\WeddingParty::update/$1/$2');
         $routes->post('(:segment)/party/delete/(:segment)', 'Admin\WeddingParty::delete/$1/$2');
     });
-    
+
     // ---------------------------------------------------------------------
     // LEADS
     // ---------------------------------------------------------------------
@@ -135,7 +138,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('convert/(:segment)', 'Admin\Leads::convert/$1');
         $routes->post('delete/(:segment)', 'Admin\Leads::delete/$1');
     });
-    
+
     // ---------------------------------------------------------------------
     // TEMPLATES
     // ---------------------------------------------------------------------
@@ -146,7 +149,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('edit/(:num)', 'Admin\Templates::edit/$1');
         $routes->post('update/(:num)', 'Admin\Templates::update/$1');
     });
-    
+
     // ---------------------------------------------------------------------
     // PERFIL
     // ---------------------------------------------------------------------
@@ -161,7 +164,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 $routes->post('api/leads', 'Api\Leads::store');
 
 // =============================================================================
-// RUTAS PÚBLICAS DE INVITACIONES (al final para capturar slugs)
+// RUTAS PÚBLICAS DE INVITACIONES
 // =============================================================================
 $routes->get('i/(:segment)', 'Invitation::view/$1');
 $routes->get('i/(:segment)/rsvp', 'Invitation::rsvp/$1');

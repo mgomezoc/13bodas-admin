@@ -45,7 +45,7 @@ class UserModel extends Model
         ]
     ];
 
-    protected $skipValidation = false;
+    protected $skipValidation = true; // Validation handled in controllers
 
     /**
      * Genera un UUID v4

@@ -21,6 +21,8 @@ class RsvpResponseModel extends Model
         'transportation_requested',
         'song_request',
         'message_to_couple',
+        'responded_at',
+        'response_method',
         'created_at'
     ];
 
@@ -35,15 +37,12 @@ class RsvpResponseModel extends Model
         $db = \Config\Database::connect();
         $db->transStart();
 
-        // Verificar si ya existe una respuesta
         $existing = $this->where('guest_id', $data['guest_id'])->first();
 
         if ($existing) {
-            // Actualizar existente
             $this->update($existing['id'], $data);
             $responseId = $existing['id'];
         } else {
-            // Crear nueva
             $responseId = UserModel::generateUUID();
             $data['id'] = $responseId;
             $data['created_at'] = date('Y-m-d H:i:s');
@@ -52,18 +51,16 @@ class RsvpResponseModel extends Model
 
         // Actualizar estado del invitado
         $guestModel = new GuestModel();
-        $guestModel->update($data['guest_id'], [
-            'rsvp_status' => $data['attending_status']
-        ]);
+        $newStatus = $data['attending_status'] === 'yes' ? 'accepted' : 'declined';
+        $guestModel->update($data['guest_id'], ['rsvp_status' => $newStatus]);
 
-        // Actualizar estado del grupo si todos han respondido
+        // Actualizar estado del grupo
         $guest = $guestModel->find($data['guest_id']);
         if ($guest) {
             $this->updateGroupStatus($guest['group_id']);
         }
 
         $db->transComplete();
-
         return $db->transStatus() ? $responseId : null;
     }
 
@@ -109,7 +106,7 @@ class RsvpResponseModel extends Model
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
             ->join('menu_options', 'menu_options.id = rsvp_responses.meal_option_id', 'left')
             ->where('guest_groups.event_id', $eventId)
-            ->orderBy('rsvp_responses.created_at', 'DESC')
+            ->orderBy('rsvp_responses.responded_at', 'DESC')
             ->findAll();
     }
 
@@ -126,7 +123,7 @@ class RsvpResponseModel extends Model
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
             ->join('menu_options', 'menu_options.id = rsvp_responses.meal_option_id')
             ->where('guest_groups.event_id', $eventId)
-            ->where('rsvp_responses.attending_status', 'accepted')
+            ->where('rsvp_responses.attending_status', 'yes')
             ->groupBy('menu_options.id')
             ->get()
             ->getResultArray();
@@ -171,5 +168,44 @@ class RsvpResponseModel extends Model
             ->where('rsvp_responses.song_request IS NOT NULL')
             ->where('rsvp_responses.song_request !=', '')
             ->findAll();
+    }
+
+    /**
+     * Obtener mensajes de los invitados
+     */
+    public function getMessages(string $eventId): array
+    {
+        return $this->select('guests.first_name, guests.last_name, rsvp_responses.message_to_couple, rsvp_responses.responded_at')
+            ->join('guests', 'guests.id = rsvp_responses.guest_id')
+            ->join('guest_groups', 'guest_groups.id = guests.group_id')
+            ->where('guest_groups.event_id', $eventId)
+            ->where('rsvp_responses.message_to_couple IS NOT NULL')
+            ->where('rsvp_responses.message_to_couple !=', '')
+            ->orderBy('rsvp_responses.responded_at', 'DESC')
+            ->findAll();
+    }
+
+    /**
+     * Contar confirmados por evento
+     */
+    public function countConfirmed(string $eventId): int
+    {
+        return $this->join('guests', 'guests.id = rsvp_responses.guest_id')
+            ->join('guest_groups', 'guest_groups.id = guests.group_id')
+            ->where('guest_groups.event_id', $eventId)
+            ->where('rsvp_responses.attending_status', 'yes')
+            ->countAllResults();
+    }
+
+    /**
+     * Contar rechazados por evento
+     */
+    public function countDeclined(string $eventId): int
+    {
+        return $this->join('guests', 'guests.id = rsvp_responses.guest_id')
+            ->join('guest_groups', 'guest_groups.id = guests.group_id')
+            ->where('guest_groups.event_id', $eventId)
+            ->where('rsvp_responses.attending_status', 'no')
+            ->countAllResults();
     }
 }

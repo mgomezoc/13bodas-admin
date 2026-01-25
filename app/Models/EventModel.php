@@ -92,7 +92,7 @@ class EventModel extends Model
                 ->orLike('events.couple_title', $filters['search'])
                 ->orLike('users.full_name', $filters['search'])
                 ->orLike('users.email', $filters['search'])
-            ->groupEnd();
+                ->groupEnd();
         }
 
         if (!empty($filters['service_status'])) {
@@ -109,7 +109,7 @@ class EventModel extends Model
 
         $sortField = $filters['sort'] ?? 'events.created_at';
         $sortOrder = $filters['order'] ?? 'DESC';
-        
+
         return $builder->orderBy($sortField, $sortOrder)->findAll();
     }
 
@@ -130,9 +130,9 @@ class EventModel extends Model
     {
         $eventId = UserModel::generateUUID();
         $data['id'] = $eventId;
-        
+
         // Valores por defecto
-        $data['site_mode'] = $data['site_mode'] ?? 'draft';
+        $data['site_mode'] = $data['site_mode'] ?? 'pending';
         $data['visibility'] = $data['visibility'] ?? 'private';
         $data['access_mode'] = $data['access_mode'] ?? 'open';
         $data['service_status'] = $data['service_status'] ?? 'pending';
@@ -143,7 +143,7 @@ class EventModel extends Model
         if ($this->insert($data)) {
             return $eventId;
         }
-        
+
         return null;
     }
 
@@ -153,7 +153,7 @@ class EventModel extends Model
     public function getEventStats(string $eventId): array
     {
         $db = \Config\Database::connect();
-        
+
         // Total de invitados
         $totalGuests = $db->table('guests')
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
@@ -194,11 +194,11 @@ class EventModel extends Model
     public function isSlugAvailable(string $slug, ?string $excludeId = null): bool
     {
         $builder = $this->where('slug', $slug);
-        
+
         if ($excludeId) {
             $builder->where('id !=', $excludeId);
         }
-        
+
         return $builder->countAllResults() === 0;
     }
 
@@ -209,16 +209,16 @@ class EventModel extends Model
     {
         // Convertir a minúsculas y reemplazar espacios
         $slug = url_title($coupleTitle, '-', true);
-        
+
         // Verificar si existe
         $originalSlug = $slug;
         $counter = 1;
-        
+
         while (!$this->isSlugAvailable($slug)) {
             $slug = $originalSlug . '-' . $counter;
             $counter++;
         }
-        
+
         return $slug;
     }
 }
