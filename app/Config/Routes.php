@@ -7,7 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // =============================================================================
-// RUTAS PÚBLICAS
+// RUTAS PÚBLICAS DEL SITIO PRINCIPAL
 // =============================================================================
 $routes->get('/', 'Home::index');
 $routes->get('terminos', 'Home::terminos');
@@ -15,41 +15,155 @@ $routes->get('privacidad', 'Home::privacidad');
 $routes->get('gracias', 'Home::gracias');
 
 // =============================================================================
-// RUTAS DE AUTENTICACIÓN
+// RUTAS DE AUTENTICACIÓN (Admin)
 // =============================================================================
-$routes->group('auth', function ($routes) {
-    $routes->get('login', 'Auth::login');
-    $routes->post('login', 'Auth::attemptLogin');
-    $routes->get('logout', 'Auth::logout');
+$routes->group('admin', function ($routes) {
+    // Login/Logout (sin autenticación requerida)
+    $routes->get('login', 'Admin\Auth::login');
+    $routes->post('login', 'Admin\Auth::attemptLogin');
+    $routes->get('logout', 'Admin\Auth::logout');
 });
 
 // =============================================================================
-// RUTAS DE ADMINISTRACIÓN (Protegidas por filtro de autenticación)
+// RUTAS DEL PANEL DE ADMINISTRACIÓN (Protegidas)
 // =============================================================================
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
+    
+    // Dashboard
     $routes->get('/', 'Admin\Dashboard::index');
     $routes->get('dashboard', 'Admin\Dashboard::index');
     
-    // Gestión de contactos/leads
-    $routes->get('leads', 'Admin\Leads::index');
-    $routes->get('leads/(:num)', 'Admin\Leads::view/$1');
-    $routes->post('leads/status/(:num)', 'Admin\Leads::updateStatus/$1');
+    // ---------------------------------------------------------------------
+    // USUARIOS (Solo admin/superadmin)
+    // ---------------------------------------------------------------------
+    $routes->group('users', function ($routes) {
+        $routes->get('/', 'Admin\Users::index');
+        $routes->get('list', 'Admin\Users::list');
+        $routes->get('create', 'Admin\Users::create');
+        $routes->post('store', 'Admin\Users::store');
+        $routes->get('edit/(:segment)', 'Admin\Users::edit/$1');
+        $routes->post('update/(:segment)', 'Admin\Users::update/$1');
+        $routes->post('toggle-status/(:segment)', 'Admin\Users::toggleStatus/$1');
+        $routes->post('delete/(:segment)', 'Admin\Users::delete/$1');
+    });
     
-    // Gestión de proyectos
-    $routes->get('proyectos', 'Admin\Proyectos::index');
-    $routes->get('proyectos/nuevo', 'Admin\Proyectos::create');
-    $routes->post('proyectos/nuevo', 'Admin\Proyectos::store');
-    $routes->get('proyectos/(:num)', 'Admin\Proyectos::view/$1');
-    $routes->get('proyectos/editar/(:num)', 'Admin\Proyectos::edit/$1');
-    $routes->post('proyectos/editar/(:num)', 'Admin\Proyectos::update/$1');
-    $routes->delete('proyectos/(:num)', 'Admin\Proyectos::delete/$1');
+    // ---------------------------------------------------------------------
+    // CLIENTES
+    // ---------------------------------------------------------------------
+    $routes->group('clients', function ($routes) {
+        $routes->get('/', 'Admin\Clients::index');
+        $routes->get('list', 'Admin\Clients::list');
+        $routes->get('create', 'Admin\Clients::create');
+        $routes->post('store', 'Admin\Clients::store');
+        $routes->get('view/(:segment)', 'Admin\Clients::view/$1');
+        $routes->get('edit/(:segment)', 'Admin\Clients::edit/$1');
+        $routes->post('update/(:segment)', 'Admin\Clients::update/$1');
+        $routes->post('toggle-status/(:segment)', 'Admin\Clients::toggleStatus/$1');
+    });
     
-    // Configuración
-    $routes->get('configuracion', 'Admin\Configuracion::index');
-    $routes->post('configuracion', 'Admin\Configuracion::update');
+    // ---------------------------------------------------------------------
+    // EVENTOS
+    // ---------------------------------------------------------------------
+    $routes->group('events', function ($routes) {
+        $routes->get('/', 'Admin\Events::index');
+        $routes->get('list', 'Admin\Events::list');
+        $routes->get('create', 'Admin\Events::create');
+        $routes->post('store', 'Admin\Events::store');
+        $routes->get('view/(:segment)', 'Admin\Events::view/$1');
+        $routes->get('edit/(:segment)', 'Admin\Events::edit/$1');
+        $routes->post('update/(:segment)', 'Admin\Events::update/$1');
+        $routes->post('check-slug', 'Admin\Events::checkSlug');
+        $routes->get('preview/(:segment)', 'Admin\Events::preview/$1');
+        
+        // Invitados del evento
+        $routes->get('(:segment)/guests', 'Admin\Guests::index/$1');
+        $routes->get('(:segment)/guests/list', 'Admin\Guests::list/$1');
+        $routes->get('(:segment)/guests/create', 'Admin\Guests::create/$1');
+        $routes->post('(:segment)/guests/store', 'Admin\Guests::store/$1');
+        $routes->get('(:segment)/guests/edit/(:segment)', 'Admin\Guests::edit/$1/$2');
+        $routes->post('(:segment)/guests/update/(:segment)', 'Admin\Guests::update/$1/$2');
+        $routes->post('(:segment)/guests/delete/(:segment)', 'Admin\Guests::delete/$1/$2');
+        $routes->get('(:segment)/guests/import', 'Admin\Guests::import/$1');
+        $routes->post('(:segment)/guests/process-import', 'Admin\Guests::processImport/$1');
+        $routes->get('(:segment)/guests/export', 'Admin\Guests::export/$1');
+        
+        // Grupos de invitados
+        $routes->get('(:segment)/groups', 'Admin\GuestGroups::index/$1');
+        $routes->get('(:segment)/groups/list', 'Admin\GuestGroups::list/$1');
+        $routes->post('(:segment)/groups/store', 'Admin\GuestGroups::store/$1');
+        $routes->post('(:segment)/groups/update/(:segment)', 'Admin\GuestGroups::update/$1/$2');
+        $routes->post('(:segment)/groups/delete/(:segment)', 'Admin\GuestGroups::delete/$1/$2');
+        
+        // RSVPs
+        $routes->get('(:segment)/rsvp', 'Admin\Rsvp::index/$1');
+        $routes->get('(:segment)/rsvp/list', 'Admin\Rsvp::list/$1');
+        $routes->get('(:segment)/rsvp/export', 'Admin\Rsvp::export/$1');
+        
+        // Galería
+        $routes->get('(:segment)/gallery', 'Admin\Gallery::index/$1');
+        $routes->post('(:segment)/gallery/upload', 'Admin\Gallery::upload/$1');
+        $routes->post('(:segment)/gallery/delete/(:segment)', 'Admin\Gallery::delete/$1/$2');
+        $routes->post('(:segment)/gallery/reorder', 'Admin\Gallery::reorder/$1');
+        
+        // Lista de regalos
+        $routes->get('(:segment)/registry', 'Admin\Registry::index/$1');
+        $routes->post('(:segment)/registry/store', 'Admin\Registry::store/$1');
+        $routes->post('(:segment)/registry/update/(:segment)', 'Admin\Registry::update/$1/$2');
+        $routes->post('(:segment)/registry/delete/(:segment)', 'Admin\Registry::delete/$1/$2');
+        
+        // Opciones de menú
+        $routes->get('(:segment)/menu', 'Admin\MenuOptions::index/$1');
+        $routes->post('(:segment)/menu/store', 'Admin\MenuOptions::store/$1');
+        $routes->post('(:segment)/menu/update/(:segment)', 'Admin\MenuOptions::update/$1/$2');
+        $routes->post('(:segment)/menu/delete/(:segment)', 'Admin\MenuOptions::delete/$1/$2');
+        
+        // Cortejo nupcial
+        $routes->get('(:segment)/party', 'Admin\WeddingParty::index/$1');
+        $routes->post('(:segment)/party/store', 'Admin\WeddingParty::store/$1');
+        $routes->post('(:segment)/party/update/(:segment)', 'Admin\WeddingParty::update/$1/$2');
+        $routes->post('(:segment)/party/delete/(:segment)', 'Admin\WeddingParty::delete/$1/$2');
+    });
     
-    // Perfil del usuario admin
-    $routes->get('perfil', 'Admin\Perfil::index');
-    $routes->post('perfil', 'Admin\Perfil::update');
-    $routes->post('perfil/password', 'Admin\Perfil::changePassword');
+    // ---------------------------------------------------------------------
+    // LEADS
+    // ---------------------------------------------------------------------
+    $routes->group('leads', function ($routes) {
+        $routes->get('/', 'Admin\Leads::index');
+        $routes->get('list', 'Admin\Leads::list');
+        $routes->get('view/(:segment)', 'Admin\Leads::view/$1');
+        $routes->post('update-status/(:segment)', 'Admin\Leads::updateStatus/$1');
+        $routes->post('convert/(:segment)', 'Admin\Leads::convert/$1');
+        $routes->post('delete/(:segment)', 'Admin\Leads::delete/$1');
+    });
+    
+    // ---------------------------------------------------------------------
+    // TEMPLATES
+    // ---------------------------------------------------------------------
+    $routes->group('templates', function ($routes) {
+        $routes->get('/', 'Admin\Templates::index');
+        $routes->get('create', 'Admin\Templates::create');
+        $routes->post('store', 'Admin\Templates::store');
+        $routes->get('edit/(:num)', 'Admin\Templates::edit/$1');
+        $routes->post('update/(:num)', 'Admin\Templates::update/$1');
+    });
+    
+    // ---------------------------------------------------------------------
+    // PERFIL
+    // ---------------------------------------------------------------------
+    $routes->get('profile', 'Admin\Profile::index');
+    $routes->post('profile/update', 'Admin\Profile::update');
+    $routes->post('profile/password', 'Admin\Profile::changePassword');
 });
+
+// =============================================================================
+// API DE LEADS (Para el formulario público del sitio)
+// =============================================================================
+$routes->post('api/leads', 'Api\Leads::store');
+
+// =============================================================================
+// RUTAS PÚBLICAS DE INVITACIONES (al final para capturar slugs)
+// =============================================================================
+$routes->get('i/(:segment)', 'Invitation::view/$1');
+$routes->get('i/(:segment)/rsvp', 'Invitation::rsvp/$1');
+$routes->post('i/(:segment)/rsvp', 'Invitation::submitRsvp/$1');
+$routes->get('i/(:segment)/rsvp/(:segment)', 'Invitation::rsvpWithCode/$1/$2');
