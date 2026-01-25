@@ -63,13 +63,13 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <div class="form-check">
-                                <input type="checkbox" id="is_child" name="is_child" class="form-check-input" value="1" <?= old('is_child') ? 'checked' : '' ?>>
+                                <input type="checkbox" id="is_child" name="is_child" class="form-check-input" value="1">
                                 <label class="form-check-label" for="is_child">Es niño/menor de edad</label>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="form-check">
-                                <input type="checkbox" id="is_primary_contact" name="is_primary_contact" class="form-check-input" value="1" <?= old('is_primary_contact', true) ? 'checked' : '' ?>>
+                                <input type="checkbox" id="is_primary_contact" name="is_primary_contact" class="form-check-input" value="1">
                                 <label class="form-check-label" for="is_primary_contact">Contacto principal del grupo</label>
                             </div>
                         </div>
@@ -103,16 +103,16 @@
                         </div>
                     </div>
                     
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Los invitados del mismo grupo comparten un código de acceso para confirmar asistencia juntos.
+                    <div class="info-box">
+                        <h6><i class="bi bi-info-circle me-2"></i>¿Qué es un grupo?</h6>
+                        <p>Los invitados del mismo grupo (ej: familia, pareja) comparten un código único para confirmar asistencia juntos desde la invitación digital.</p>
                     </div>
                 </div>
             </div>
             
             <hr class="my-4">
             
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between flex-wrap gap-2">
                 <a href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-2"></i>Cancelar
                 </a>
@@ -129,16 +129,11 @@
 <script>
 $(document).ready(function() {
     toggleNewGroupFields();
-    
     $('#group_id').on('change', toggleNewGroupFields);
 });
 
 function toggleNewGroupFields() {
-    if ($('#group_id').val() === 'new') {
-        $('#newGroupFields').show();
-    } else {
-        $('#newGroupFields').hide();
-    }
+    $('#newGroupFields').toggle($('#group_id').val() === 'new');
 }
 </script>
 <?= $this->endSection() ?>

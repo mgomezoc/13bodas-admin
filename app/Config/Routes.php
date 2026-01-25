@@ -93,7 +93,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/groups/update/(:segment)', 'Admin\GuestGroups::update/$1/$2');
         $routes->post('(:segment)/groups/delete/(:segment)', 'Admin\GuestGroups::delete/$1/$2');
 
-        // RSVPs
+        // RSVPs (Confirmaciones)
         $routes->get('(:segment)/rsvp', 'Admin\Rsvp::index/$1');
         $routes->get('(:segment)/rsvp/list', 'Admin\Rsvp::list/$1');
         $routes->get('(:segment)/rsvp/export', 'Admin\Rsvp::export/$1');
@@ -112,6 +112,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('(:segment)/registry', 'Admin\Registry::index/$1');
         $routes->post('(:segment)/registry/store', 'Admin\Registry::store/$1');
         $routes->post('(:segment)/registry/update/(:segment)', 'Admin\Registry::update/$1/$2');
+        $routes->post('(:segment)/registry/toggle-claimed/(:segment)', 'Admin\Registry::toggleClaimed/$1/$2');
         $routes->post('(:segment)/registry/delete/(:segment)', 'Admin\Registry::delete/$1/$2');
 
         // Opciones de menú

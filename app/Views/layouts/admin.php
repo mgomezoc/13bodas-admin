@@ -1,49 +1,50 @@
 <!DOCTYPE html>
 <html lang="es-MX">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="<?= csrf_hash() ?>">
-    
+
     <title><?= $this->renderSection('title') ?> | 13Bodas Admin</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="<?= base_url('img/favicon.svg') ?>">
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
-    
+
     <!-- Flatpickr CSS -->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Table CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.1/dist/bootstrap-table.min.css" rel="stylesheet">
-    
+
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    
+
     <!-- Admin Custom CSS -->
     <link rel="stylesheet" href="<?= base_url('css/admin.css') ?>">
-    
+
     <?= $this->renderSection('styles') ?>
 </head>
 
 <body class="admin-body">
-    <?php 
+    <?php
     $session = session();
     $userRoles = $session->get('user_roles') ?? [];
     $isAdmin = in_array('superadmin', $userRoles) || in_array('admin', $userRoles);
@@ -62,7 +63,7 @@
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <ul class="nav-menu">
                     <!-- Dashboard -->
@@ -72,17 +73,17 @@
                             <span>Dashboard</span>
                         </a>
                     </li>
-                    
+
                     <?php if ($isAdmin || $isStaff): ?>
-                    <!-- Clientes -->
-                    <li class="nav-item">
-                        <a href="<?= base_url('admin/clients') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/clients') ? 'active' : '' ?>">
-                            <i class="bi bi-people"></i>
-                            <span>Clientes</span>
-                        </a>
-                    </li>
+                        <!-- Clientes -->
+                        <li class="nav-item">
+                            <a href="<?= base_url('admin/clients') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/clients') ? 'active' : '' ?>">
+                                <i class="bi bi-people"></i>
+                                <span>Clientes</span>
+                            </a>
+                        </li>
                     <?php endif; ?>
-                    
+
                     <!-- Eventos -->
                     <li class="nav-item">
                         <a href="<?= base_url('admin/events') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/events') ? 'active' : '' ?>">
@@ -90,37 +91,37 @@
                             <span><?= $isClient ? 'Mi Evento' : 'Eventos' ?></span>
                         </a>
                     </li>
-                    
+
                     <?php if ($isAdmin || $isStaff): ?>
-                    <!-- Leads -->
-                    <li class="nav-item">
-                        <a href="<?= base_url('admin/leads') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/leads') ? 'active' : '' ?>">
-                            <i class="bi bi-envelope-paper"></i>
-                            <span>Leads</span>
-                        </a>
-                    </li>
+                        <!-- Leads -->
+                        <li class="nav-item">
+                            <a href="<?= base_url('admin/leads') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/leads') ? 'active' : '' ?>">
+                                <i class="bi bi-envelope-paper"></i>
+                                <span>Leads</span>
+                            </a>
+                        </li>
                     <?php endif; ?>
-                    
+
                     <?php if ($isAdmin): ?>
-                    <!-- Templates -->
-                    <li class="nav-item">
-                        <a href="<?= base_url('admin/templates') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/templates') ? 'active' : '' ?>">
-                            <i class="bi bi-palette"></i>
-                            <span>Templates</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Usuarios -->
-                    <li class="nav-item">
-                        <a href="<?= base_url('admin/users') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/users') ? 'active' : '' ?>">
-                            <i class="bi bi-person-gear"></i>
-                            <span>Usuarios</span>
-                        </a>
-                    </li>
+                        <!-- Templates -->
+                        <li class="nav-item">
+                            <a href="<?= base_url('admin/templates') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/templates') ? 'active' : '' ?>">
+                                <i class="bi bi-palette"></i>
+                                <span>Templates</span>
+                            </a>
+                        </li>
+
+                        <!-- Usuarios -->
+                        <li class="nav-item">
+                            <a href="<?= base_url('admin/users') ?>" class="nav-link <?= str_starts_with(uri_string(), 'admin/users') ? 'active' : '' ?>">
+                                <i class="bi bi-person-gear"></i>
+                                <span>Usuarios</span>
+                            </a>
+                        </li>
                     <?php endif; ?>
                 </ul>
             </nav>
-            
+
             <div class="sidebar-footer">
                 <a href="<?= base_url('/') ?>" target="_blank" class="sidebar-link">
                     <i class="bi bi-box-arrow-up-right"></i>
@@ -141,7 +142,7 @@
                         <?= $this->renderSection('breadcrumb') ?>
                     </nav>
                 </div>
-                
+
                 <div class="topbar-right">
                     <div class="dropdown">
                         <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -156,13 +157,17 @@
                                     <?= esc($session->get('user_email')) ?>
                                 </span>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <a class="dropdown-item" href="<?= base_url('admin/profile') ?>">
                                     <i class="bi bi-person me-2"></i>Mi Perfil
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <a class="dropdown-item text-danger" href="<?= base_url('admin/logout') ?>">
                                     <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
@@ -185,38 +190,38 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
+
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- jQuery Validate -->
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_es.min.js"></script>
-    
+
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
-    
+
     <!-- Flatpickr -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    
+
     <!-- Bootstrap Table -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.1/dist/locale/bootstrap-table-es-MX.min.js"></script>
-    
+
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <!-- Admin JS -->
     <script src="<?= base_url('js/admin.js') ?>"></script>
-    
+
     <script>
         // Configuración global
         const BASE_URL = '<?= base_url() ?>';
         const CSRF_TOKEN = '<?= csrf_hash() ?>';
-        
+
         // Configuración de SweetAlert2
         const Toast = Swal.mixin({
             toast: true,
@@ -228,27 +233,28 @@
 
         // Mostrar mensajes flash
         <?php if (session()->getFlashdata('success')): ?>
-        Toast.fire({
-            icon: 'success',
-            title: '<?= esc(session()->getFlashdata('success')) ?>'
-        });
+            Toast.fire({
+                icon: 'success',
+                title: '<?= esc(session()->getFlashdata('success')) ?>'
+            });
         <?php endif; ?>
-        
+
         <?php if (session()->getFlashdata('error')): ?>
-        Toast.fire({
-            icon: 'error',
-            title: '<?= esc(session()->getFlashdata('error')) ?>'
-        });
+            Toast.fire({
+                icon: 'error',
+                title: '<?= esc(session()->getFlashdata('error')) ?>'
+            });
         <?php endif; ?>
-        
+
         <?php if (session()->getFlashdata('warning')): ?>
-        Toast.fire({
-            icon: 'warning',
-            title: '<?= esc(session()->getFlashdata('warning')) ?>'
-        });
+            Toast.fire({
+                icon: 'warning',
+                title: '<?= esc(session()->getFlashdata('warning')) ?>'
+            });
         <?php endif; ?>
     </script>
-    
+
     <?= $this->renderSection('scripts') ?>
 </body>
+
 </html>

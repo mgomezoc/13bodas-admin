@@ -20,7 +20,9 @@ class MediaAssetModel extends Model
         'file_url_large',
         'mime_type',
         'alt_text',
+        'caption',
         'aspect_ratio',
+        'category',
         'category_tag',
         'sort_order',
         'is_private',
@@ -38,10 +40,18 @@ class MediaAssetModel extends Model
         $builder = $this->where('event_id', $eventId);
         
         if ($category) {
-            $builder->where('category_tag', $category);
+            $builder->where('category', $category);
         }
         
         return $builder->orderBy('sort_order', 'ASC')->findAll();
+    }
+
+    /**
+     * Crear asset (alias para compatibilidad)
+     */
+    public function createMedia(array $data): ?string
+    {
+        return $this->createAsset($data);
     }
 
     /**
@@ -54,7 +64,6 @@ class MediaAssetModel extends Model
         $data['is_private'] = $data['is_private'] ?? 0;
         $data['created_at'] = date('Y-m-d H:i:s');
         
-        // Obtener siguiente orden
         if (!isset($data['sort_order'])) {
             $maxOrder = $this->where('event_id', $data['event_id'])
                 ->selectMax('sort_order')
@@ -83,16 +92,5 @@ class MediaAssetModel extends Model
 
         $db->transComplete();
         return $db->transStatus();
-    }
-
-    /**
-     * Obtener categorías disponibles de un evento
-     */
-    public function getCategories(string $eventId): array
-    {
-        return $this->select('DISTINCT category_tag')
-            ->where('event_id', $eventId)
-            ->where('category_tag IS NOT NULL')
-            ->findAll();
     }
 }

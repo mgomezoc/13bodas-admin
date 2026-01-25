@@ -52,7 +52,7 @@ class Auth extends BaseController
         if (!password_verify($password, $user['password_hash'])) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Credenciales incorrectas.(' . $password . ')' . $user['password_hash']);
+                ->with('error', 'Credenciales incorrectas.');
         }
 
         if (!$user['is_active']) {

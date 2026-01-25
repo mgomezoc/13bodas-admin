@@ -16,15 +16,27 @@ class RegistryItemModel extends Model
         'id',
         'event_id',
         'title',
+        'name',
         'description',
+        'category',
         'image_url',
         'product_url',
+        'external_url',
         'price',
         'currency_code',
         'is_fund',
+        'fund_goal',
         'goal_amount',
         'amount_collected',
+        'current_amount',
+        'quantity_requested',
+        'quantity_fulfilled',
         'is_claimed',
+        'is_priority',
+        'is_visible',
+        'sort_order',
+        'claimed_by',
+        'claimed_at',
         'created_at'
     ];
 
@@ -37,6 +49,7 @@ class RegistryItemModel extends Model
     public function getByEvent(string $eventId): array
     {
         return $this->where('event_id', $eventId)
+            ->orderBy('sort_order', 'ASC')
             ->orderBy('created_at', 'ASC')
             ->findAll();
     }
@@ -80,7 +93,10 @@ class RegistryItemModel extends Model
      */
     public function markAsClaimed(string $itemId): bool
     {
-        return $this->update($itemId, ['is_claimed' => 1]);
+        return $this->update($itemId, [
+            'is_claimed' => 1,
+            'claimed_at' => date('Y-m-d H:i:s')
+        ]);
     }
 
     /**
@@ -100,8 +116,8 @@ class RegistryItemModel extends Model
                 $claimedItems++;
             }
             if ($item['is_fund']) {
-                $totalFunds += (float)$item['goal_amount'];
-                $collectedFunds += (float)$item['amount_collected'];
+                $totalFunds += (float)($item['goal_amount'] ?? $item['fund_goal'] ?? 0);
+                $collectedFunds += (float)($item['amount_collected'] ?? $item['current_amount'] ?? 0);
             }
         }
 

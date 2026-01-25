@@ -5,9 +5,9 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\EventModel;
 use App\Models\ClientModel;
-use App\Models\UserModel;
 use App\Models\GuestModel;
 use App\Models\ContentModuleModel;
+use App\Models\TemplateModel;
 
 class Events extends BaseController
 {
@@ -29,7 +29,6 @@ class Events extends BaseController
         $userRoles = $session->get('user_roles') ?? [];
         $isClient = in_array('client', $userRoles) && !in_array('admin', $userRoles) && !in_array('superadmin', $userRoles);
 
-        // Si es cliente, redirigir a su evento o mostrar mensaje
         if ($isClient) {
             $clientId = $session->get('client_id');
             $event = $this->eventModel->where('client_id', $clientId)->first();
@@ -41,11 +40,7 @@ class Events extends BaseController
             return view('admin/events/no_event');
         }
 
-        $data = [
-            'pageTitle' => 'Eventos'
-        ];
-
-        return view('admin/events/index', $data);
+        return view('admin/events/index', ['pageTitle' => 'Eventos']);
     }
 
     /**
@@ -62,14 +57,12 @@ class Events extends BaseController
             'service_status' => $this->request->getGet('service_status'),
         ];
 
-        // Si es cliente, solo mostrar sus eventos
         if ($isClient) {
             $filters['client_id'] = $session->get('client_id');
         }
 
         $events = $this->eventModel->listWithClients($filters);
 
-        // Agregar estadísticas a cada evento
         foreach ($events as &$event) {
             $stats = $this->eventModel->getEventStats($event['id']);
             $event['guest_count'] = $stats['total_guests'];
@@ -88,18 +81,14 @@ class Events extends BaseController
     public function create()
     {
         $clients = $this->clientModel->listWithUsers();
-        
-        // Pre-seleccionar cliente si viene en la URL
         $selectedClientId = $this->request->getGet('client_id');
 
-        $data = [
+        return view('admin/events/create', [
             'pageTitle' => 'Nuevo Evento',
             'clients' => $clients,
             'selectedClientId' => $selectedClientId,
             'timezones' => $this->getTimezones()
-        ];
-
-        return view('admin/events/create', $data);
+        ]);
     }
 
     /**
@@ -111,7 +100,7 @@ class Events extends BaseController
             'client_id' => 'required',
             'couple_title' => 'required|min_length[3]|max_length[255]',
             'slug' => 'required|alpha_dash|min_length[3]|max_length[100]|is_unique[events.slug]',
-            'event_date_start' => 'required|valid_date[Y-m-d H:i]',
+            'event_date_start' => 'required',
         ];
 
         if (!$this->validate($rules)) {
@@ -124,9 +113,9 @@ class Events extends BaseController
             'slug' => $this->request->getPost('slug'),
             'primary_contact_email' => $this->request->getPost('primary_contact_email'),
             'time_zone' => $this->request->getPost('time_zone') ?: 'America/Mexico_City',
-            'event_date_start' => $this->request->getPost('event_date_start') . ':00',
-            'event_date_end' => $this->request->getPost('event_date_end') ? $this->request->getPost('event_date_end') . ':00' : null,
-            'rsvp_deadline' => $this->request->getPost('rsvp_deadline') ? $this->request->getPost('rsvp_deadline') . ':00' : null,
+            'event_date_start' => $this->formatDateTime($this->request->getPost('event_date_start')),
+            'event_date_end' => $this->formatDateTime($this->request->getPost('event_date_end')),
+            'rsvp_deadline' => $this->formatDateTime($this->request->getPost('rsvp_deadline')),
             'venue_name' => $this->request->getPost('venue_name'),
             'venue_address' => $this->request->getPost('venue_address'),
             'service_status' => 'pending',
@@ -137,7 +126,6 @@ class Events extends BaseController
         $eventId = $this->eventModel->createEvent($eventData);
 
         if ($eventId) {
-            // Crear módulos por defecto
             $contentModule = new ContentModuleModel();
             $contentModule->createDefaultModules($eventId);
 
@@ -157,29 +145,24 @@ class Events extends BaseController
         $event = $this->eventModel->getWithClient($id);
 
         if (!$event) {
-            return redirect()->to(base_url('admin/events'))
-                ->with('error', 'Evento no encontrado.');
+            return redirect()->to(base_url('admin/events'))->with('error', 'Evento no encontrado.');
         }
 
-        // Verificar acceso si es cliente
         if (!$this->canAccessEvent($id)) {
-            return redirect()->to(base_url('admin/dashboard'))
-                ->with('error', 'No tienes acceso a este evento.');
+            return redirect()->to(base_url('admin/dashboard'))->with('error', 'No tienes acceso a este evento.');
         }
 
         $stats = $this->eventModel->getEventStats($id);
         $guestModel = new GuestModel();
         $rsvpStats = $guestModel->getRsvpStatsByEvent($id);
 
-        $data = [
+        return view('admin/events/view', [
             'pageTitle' => $event['couple_title'],
             'event' => $event,
             'stats' => $stats,
             'rsvpStats' => $rsvpStats,
             'invitationUrl' => base_url('i/' . $event['slug'])
-        ];
-
-        return view('admin/events/view', $data);
+        ]);
     }
 
     /**
@@ -190,30 +173,29 @@ class Events extends BaseController
         $event = $this->eventModel->getWithClient($id);
 
         if (!$event) {
-            return redirect()->to(base_url('admin/events'))
-                ->with('error', 'Evento no encontrado.');
+            return redirect()->to(base_url('admin/events'))->with('error', 'Evento no encontrado.');
         }
 
-        // Verificar acceso si es cliente
         if (!$this->canAccessEvent($id)) {
-            return redirect()->to(base_url('admin/dashboard'))
-                ->with('error', 'No tienes acceso a este evento.');
+            return redirect()->to(base_url('admin/dashboard'))->with('error', 'No tienes acceso a este evento.');
         }
 
         $session = session();
         $userRoles = $session->get('user_roles') ?? [];
         $isClient = in_array('client', $userRoles) && !in_array('admin', $userRoles) && !in_array('superadmin', $userRoles);
 
-        // Obtener módulos del evento
         $contentModule = new ContentModuleModel();
         $modules = $contentModule->getByEvent($id);
 
-        // Estadísticas
         $stats = $this->eventModel->getEventStats($id);
         $guestModel = new GuestModel();
         $rsvpStats = $guestModel->getRsvpStatsByEvent($id);
 
-        $data = [
+        // Obtener templates disponibles
+        $templateModel = new TemplateModel();
+        $templates = $templateModel->where('is_public', 1)->findAll();
+
+        return view('admin/events/edit', [
             'pageTitle' => 'Editar: ' . $event['couple_title'],
             'event' => $event,
             'modules' => $modules,
@@ -222,10 +204,9 @@ class Events extends BaseController
             'timezones' => $this->getTimezones(),
             'isClient' => $isClient,
             'invitationUrl' => base_url('i/' . $event['slug']),
-            'clients' => $isClient ? [] : $this->clientModel->listWithUsers()
-        ];
-
-        return view('admin/events/edit', $data);
+            'clients' => $isClient ? [] : $this->clientModel->listWithUsers(),
+            'templates' => $templates
+        ]);
     }
 
     /**
@@ -236,11 +217,17 @@ class Events extends BaseController
         $event = $this->eventModel->find($id);
 
         if (!$event) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Evento no encontrado.']);
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Evento no encontrado.']);
+            }
+            return redirect()->to(base_url('admin/events'))->with('error', 'Evento no encontrado.');
         }
 
         if (!$this->canAccessEvent($id)) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Sin acceso.']);
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Sin acceso.']);
+            }
+            return redirect()->to(base_url('admin/dashboard'))->with('error', 'Sin acceso.');
         }
 
         $rules = [
@@ -292,6 +279,9 @@ class Events extends BaseController
             if ($this->request->getPost('visibility')) {
                 $eventData['visibility'] = $this->request->getPost('visibility');
             }
+            if ($this->request->getPost('template_id')) {
+                $eventData['template_id'] = $this->request->getPost('template_id');
+            }
         }
 
         $this->eventModel->update($id, $eventData);
@@ -329,15 +319,10 @@ class Events extends BaseController
     {
         $event = $this->eventModel->find($id);
 
-        if (!$event) {
+        if (!$event || !$this->canAccessEvent($id)) {
             return redirect()->to(base_url('admin/events'));
         }
 
-        if (!$this->canAccessEvent($id)) {
-            return redirect()->to(base_url('admin/dashboard'));
-        }
-
-        // Redirigir a la URL pública en modo preview
         return redirect()->to(base_url('i/' . $event['slug'] . '?preview=1'));
     }
 
@@ -349,12 +334,10 @@ class Events extends BaseController
         $session = session();
         $userRoles = $session->get('user_roles') ?? [];
         
-        // Admin tiene acceso a todo
         if (in_array('superadmin', $userRoles) || in_array('admin', $userRoles) || in_array('staff', $userRoles)) {
             return true;
         }
 
-        // Cliente solo puede acceder a su evento
         $clientId = $session->get('client_id');
         if ($clientId) {
             $event = $this->eventModel->find($eventId);
@@ -373,20 +356,9 @@ class Events extends BaseController
             return null;
         }
         
-        // Si ya tiene segundos, retornar como está
-        if (strlen($datetime) === 19) {
-            return $datetime;
-        }
-        
-        // Si solo tiene fecha y hora (sin segundos), agregar :00
-        if (strlen($datetime) === 16) {
-            return $datetime . ':00';
-        }
-        
-        // Si solo es fecha, agregar hora por defecto
-        if (strlen($datetime) === 10) {
-            return $datetime . ' 00:00:00';
-        }
+        if (strlen($datetime) === 19) return $datetime;
+        if (strlen($datetime) === 16) return $datetime . ':00';
+        if (strlen($datetime) === 10) return $datetime . ' 00:00:00';
         
         return $datetime;
     }
