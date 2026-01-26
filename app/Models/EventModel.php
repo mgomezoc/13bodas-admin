@@ -11,8 +11,11 @@ class EventModel extends Model
     protected $useAutoIncrement = false;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
-    protected $protectFields    = true;
-    protected $allowedFields    = [
+
+    protected $protectFields = true;
+
+    // NOTA: NO incluir created_at/updated_at para evitar que se puedan setear por POST.
+    protected $allowedFields = [
         'id',
         'client_id',
         'slug',
@@ -35,8 +38,6 @@ class EventModel extends Model
         'service_status',
         'is_paid',
         'paid_until',
-        'created_at',
-        'updated_at'
     ];
 
     protected $useTimestamps = true;
@@ -44,17 +45,34 @@ class EventModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
+    /**
+     * Validación del modelo:
+     * - Mantener SOLO reglas estructurales.
+     * - is_unique se valida en Controller (insert/update) porque depende del contexto (id).
+     */
     protected $validationRules = [
-        'slug'         => 'required|alpha_dash|min_length[3]|max_length[100]|is_unique[events.slug,id,{id}]',
-        'couple_title' => 'required|max_length[255]',
+        'id'           => 'permit_empty',
+        'slug'         => 'required|alpha_dash|min_length[3]|max_length[100]',
+        'couple_title' => 'required|min_length[3]|max_length[255]',
         'time_zone'    => 'required|max_length[50]',
     ];
 
     protected $validationMessages = [
         'slug' => [
-            'is_unique' => 'Este slug ya está en uso. Por favor elige otro.',
-            'alpha_dash' => 'El slug solo puede contener letras, números, guiones y guiones bajos.'
-        ]
+            'required'   => 'El slug es obligatorio.',
+            'alpha_dash' => 'El slug solo puede contener letras, números, guiones y guiones bajos.',
+            'min_length' => 'El slug debe tener al menos 3 caracteres.',
+            'max_length' => 'El slug no puede exceder 100 caracteres.',
+        ],
+        'couple_title' => [
+            'required'   => 'El título de la pareja es obligatorio.',
+            'min_length' => 'El título debe tener al menos 3 caracteres.',
+            'max_length' => 'El título no puede exceder 255 caracteres.',
+        ],
+        'time_zone' => [
+            'required'   => 'La zona horaria es obligatoria.',
+            'max_length' => 'La zona horaria no puede exceder 50 caracteres.',
+        ],
     ];
 
     /**
@@ -107,8 +125,24 @@ class EventModel extends Model
             $builder->where('events.is_demo', $filters['is_demo']);
         }
 
+        // Whitelist para evitar orderBy peligroso por GET
+        $allowedSortFields = [
+            'events.created_at',
+            'events.updated_at',
+            'events.couple_title',
+            'events.slug',
+            'events.service_status',
+            'users.full_name',
+            'users.email',
+        ];
+
         $sortField = $filters['sort'] ?? 'events.created_at';
-        $sortOrder = $filters['order'] ?? 'DESC';
+        if (!in_array($sortField, $allowedSortFields, true)) {
+            $sortField = 'events.created_at';
+        }
+
+        $sortOrder = strtoupper($filters['order'] ?? 'DESC');
+        $sortOrder = in_array($sortOrder, ['ASC', 'DESC'], true) ? $sortOrder : 'DESC';
 
         return $builder->orderBy($sortField, $sortOrder)->findAll();
     }
@@ -128,21 +162,26 @@ class EventModel extends Model
      */
     public function createEvent(array $data): ?string
     {
-        $eventId = UserModel::generateUUID();
+        // Idealmente esto debería vivir en un helper/servicio UUID,
+        // pero lo dejamos así por compatibilidad con tu código actual.
+        $eventId    = UserModel::generateUUID();
         $data['id'] = $eventId;
 
-        // Valores por defecto
-        $data['site_mode'] = $data['site_mode'] ?? 'pending';
-        $data['visibility'] = $data['visibility'] ?? 'private';
-        $data['access_mode'] = $data['access_mode'] ?? 'open';
-        $data['service_status'] = $data['service_status'] ?? 'pending';
-        $data['is_demo'] = $data['is_demo'] ?? 0;
-        $data['is_paid'] = $data['is_paid'] ?? 0;
-        $data['time_zone'] = $data['time_zone'] ?? 'America/Mexico_City';
+        // Valores por defecto coherentes
+        $data['site_mode']       = $data['site_mode']       ?? 'draft';
+        $data['visibility']      = $data['visibility']      ?? 'private';
+        $data['access_mode']     = $data['access_mode']     ?? 'open';
+        $data['service_status']  = $data['service_status']  ?? 'pending';
+        $data['is_demo']         = $data['is_demo']         ?? 0;
+        $data['is_paid']         = $data['is_paid']         ?? 0;
+        $data['time_zone']       = $data['time_zone']       ?? 'America/Mexico_City';
 
         if ($this->insert($data)) {
             return $eventId;
         }
+
+        // Debug útil en desarrollo
+        log_message('error', 'EventModel::createEvent insert failed. Errors: ' . json_encode($this->errors()));
 
         return null;
     }
@@ -154,37 +193,33 @@ class EventModel extends Model
     {
         $db = \Config\Database::connect();
 
-        // Total de invitados
         $totalGuests = $db->table('guests')
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
             ->where('guest_groups.event_id', $eventId)
             ->countAllResults();
 
-        // RSVPs confirmados
         $confirmedGuests = $db->table('guests')
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
             ->where('guest_groups.event_id', $eventId)
             ->where('guests.rsvp_status', 'accepted')
             ->countAllResults();
 
-        // RSVPs rechazados
         $declinedGuests = $db->table('guests')
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
             ->where('guest_groups.event_id', $eventId)
             ->where('guests.rsvp_status', 'declined')
             ->countAllResults();
 
-        // Grupos de invitados
         $totalGroups = $db->table('guest_groups')
             ->where('event_id', $eventId)
             ->countAllResults();
 
         return [
-            'total_guests' => $totalGuests,
-            'confirmed' => $confirmedGuests,
-            'declined' => $declinedGuests,
-            'pending' => $totalGuests - $confirmedGuests - $declinedGuests,
-            'total_groups' => $totalGroups,
+            'total_guests'  => $totalGuests,
+            'confirmed'     => $confirmedGuests,
+            'declined'      => $declinedGuests,
+            'pending'       => $totalGuests - $confirmedGuests - $declinedGuests,
+            'total_groups'  => $totalGroups,
         ];
     }
 
@@ -195,7 +230,7 @@ class EventModel extends Model
     {
         $builder = $this->where('slug', $slug);
 
-        if ($excludeId) {
+        if (!empty($excludeId)) {
             $builder->where('id !=', $excludeId);
         }
 
@@ -207,12 +242,9 @@ class EventModel extends Model
      */
     public function generateUniqueSlug(string $coupleTitle): string
     {
-        // Convertir a minúsculas y reemplazar espacios
-        $slug = url_title($coupleTitle, '-', true);
-
-        // Verificar si existe
+        $slug         = url_title($coupleTitle, '-', true);
         $originalSlug = $slug;
-        $counter = 1;
+        $counter      = 1;
 
         while (!$this->isSlugAvailable($slug)) {
             $slug = $originalSlug . '-' . $counter;
