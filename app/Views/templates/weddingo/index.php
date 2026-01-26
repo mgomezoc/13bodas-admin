@@ -1,0 +1,524 @@
+<?php
+// ===========================
+// Datos base (defensivo)
+// ===========================
+$event    = $event ?? [];
+$template = $template ?? [];
+$theme    = $theme ?? [];
+$modules  = $modules ?? [];
+
+// NUEVO (alineado a Invitation.php)
+$galleryAssets = $galleryAssets ?? ($gallery ?? []);   // compat fallback
+$registryItems = $registryItems ?? ($gifts ?? []);     // compat fallback
+$registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0.0];
+
+$slug        = esc($event['slug'] ?? '');
+$eventId     = esc($event['id'] ?? '');
+$coupleTitle = esc($event['couple_title'] ?? 'Nuestra Boda');
+
+$startRaw     = $event['event_date_start'] ?? null;
+$endRaw       = $event['event_date_end'] ?? null;
+$rsvpDeadline = $event['rsvp_deadline'] ?? null;
+
+$venueName = esc($event['venue_name'] ?? '');
+$venueAddr = esc($event['venue_address'] ?? '');
+$lat       = $event['venue_geo_lat'] ?? '';
+$lng       = $event['venue_geo_lng'] ?? '';
+
+// ===========================
+// Helpers
+// ===========================
+function fmtDate(?string $dt, string $fmt = 'd M Y'): string
+{
+    if (!$dt) return '';
+    return date($fmt, strtotime($dt));
+}
+function fmtTime(?string $dt, string $fmt = 'H:i'): string
+{
+    if (!$dt) return '';
+    return date($fmt, strtotime($dt));
+}
+function moneyFmt($amount, string $currency = 'MXN'): string
+{
+    $n = is_numeric($amount) ? (float)$amount : 0.0;
+    $formatted = number_format($n, 2, '.', ',');
+    return ($currency === 'MXN' ? '$' : '') . $formatted . ($currency !== 'MXN' ? " {$currency}" : '');
+}
+
+$eventDateLabel    = fmtDate($startRaw, 'd M Y');
+$eventTimeRange    = trim(fmtTime($startRaw) . ($endRaw ? ' - ' . fmtTime($endRaw) : ''));
+$eventDateISO      = $startRaw ? date('c', strtotime($startRaw)) : '';
+$rsvpDeadlineLabel = fmtDate($rsvpDeadline, 'd M Y');
+
+// Base de assets del template (public/templates/weddingo/...)
+$assetsBase = base_url('templates/weddingo');
+
+// ===========================
+// Schema y secciones (toggle)
+// ===========================
+$schema = [];
+if (!empty($template['schema_json'])) {
+    $schema = json_decode($template['schema_json'], true) ?: [];
+}
+$schemaTheme = $schema['theme'] ?? [];
+$sections = $schema['sections'] ?? [];
+$enabled = [
+    'hero'      => true,
+    'countdown' => true,
+    'story'     => true,
+    'event'     => true,
+    'gallery'   => true,
+    'gifts'     => true,
+    'rsvp'      => true,
+];
+if (is_array($sections) && !empty($sections)) {
+    foreach ($sections as $s) {
+        $id = $s['id'] ?? null;
+        if ($id) $enabled[$id] = (bool)($s['enabled'] ?? true);
+    }
+}
+
+// ===========================
+// Theme (evento > schema > defaults)
+// ===========================
+$primary   = $theme['primary']   ?? ($schemaTheme['primary']['default']   ?? '#C08CA3');
+$secondary = $theme['secondary'] ?? ($schemaTheme['secondary']['default'] ?? '#2C2A2E');
+$bg        = $theme['bg']        ?? ($schemaTheme['bg']['default']        ?? '#FFFFFF');
+$surface   = $theme['surface']   ?? ($schemaTheme['surface']['default']   ?? '#F6F3F6');
+$text      = $theme['text']      ?? ($schemaTheme['text']['default']      ?? '#1E1B1F');
+$muted     = $theme['muted']     ?? ($schemaTheme['muted']['default']     ?? '#6B6670');
+
+$fontHead  = $theme['font_head'] ?? ($schemaTheme['font_head']['default'] ?? 'Playfair Display');
+$fontBody  = $theme['font_body'] ?? ($schemaTheme['font_body']['default'] ?? 'Inter');
+
+// ===========================
+// Google Maps URL
+// ===========================
+$mapsHref = '';
+if ($lat !== '' && $lng !== '') $mapsHref = 'https://www.google.com/maps?q=' . urlencode($lat . ',' . $lng);
+elseif ($venueAddr) $mapsHref = 'https://www.google.com/maps?q=' . urlencode($venueAddr);
+
+// ===========================
+// Normalización Galería (por si viene en formato viejo)
+// Esperado: ['full','thumb','alt','caption']
+// ===========================
+$gallery = [];
+if (!empty($galleryAssets) && is_array($galleryAssets)) {
+    foreach ($galleryAssets as $img) {
+        if (!is_array($img)) continue;
+
+        // formato nuevo
+        $full  = (string)($img['full'] ?? '');
+        $thumb = (string)($img['thumb'] ?? '');
+        $alt   = (string)($img['alt'] ?? $coupleTitle);
+        $cap   = (string)($img['caption'] ?? '');
+
+        // fallback formato viejo: ['url'=>...]
+        if ($full === '' && !empty($img['url'])) {
+            $full = (string)$img['url'];
+            $thumb = $thumb ?: $full;
+        }
+
+        if ($full === '') continue;
+
+        $gallery[] = [
+            'full'  => $full,
+            'thumb' => $thumb ?: $full,
+            'alt'   => $alt,
+            'caption' => $cap,
+        ];
+    }
+}
+
+// ===========================
+// Normalización Regalos (registry_items)
+// ===========================
+$gifts = [];
+if (!empty($registryItems) && is_array($registryItems)) {
+    foreach ($registryItems as $it) {
+        if (!is_array($it)) continue;
+
+        // Si viene desde registry_items (tu caso)
+        $title = (string)($it['title'] ?? $it['name'] ?? 'Regalo');
+        $desc  = (string)($it['description'] ?? '');
+        $img   = (string)($it['image_url'] ?? '');
+        $url   = (string)($it['product_url'] ?? $it['external_url'] ?? '');
+        $price = $it['price'] ?? null;
+        $curr  = (string)($it['currency_code'] ?? 'MXN');
+
+        $isFund   = (int)($it['is_fund'] ?? 0) === 1;
+        $isClaimed = (int)($it['is_claimed'] ?? 0) === 1;
+
+        // fondos (si decides usar goal/current)
+        $goal    = $it['goal_amount'] ?? $it['fund_goal'] ?? null;
+        $current = $it['amount_collected'] ?? $it['current_amount'] ?? null;
+
+        $gifts[] = [
+            'title' => $title,
+            'description' => $desc,
+            'image_url' => $img,
+            'link' => $url,
+            'currency' => $curr,
+            'price' => $price,
+            'is_fund' => $isFund,
+            'goal' => $goal,
+            'current' => $current,
+            'status' => $isClaimed ? 'claimed' : 'available',
+        ];
+    }
+}
+?>
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= $coupleTitle ?> | 13Bodas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=<?= str_replace(' ', '+', $fontHead) ?>:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=<?= str_replace(' ', '+', $fontBody) ?>:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="<?= $assetsBase ?>/css/style.css">
+
+    <style>
+        :root {
+            --w-primary: <?= esc($primary) ?>;
+            --w-secondary: <?= esc($secondary) ?>;
+            --w-bg: <?= esc($bg) ?>;
+            --w-surface: <?= esc($surface) ?>;
+            --w-text: <?= esc($text) ?>;
+            --w-muted: <?= esc($muted) ?>;
+            --w-font-head: "<?= esc($fontHead) ?>", serif;
+            --w-font-body: "<?= esc($fontBody) ?>", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="w-topbar">
+        <a class="w-brand" href="#home"><?= $coupleTitle ?></a>
+
+        <button class="w-burger" aria-label="Abrir menú" data-w-burger>
+            <span></span><span></span><span></span>
+        </button>
+
+        <nav class="w-nav" data-w-nav>
+            <?php if (!empty($enabled['story'])): ?><a href="#story">Historia</a><?php endif; ?>
+            <?php if (!empty($enabled['event'])): ?><a href="#event">Evento</a><?php endif; ?>
+            <?php if (!empty($enabled['gallery'])): ?><a href="#gallery">Galería</a><?php endif; ?>
+            <?php if (!empty($enabled['gifts'])): ?><a href="#gifts">Regalos</a><?php endif; ?>
+            <?php if (!empty($enabled['rsvp'])): ?><a href="#rsvp" class="w-nav-cta">Confirmar</a><?php endif; ?>
+        </nav>
+    </header>
+
+    <?php if (!empty($enabled['hero'])): ?>
+        <!-- HERO -->
+        <section id="home" class="w-hero">
+            <div class="w-hero-bg" aria-hidden="true"></div>
+
+            <div class="w-hero-inner w-container">
+                <p class="w-kicker" data-reveal>13Bodas presenta</p>
+                <h1 class="w-title" data-reveal><?= $coupleTitle ?></h1>
+
+                <p class="w-subtitle" data-reveal>
+                    <?= $eventDateLabel ?: 'Fecha por confirmar' ?>
+                    <?php if ($eventTimeRange): ?> · <?= esc($eventTimeRange) ?><?php endif; ?>
+                </p>
+
+                <div class="w-hero-actions" data-reveal>
+                    <?php if (!empty($enabled['rsvp'])): ?>
+                        <a class="w-btn" href="#rsvp">Confirmar asistencia</a>
+                    <?php endif; ?>
+
+                    <?php if ($mapsHref): ?>
+                        <a class="w-btn w-btn-ghost" target="_blank" rel="noopener" href="<?= esc($mapsHref) ?>">Ver ubicación</a>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty($enabled['countdown'])): ?>
+                    <div class="w-countdown" data-reveal>
+                        <div class="w-pill"><span data-cd-days>--</span><small>días</small></div>
+                        <div class="w-pill"><span data-cd-hours>--</span><small>horas</small></div>
+                        <div class="w-pill"><span data-cd-min>--</span><small>min</small></div>
+                        <div class="w-pill"><span data-cd-sec>--</span><small>seg</small></div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($enabled['story'])): ?>
+        <!-- STORY -->
+        <section id="story" class="w-section">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Nuestra historia</h2>
+                    <p>Este bloque queda listo para conectarse a <code>content_modules</code> (module_type: <code>story</code>, <code>notes</code>, etc.).</p>
+                </div>
+
+                <div class="w-story-grid">
+                    <article class="w-card" data-reveal>
+                        <h3>Cómo empezó</h3>
+                        <p>Primer encuentro, primera cita, cómo se fue dando…</p>
+                    </article>
+                    <article class="w-card" data-reveal>
+                        <h3>La propuesta</h3>
+                        <p>Fecha, lugar, anécdota y detalle especial.</p>
+                    </article>
+                    <article class="w-card" data-reveal>
+                        <h3>El gran día</h3>
+                        <p>Notas para invitados: dress code, hashtag, estacionamiento, niños, etc.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($enabled['event'])): ?>
+        <!-- EVENT -->
+        <section id="event" class="w-section w-section-alt">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Detalles del evento</h2>
+                    <p>Ubicación, hora y lo esencial para llegar sin fricción.</p>
+                </div>
+
+                <div class="w-event">
+                    <div class="w-card w-event-card" data-reveal>
+                        <div class="w-event-main">
+                            <h3><?= $venueName ?: 'Lugar por confirmar' ?></h3>
+                            <?php if ($venueAddr): ?><p class="w-muted"><?= $venueAddr ?></p><?php endif; ?>
+
+                            <div class="w-event-meta">
+                                <div><strong>Fecha</strong><span><?= $eventDateLabel ?: '—' ?></span></div>
+                                <div><strong>Horario</strong><span><?= $eventTimeRange ?: '—' ?></span></div>
+                                <div><strong>RSVP</strong><span><?= $rsvpDeadlineLabel ?: '—' ?></span></div>
+                            </div>
+
+                            <div class="w-event-actions">
+                                <?php if ($mapsHref): ?>
+                                    <a class="w-btn w-btn-sm" target="_blank" rel="noopener" href="<?= esc($mapsHref) ?>">Abrir en Maps</a>
+                                <?php endif; ?>
+                                <?php if (!empty($enabled['gallery'])): ?>
+                                    <a class="w-btn w-btn-sm w-btn-ghost" href="#gallery">Ver galería</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="w-event-aside" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($enabled['gallery'])): ?>
+        <!-- GALLERY -->
+        <section id="gallery" class="w-section">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Galería</h2>
+                    <p class="w-muted">
+                        <?= !empty($gallery) ? 'Momentos especiales.' : 'Aún no hay fotos cargadas.' ?>
+                    </p>
+                </div>
+
+                <div class="w-gallery" data-reveal>
+                    <?php if (!empty($gallery)): ?>
+                        <?php foreach ($gallery as $img): ?>
+                            <?php
+                            $full  = esc($img['full'] ?? '');
+                            $thumb = esc($img['thumb'] ?? $full);
+                            $alt   = esc($img['alt'] ?? $coupleTitle);
+                            $cap   = esc($img['caption'] ?? '');
+                            ?>
+                            <a class="w-photo" href="<?= $full ?>" target="_blank" rel="noopener" title="<?= $cap ?>">
+                                <img loading="lazy" src="<?= $thumb ?>" alt="<?= $alt ?>">
+                            </a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php for ($i = 0; $i < 8; $i++): ?>
+                            <div class="w-photo w-photo-ph" aria-hidden="true"></div>
+                        <?php endfor; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($enabled['gifts'])): ?>
+        <!-- GIFTS -->
+        <section id="gifts" class="w-section w-section-alt">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Regalos</h2>
+                    <p class="w-muted">Mesa de regalos y/o aportaciones.</p>
+
+                    <?php if (!empty($registryStats) && (int)($registryStats['total'] ?? 0) > 0): ?>
+                        <div class="w-badges" style="margin-top:10px;">
+                            <span class="w-badge">Total: <?= (int)$registryStats['total'] ?></span>
+                            <span class="w-badge">Disponibles: <?= (int)$registryStats['available'] ?></span>
+                            <span class="w-badge is-claimed">Apartados: <?= (int)$registryStats['claimed'] ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="w-gifts" data-reveal>
+                    <?php if (!empty($gifts)): ?>
+                        <?php foreach ($gifts as $g): ?>
+                            <?php
+                            $title = esc($g['title'] ?? 'Regalo');
+                            $desc  = esc($g['description'] ?? '');
+                            $img   = esc($g['image_url'] ?? '');
+                            $link  = esc($g['link'] ?? '');
+                            $curr  = esc($g['currency'] ?? 'MXN');
+                            $isFund = !empty($g['is_fund']);
+                            $status = (string)($g['status'] ?? 'available');
+                            $isClaimed = $status === 'claimed';
+
+                            $priceLabel = '';
+                            if (!$isFund && isset($g['price']) && $g['price'] !== null && $g['price'] !== '') {
+                                $priceLabel = moneyFmt($g['price'], (string)$curr);
+                            }
+
+                            $goalLabel = '';
+                            if ($isFund && isset($g['goal']) && $g['goal'] !== null && $g['goal'] !== '') {
+                                $goalLabel = moneyFmt($g['goal'], (string)$curr);
+                            }
+
+                            $currentLabel = '';
+                            if ($isFund && isset($g['current']) && $g['current'] !== null && $g['current'] !== '') {
+                                $currentLabel = moneyFmt($g['current'], (string)$curr);
+                            }
+                            ?>
+                            <article class="w-card w-gift">
+                                <div class="w-gift-top">
+                                    <h3><?= $title ?></h3>
+
+                                    <span class="w-badge <?= $isClaimed ? 'is-claimed' : '' ?>">
+                                        <?= $isClaimed ? 'Apartado' : ($isFund ? 'Aportación' : 'Disponible') ?>
+                                    </span>
+                                </div>
+
+                                <?php if ($img): ?>
+                                    <div class="w-gift-media" style="margin:10px 0;">
+                                        <img loading="lazy" src="<?= $img ?>" alt="<?= $title ?>" style="width:100%; border-radius:14px; display:block;">
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($desc): ?>
+                                    <p class="w-muted"><?= $desc ?></p>
+                                <?php endif; ?>
+
+                                <div class="w-gift-bottom">
+                                    <div>
+                                        <?php if ($priceLabel): ?>
+                                            <strong class="w-price"><?= esc($priceLabel) ?></strong>
+                                        <?php elseif ($isFund): ?>
+                                            <strong class="w-price">Meta: <?= esc($goalLabel ?: '—') ?></strong>
+                                            <?php if ($currentLabel): ?>
+                                                <div class="w-muted" style="font-size: 13px; margin-top: 4px;">Recaudado: <?= esc($currentLabel) ?></div>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <?php if ($link): ?>
+                                        <a class="w-btn w-btn-sm" target="_blank" rel="noopener" href="<?= $link ?>">Ver</a>
+                                    <?php endif; ?>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <article class="w-card w-gift">
+                            <h3>Ej. Set de copas</h3>
+                            <p class="w-muted">Agrega tu mesa de regalos y enlaces.</p>
+                            <div class="w-gift-bottom"><strong class="w-price">$900.00</strong></div>
+                        </article>
+                        <article class="w-card w-gift">
+                            <h3>Ej. Fondo luna de miel</h3>
+                            <p class="w-muted">Aportación libre.</p>
+                            <div class="w-gift-bottom"><strong class="w-price">Meta: $10,000.00</strong></div>
+                        </article>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($enabled['rsvp'])): ?>
+        <!-- RSVP -->
+        <section id="rsvp" class="w-section">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Confirmación</h2>
+                    <p><?= $rsvpDeadlineLabel ? 'Confirma antes del ' . esc($rsvpDeadlineLabel) . '.' : 'Confirma tu asistencia.' ?></p>
+                </div>
+
+                <div class="w-rsvp" data-reveal>
+                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= site_url("i/{$slug}/rsvp") ?>">
+                        <?= csrf_field() ?>
+
+                        <div class="w-field">
+                            <label>Tu nombre*</label>
+                            <input name="name" required autocomplete="name" placeholder="Nombre y apellido">
+                        </div>
+
+                        <div class="w-field">
+                            <label>Email (opcional)</label>
+                            <input type="email" name="email" autocomplete="email" placeholder="correo@ejemplo.com">
+                        </div>
+
+                        <div class="w-field">
+                            <label>¿Asistirás?*</label>
+                            <select name="attending" required>
+                                <option value="" disabled selected>Selecciona…</option>
+                                <option value="accepted">Sí, asistiré</option>
+                                <option value="declined">No podré asistir</option>
+                            </select>
+                        </div>
+
+                        <div class="w-field">
+                            <label>Mensaje (opcional)</label>
+                            <textarea name="message" rows="4" placeholder="Mensaje para los novios"></textarea>
+                        </div>
+
+                        <div class="w-actions">
+                            <button class="w-btn" type="submit">Enviar</button>
+                            <span class="w-inline" data-rsvp-loader hidden>Enviando…</span>
+                        </div>
+
+                        <div class="w-alert w-ok" data-rsvp-ok hidden></div>
+                        <div class="w-alert w-err" data-rsvp-err hidden></div>
+                    </form>
+
+                    <aside class="w-card w-side">
+                        <h3>Info útil</h3>
+                        <p class="w-muted">Aquí puedes agregar: dress code, hashtag, niños, estacionamiento, clima, hoteles cercanos, etc.</p>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <footer class="w-footer">
+        <div class="w-container">
+            <p>Hecho con 13Bodas · <?= $coupleTitle ?></p>
+        </div>
+    </footer>
+
+    <script>
+        window.__WEDDINGO__ = {
+            eventId: <?= json_encode($eventId) ?>,
+            slug: <?= json_encode($slug) ?>,
+            eventDateISO: <?= json_encode($eventDateISO) ?>,
+            rsvpUrl: <?= json_encode(site_url("i/{$slug}/rsvp")) ?>,
+        };
+    </script>
+    <script src="<?= $assetsBase ?>/js/weddingo.js"></script>
+</body>
+
+</html>
