@@ -7,7 +7,7 @@
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a href="<?= base_url('admin/dashboard') ?>">Dashboard</a></li>
         <?php if (!$isClient): ?>
-        <li class="breadcrumb-item"><a href="<?= base_url('admin/events') ?>">Eventos</a></li>
+            <li class="breadcrumb-item"><a href="<?= base_url('admin/events') ?>">Eventos</a></li>
         <?php endif; ?>
         <li class="breadcrumb-item active"><?= esc($event['couple_title']) ?></li>
     </ol>
@@ -123,7 +123,7 @@
     <div class="tab-pane fade show active" id="info" role="tabpanel">
         <form id="eventForm" method="POST" action="<?= base_url('admin/events/update/' . $event['id']) ?>">
             <?= csrf_field() ?>
-            
+
             <div class="row">
                 <div class="col-lg-8">
                     <!-- Información Principal -->
@@ -133,55 +133,55 @@
                         </div>
                         <div class="card-body">
                             <?php if (!$isClient): ?>
-                            <div class="mb-3">
-                                <label class="form-label" for="client_id">Cliente</label>
-                                <select id="client_id" name="client_id" class="form-select select2">
-                                    <?php foreach ($clients as $client): ?>
-                                        <option value="<?= $client['id'] ?>" <?= $event['client_id'] === $client['id'] ? 'selected' : '' ?>>
-                                            <?= esc($client['full_name']) ?> (<?= esc($client['email']) ?>)
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="client_id">Cliente</label>
+                                    <select id="client_id" name="client_id" class="form-select select2">
+                                        <?php foreach ($clients as $client): ?>
+                                            <option value="<?= $client['id'] ?>" <?= $event['client_id'] === $client['id'] ? 'selected' : '' ?>>
+                                                <?= esc($client['full_name']) ?> (<?= esc($client['email']) ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             <?php endif; ?>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label" for="couple_title">Título de la Pareja <span class="text-danger">*</span></label>
-                                <input type="text" id="couple_title" name="couple_title" class="form-control" 
-                                       value="<?= esc($event['couple_title']) ?>" required>
+                                <input type="text" id="couple_title" name="couple_title" class="form-control"
+                                    value="<?= esc($event['couple_title']) ?>" required>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label" for="slug">URL Personalizada <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><?= base_url('i/') ?></span>
-                                    <input type="text" id="slug" name="slug" class="form-control" 
-                                           value="<?= esc($event['slug']) ?>" pattern="[a-z0-9\-_]+" required>
+                                    <input type="text" id="slug" name="slug" class="form-control"
+                                        value="<?= esc($event['slug']) ?>" pattern="[a-z0-9\-_]+" required>
                                 </div>
                                 <div id="slugFeedback" class="mt-1"></div>
                             </div>
-                            
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="event_date_start">Fecha y Hora del Evento <span class="text-danger">*</span></label>
-                                    <input type="text" id="event_date_start" name="event_date_start" 
-                                           class="form-control datetimepicker" 
-                                           value="<?= date('Y-m-d H:i', strtotime($event['event_date_start'])) ?>" required>
+                                    <input type="text" id="event_date_start" name="event_date_start"
+                                        class="form-control datetimepicker"
+                                        value="<?= date('Y-m-d H:i', strtotime($event['event_date_start'])) ?>" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="event_date_end">Hora de Finalización</label>
-                                    <input type="text" id="event_date_end" name="event_date_end" 
-                                           class="form-control datetimepicker" 
-                                           value="<?= $event['event_date_end'] ? date('Y-m-d H:i', strtotime($event['event_date_end'])) : '' ?>">
+                                    <input type="text" id="event_date_end" name="event_date_end"
+                                        class="form-control datetimepicker"
+                                        value="<?= $event['event_date_end'] ? date('Y-m-d H:i', strtotime($event['event_date_end'])) : '' ?>">
                                 </div>
                             </div>
-                            
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="rsvp_deadline">Fecha Límite para Confirmar</label>
-                                    <input type="text" id="rsvp_deadline" name="rsvp_deadline" 
-                                           class="form-control datetimepicker" 
-                                           value="<?= $event['rsvp_deadline'] ? date('Y-m-d H:i', strtotime($event['rsvp_deadline'])) : '' ?>">
+                                    <input type="text" id="rsvp_deadline" name="rsvp_deadline"
+                                        class="form-control datetimepicker"
+                                        value="<?= $event['rsvp_deadline'] ? date('Y-m-d H:i', strtotime($event['rsvp_deadline'])) : '' ?>">
                                     <div class="form-text">Hasta cuándo pueden los invitados confirmar asistencia</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -195,16 +195,16 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label" for="primary_contact_email">Email de Contacto</label>
-                                <input type="email" id="primary_contact_email" name="primary_contact_email" 
-                                       class="form-control" value="<?= esc($event['primary_contact_email']) ?>">
+                                <input type="email" id="primary_contact_email" name="primary_contact_email"
+                                    class="form-control" value="<?= esc($event['primary_contact_email']) ?>">
                                 <div class="form-text">Recibirá notificaciones de confirmaciones</div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Lugar del Evento -->
                     <div class="card mb-4">
                         <div class="card-header">
@@ -213,26 +213,26 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label class="form-label" for="venue_name">Nombre del Lugar</label>
-                                <input type="text" id="venue_name" name="venue_name" class="form-control" 
-                                       value="<?= esc($event['venue_name']) ?>" placeholder="Ej: Hacienda San José">
+                                <input type="text" id="venue_name" name="venue_name" class="form-control"
+                                    value="<?= esc($event['venue_name']) ?>" placeholder="Ej: Hacienda San José">
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label class="form-label" for="venue_address">Dirección Completa</label>
-                                <textarea id="venue_address" name="venue_address" class="form-control" 
-                                          rows="2"><?= esc($event['venue_address']) ?></textarea>
+                                <textarea id="venue_address" name="venue_address" class="form-control"
+                                    rows="2"><?= esc($event['venue_address']) ?></textarea>
                             </div>
-                            
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="venue_geo_lat">Latitud</label>
-                                    <input type="text" id="venue_geo_lat" name="venue_geo_lat" class="form-control" 
-                                           value="<?= esc($event['venue_geo_lat']) ?>" placeholder="Ej: 25.6866">
+                                    <input type="text" id="venue_geo_lat" name="venue_geo_lat" class="form-control"
+                                        value="<?= esc($event['venue_geo_lat']) ?>" placeholder="Ej: 25.6866">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="venue_geo_lng">Longitud</label>
-                                    <input type="text" id="venue_geo_lng" name="venue_geo_lng" class="form-control" 
-                                           value="<?= esc($event['venue_geo_lng']) ?>" placeholder="Ej: -100.3161">
+                                    <input type="text" id="venue_geo_lng" name="venue_geo_lng" class="form-control"
+                                        value="<?= esc($event['venue_geo_lng']) ?>" placeholder="Ej: -100.3161">
                                 </div>
                             </div>
                             <div class="form-text">
@@ -242,62 +242,103 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-4">
-                    <?php if (!$isClient): ?>
-                    <!-- Configuración (solo admin) -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="bi bi-gear"></i> Configuración
+                    <?php if ($isAdmin): ?>
+                        <!-- Configuración (solo admin) -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="bi bi-gear"></i> Configuración
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label" for="service_status">Estado del Servicio</label>
+                                    <select id="service_status" name="service_status" class="form-select">
+                                        <option value="draft" <?= $event['service_status'] === 'draft' ? 'selected' : '' ?>>Borrador</option>
+                                        <option value="active" <?= $event['service_status'] === 'active' ? 'selected' : '' ?>>Activo</option>
+                                        <option value="suspended" <?= $event['service_status'] === 'suspended' ? 'selected' : '' ?>>Suspendido</option>
+                                        <option value="archived" <?= $event['service_status'] === 'archived' ? 'selected' : '' ?>>Archivado</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="site_mode">Modo del Sitio</label>
+                                    <select id="site_mode" name="site_mode" class="form-select">
+                                        <option value="auto" <?= $event['site_mode'] === 'auto' ? 'selected' : '' ?>>Automático</option>
+                                        <option value="pre" <?= $event['site_mode'] === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
+                                        <option value="live" <?= $event['site_mode'] === 'live' ? 'selected' : '' ?>>En vivo</option>
+                                        <option value="post" <?= $event['site_mode'] === 'post' ? 'selected' : '' ?>>Post-evento</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="visibility">Visibilidad</label>
+                                    <select id="visibility" name="visibility" class="form-select">
+                                        <option value="private" <?= $event['visibility'] === 'private' ? 'selected' : '' ?>>Privado</option>
+                                        <option value="public" <?= $event['visibility'] === 'public' ? 'selected' : '' ?>>Público</option>
+                                    </select>
+                                </div>
+
+                                <!-- Paso 2: Admin-only directos en events -->
+                                <div class="mb-3">
+                                    <label class="form-label" for="access_mode">Modo de Acceso</label>
+                                    <select id="access_mode" name="access_mode" class="form-select">
+                                        <option value="open" <?= ($event['access_mode'] ?? '') === 'open' ? 'selected' : '' ?>>Abierto</option>
+                                        <option value="invite_code" <?= ($event['access_mode'] ?? '') === 'invite_code' ? 'selected' : '' ?>>Con código</option>
+                                    </select>
+                                    <div class="form-text">Controla el acceso a la invitación</div>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="is_demo" name="is_demo" value="1"
+                                        <?= !empty($event['is_demo']) ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="is_demo">Es demo</label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_paid" name="is_paid" value="1"
+                                        <?= !empty($event['is_paid']) ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="is_paid">Pagado</label>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="paid_until">Pagado hasta</label>
+                                    <input type="text" id="paid_until" name="paid_until"
+                                        class="form-control datetimepicker"
+                                        value="<?= !empty($event['paid_until']) ? date('Y-m-d H:i', strtotime($event['paid_until'])) : '' ?>">
+                                    <div class="form-text">Si “Pagado” está desactivado, este campo se guarda como NULL.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="venue_config">Venue config (JSON)</label>
+                                    <textarea id="venue_config" name="venue_config" class="form-control" rows="4"
+                                        placeholder='{"example":true}'><?= esc($event['venue_config'] ?? '') ?></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="theme_config">Theme config (JSON)</label>
+                                    <textarea id="theme_config" name="theme_config" class="form-control" rows="4"
+                                        placeholder='{"colors":{"primary":"#000"}}'><?= esc($event['theme_config'] ?? '') ?></textarea>
+                                </div>
+
+                                <?php if (!empty($templates)): ?>
+                                    <div class="mb-0">
+                                        <label class="form-label" for="template_id">Plantilla de Diseño</label>
+                                        <select id="template_id" name="template_id" class="form-select">
+                                            <option value="">Sin plantilla</option>
+                                            <?php foreach ($templates as $template): ?>
+                                                <option value="<?= $template['id'] ?>" <?= ($event['template_id'] ?? '') == $template['id'] ? 'selected' : '' ?>>
+                                                    <?= esc($template['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="form-text">Define el diseño visual de la invitación</div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label" for="service_status">Estado del Servicio</label>
-                                <select id="service_status" name="service_status" class="form-select">
-                                    <option value="pending" <?= $event['service_status'] === 'pending' ? 'selected' : '' ?>>Pendiente</option>
-                                    <option value="active" <?= $event['service_status'] === 'active' ? 'selected' : '' ?>>Activo</option>
-                                    <option value="completed" <?= $event['service_status'] === 'completed' ? 'selected' : '' ?>>Completado</option>
-                                    <option value="cancelled" <?= $event['service_status'] === 'cancelled' ? 'selected' : '' ?>>Cancelado</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label" for="site_mode">Modo del Sitio</label>
-                                <select id="site_mode" name="site_mode" class="form-select">
-                                    <option value="draft" <?= $event['site_mode'] === 'draft' ? 'selected' : '' ?>>Borrador</option>
-                                    <option value="pre" <?= $event['site_mode'] === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
-                                    <option value="live" <?= $event['site_mode'] === 'live' ? 'selected' : '' ?>>En vivo</option>
-                                    <option value="post" <?= $event['site_mode'] === 'post' ? 'selected' : '' ?>>Post-evento</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label" for="visibility">Visibilidad</label>
-                                <select id="visibility" name="visibility" class="form-select">
-                                    <option value="private" <?= $event['visibility'] === 'private' ? 'selected' : '' ?>>Privado</option>
-                                    <option value="unlisted" <?= $event['visibility'] === 'unlisted' ? 'selected' : '' ?>>No listado</option>
-                                    <option value="public" <?= $event['visibility'] === 'public' ? 'selected' : '' ?>>Público</option>
-                                </select>
-                            </div>
-                            
-                            <?php if (!empty($templates)): ?>
-                            <div class="mb-0">
-                                <label class="form-label" for="template_id">Plantilla de Diseño</label>
-                                <select id="template_id" name="template_id" class="form-select">
-                                    <option value="">Sin plantilla</option>
-                                    <?php foreach ($templates as $template): ?>
-                                        <option value="<?= $template['id'] ?>" <?= ($event['template_id'] ?? '') == $template['id'] ? 'selected' : '' ?>>
-                                            <?= esc($template['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <div class="form-text">Define el diseño visual de la invitación</div>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
                     <?php endif; ?>
-                    
+
                     <!-- URL de la Invitación -->
                     <div class="card mb-4">
                         <div class="card-header">
@@ -314,14 +355,14 @@
                                 <a href="<?= $invitationUrl ?>" target="_blank" class="btn btn-outline-primary">
                                     <i class="bi bi-eye me-2"></i>Ver Invitación
                                 </a>
-                                <a href="https://wa.me/?text=<?= urlencode('¡Estás invitado! ' . $invitationUrl) ?>" 
-                                   target="_blank" class="btn btn-success">
+                                <a href="https://wa.me/?text=<?= urlencode('¡Estás invitado! ' . $invitationUrl) ?>"
+                                    target="_blank" class="btn btn-success">
                                     <i class="bi bi-whatsapp me-2"></i>Compartir por WhatsApp
                                 </a>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Acciones Rápidas -->
                     <div class="card mb-4">
                         <div class="card-header">
@@ -343,16 +384,16 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Botón Guardar -->
             <div class="card">
                 <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <?php if (!$isClient): ?>
-                    <a href="<?= base_url('admin/events') ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>Volver
-                    </a>
+                        <a href="<?= base_url('admin/events') ?>" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver
+                        </a>
                     <?php else: ?>
-                    <div></div>
+                        <div></div>
                     <?php endif; ?>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg me-2"></i>Guardar Cambios
@@ -366,63 +407,90 @@
 
 <?= $this->section('scripts') ?>
 <script>
-$(document).ready(function() {
-    // Verificar disponibilidad del slug al cambiar
-    let slugTimeout;
-    $('#slug').on('input', function() {
-        clearTimeout(slugTimeout);
-        const slug = $(this).val();
-        if (slug.length >= 3) {
-            slugTimeout = setTimeout(function() {
-                checkSlugAvailability(slug, '<?= $event['id'] ?>');
-            }, 500);
-        }
-    });
-    
-    // Guardar formulario
-    $('#eventForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        const $btn = $(this).find('button[type="submit"]');
-        const originalText = $btn.html();
-        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-2"></i>Guardando...');
-        
-        $.ajax({
-            url: $(this).attr('action'),
-            method: 'POST',
-            data: $(this).serialize(),
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    Toast.fire({ icon: 'success', title: response.message });
-                } else {
-                    let msg = response.message || 'Error al guardar';
-                    if (response.errors) {
-                        msg = Object.values(response.errors).join('<br>');
-                    }
-                    Toast.fire({ icon: 'error', title: msg });
-                }
-            },
-            error: function(xhr) {
-                Toast.fire({ icon: 'error', title: 'Error de conexión' });
-            },
-            complete: function() {
-                $btn.prop('disabled', false).html(originalText);
+    $(document).ready(function() {
+        // Verificar disponibilidad del slug al cambiar
+        let slugTimeout;
+        $('#slug').on('input', function() {
+            clearTimeout(slugTimeout);
+            const slug = $(this).val();
+            if (slug.length >= 3) {
+                slugTimeout = setTimeout(function() {
+                    checkSlugAvailability(slug, '<?= $event['id'] ?>');
+                }, 500);
             }
         });
-    });
-});
 
-function checkSlugAvailability(slug, excludeId) {
-    $.post('<?= base_url('admin/events/check-slug') ?>', { slug: slug, exclude_id: excludeId })
-        .done(function(response) {
-            const feedback = $('#slugFeedback');
-            if (response.available) {
-                feedback.html('<span class="text-success small"><i class="bi bi-check-circle me-1"></i>Disponible</span>');
+        // UX: si no está pagado, deshabilitar/limpiar paid_until
+        function syncPaidUntil() {
+            const isPaid = $('#is_paid').is(':checked');
+            const $paidUntil = $('#paid_until');
+            if (!isPaid) {
+                $paidUntil.val('').prop('disabled', true);
             } else {
-                feedback.html('<span class="text-danger small"><i class="bi bi-x-circle me-1"></i>No disponible</span>');
+                $paidUntil.prop('disabled', false);
             }
+        }
+        if ($('#is_paid').length && $('#paid_until').length) {
+            syncPaidUntil();
+            $('#is_paid').on('change', syncPaidUntil);
+        }
+
+        // Guardar formulario
+        $('#eventForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const $btn = $(this).find('button[type="submit"]');
+            const originalText = $btn.html();
+            $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-2"></i>Guardando...');
+
+            $.ajax({
+                url: $(this).attr('action'),
+                method: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: response.message
+                        });
+                    } else {
+                        let msg = response.message || 'Error al guardar';
+                        if (response.errors) {
+                            msg = Object.values(response.errors).join('<br>');
+                        }
+                        Toast.fire({
+                            icon: 'error',
+                            title: msg
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Error de conexión'
+                    });
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).html(originalText);
+                }
+            });
         });
-}
+    });
+
+    function checkSlugAvailability(slug, excludeId) {
+        $.post('<?= base_url('admin/events/check-slug') ?>', {
+                slug: slug,
+                exclude_id: excludeId
+            })
+            .done(function(response) {
+                const feedback = $('#slugFeedback');
+                if (response.available) {
+                    feedback.html('<span class="text-success small"><i class="bi bi-check-circle me-1"></i>Disponible</span>');
+                } else {
+                    feedback.html('<span class="text-danger small"><i class="bi bi-x-circle me-1"></i>No disponible</span>');
+                }
+            });
+    }
 </script>
 <?= $this->endSection() ?>

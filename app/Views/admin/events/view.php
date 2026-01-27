@@ -18,22 +18,64 @@
         <h1 class="page-title"><?= esc($event['couple_title']) ?></h1>
         <p class="page-subtitle">
             <?php
-            $statusClass = match($event['service_status']) {
-                'pending' => 'bg-warning',
-                'active' => 'bg-success',
-                'completed' => 'bg-info',
-                'cancelled' => 'bg-danger',
+            // Enums reales BD:
+            // service_status: draft|active|suspended|archived
+            // site_mode: auto|pre|live|post
+            // visibility: public|private
+
+            $statusClass = match ($event['service_status']) {
+                'draft'     => 'bg-secondary',
+                'active'    => 'bg-success',
+                'suspended' => 'bg-warning',
+                'archived'  => 'bg-dark',
+                default     => 'bg-secondary'
+            };
+
+            $statusLabel = match ($event['service_status']) {
+                'draft'     => 'Borrador',
+                'active'    => 'Activo',
+                'suspended' => 'Suspendido',
+                'archived'  => 'Archivado',
+                default     => $event['service_status']
+            };
+
+            $visibilityClass = match ($event['visibility'] ?? '') {
+                'public'  => 'bg-primary',
+                'private' => 'bg-secondary',
+                default   => 'bg-secondary'
+            };
+
+            $visibilityLabel = match ($event['visibility'] ?? '') {
+                'public'  => 'Público',
+                'private' => 'Privado',
+                default   => ($event['visibility'] ?? '')
+            };
+
+            $siteModeClass = match ($event['site_mode'] ?? '') {
+                'auto' => 'bg-info',
+                'pre'  => 'bg-info',
+                'live' => 'bg-success',
+                'post' => 'bg-secondary',
                 default => 'bg-secondary'
             };
-            $statusLabel = match($event['service_status']) {
-                'pending' => 'Pendiente',
-                'active' => 'Activo',
-                'completed' => 'Completado',
-                'cancelled' => 'Cancelado',
-                default => $event['service_status']
+
+            $siteModeLabel = match ($event['site_mode'] ?? '') {
+                'auto' => 'Auto',
+                'pre'  => 'Pre',
+                'live' => 'Live',
+                'post' => 'Post',
+                default => ($event['site_mode'] ?? '')
             };
             ?>
             <span class="badge <?= $statusClass ?>"><?= $statusLabel ?></span>
+
+            <?php if (!empty($event['visibility'])): ?>
+                <span class="badge <?= $visibilityClass ?> ms-1"><?= $visibilityLabel ?></span>
+            <?php endif; ?>
+
+            <?php if (!empty($event['site_mode'])): ?>
+                <span class="badge <?= $siteModeClass ?> ms-1"><?= $siteModeLabel ?></span>
+            <?php endif; ?>
         </p>
     </div>
     <div class="d-flex gap-2">
@@ -110,7 +152,7 @@
                         </a>
                         <br><small class="text-muted"><?= esc($event['client_email']) ?></small>
                     </dd>
-                    
+
                     <dt class="col-sm-4">Fecha</dt>
                     <dd class="col-sm-8">
                         <?= date('d/m/Y H:i', strtotime($event['event_date_start'])) ?>
@@ -118,22 +160,22 @@
                             - <?= date('H:i', strtotime($event['event_date_end'])) ?>
                         <?php endif; ?>
                     </dd>
-                    
+
                     <dt class="col-sm-4">Zona Horaria</dt>
                     <dd class="col-sm-8"><?= esc($event['time_zone']) ?></dd>
-                    
+
                     <dt class="col-sm-4">RSVP Límite</dt>
                     <dd class="col-sm-8">
                         <?= $event['rsvp_deadline'] ? date('d/m/Y H:i', strtotime($event['rsvp_deadline'])) : '<span class="text-muted">No definido</span>' ?>
                     </dd>
-                    
+
                     <dt class="col-sm-4">Creado</dt>
                     <dd class="col-sm-8"><?= date('d/m/Y', strtotime($event['created_at'])) ?></dd>
                 </dl>
             </div>
         </div>
     </div>
-    
+
     <!-- Lugar -->
     <div class="col-lg-6">
         <div class="card h-100">
@@ -144,11 +186,11 @@
                 <?php if ($event['venue_name']): ?>
                     <h5><?= esc($event['venue_name']) ?></h5>
                     <p class="text-muted mb-3"><?= nl2br(esc($event['venue_address'])) ?></p>
-                    
+
                     <?php if ($event['venue_geo_lat'] && $event['venue_geo_lng']): ?>
-                        <a href="https://www.google.com/maps?q=<?= $event['venue_geo_lat'] ?>,<?= $event['venue_geo_lng'] ?>" 
-                           target="_blank" 
-                           class="btn btn-outline-primary btn-sm">
+                        <a href="https://www.google.com/maps?q=<?= $event['venue_geo_lat'] ?>,<?= $event['venue_geo_lng'] ?>"
+                            target="_blank"
+                            class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-map me-1"></i>Ver en Google Maps
                         </a>
                     <?php endif; ?>
@@ -177,9 +219,9 @@
                 </div>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <a href="https://wa.me/?text=<?= urlencode('¡Estás invitado! ' . $invitationUrl) ?>" 
-                   target="_blank" 
-                   class="btn btn-success">
+                <a href="https://wa.me/?text=<?= urlencode('¡Estás invitado! ' . $invitationUrl) ?>"
+                    target="_blank"
+                    class="btn btn-success">
                     <i class="bi bi-whatsapp me-2"></i>Compartir por WhatsApp
                 </a>
             </div>

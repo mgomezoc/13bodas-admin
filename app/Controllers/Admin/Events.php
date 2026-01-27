@@ -161,8 +161,8 @@ class Events extends BaseController
             return redirect()->to(base_url('admin/dashboard'))->with('error', 'No tienes acceso a este evento.');
         }
 
-        $stats      = $this->eventModel->getEventStats($id);
-        $rsvpStats  = (new GuestModel())->getRsvpStatsByEvent($id);
+        $stats     = $this->eventModel->getEventStats($id);
+        $rsvpStats = (new GuestModel())->getRsvpStatsByEvent($id);
 
         // plantilla activa
         $event['template_id'] = $this->eventTemplateModel->getActiveTemplateId($id);
@@ -261,8 +261,22 @@ class Events extends BaseController
         $userRoles = $session->get('user_roles') ?? [];
         $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
 
-        // Campos restringidos + template_id (pivote)
-        $restrictedKeys  = ['client_id', 'service_status', 'site_mode', 'visibility', 'template_id'];
+        // Campos restringidos + template_id (pivote) + nuevos campos admin-only de events
+        $restrictedKeys  = [
+            'client_id',
+            'service_status',
+            'site_mode',
+            'visibility',
+            'template_id',
+
+            // Paso 2: directos en events (admin-only)
+            'access_mode',
+            'is_demo',
+            'is_paid',
+            'paid_until',
+            'venue_config',
+            'theme_config',
+        ];
         $triedRestricted = false;
 
         foreach ($restrictedKeys as $k) {
@@ -277,7 +291,7 @@ class Events extends BaseController
             return $this->jsonOrRedirect(false, 'No tienes permisos para modificar la configuración del evento.');
         }
 
-        // Admin: validar/normalizar enums
+        // Admin: validar/normalizar enums + nuevos campos
         if ($isAdmin) {
             $clientId = $this->request->getPost('client_id');
             if ($clientId !== null && $clientId !== '') {
@@ -309,6 +323,49 @@ class Events extends BaseController
                     return $this->jsonOrRedirect(false, 'visibility inválido.');
                 }
                 $eventData['visibility'] = $visibility;
+            }
+
+            // Paso 2: directos en events
+            $accessMode = $this->request->getPost('access_mode');
+            if ($accessMode !== null && $accessMode !== '') {
+                $allowed = ['open', 'invite_code'];
+                if (!in_array($accessMode, $allowed, true)) {
+                    return $this->jsonOrRedirect(false, 'access_mode inválido.');
+                }
+                $eventData['access_mode'] = $accessMode;
+            }
+
+            // checkboxes: si no vienen, quedan 0
+            $eventData['is_demo'] = $this->request->getPost('is_demo') ? 1 : 0;
+
+            $isPaid = $this->request->getPost('is_paid') ? 1 : 0;
+            $eventData['is_paid'] = $isPaid;
+
+            // Regla: cuando is_paid = 0 => paid_until = NULL
+            if ($isPaid === 1) {
+                $paidUntil = $this->request->getPost('paid_until');
+                $eventData['paid_until'] = !empty($paidUntil) ? $this->formatDateTime($paidUntil) : null;
+            } else {
+                $eventData['paid_until'] = null;
+            }
+
+            // JSON libre con validación básica (si viene)
+            $venueConfig = $this->request->getPost('venue_config');
+            if ($venueConfig !== null && $venueConfig !== '') {
+                json_decode($venueConfig);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return $this->jsonOrRedirect(false, 'venue_config no es JSON válido.');
+                }
+                $eventData['venue_config'] = $venueConfig;
+            }
+
+            $themeConfig = $this->request->getPost('theme_config');
+            if ($themeConfig !== null && $themeConfig !== '') {
+                json_decode($themeConfig);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return $this->jsonOrRedirect(false, 'theme_config no es JSON válido.');
+                }
+                $eventData['theme_config'] = $themeConfig;
             }
         }
 
