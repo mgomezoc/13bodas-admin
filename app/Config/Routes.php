@@ -14,6 +14,9 @@ $routes->get('terminos', 'Home::terminos');
 $routes->get('privacidad', 'Home::privacidad');
 $routes->get('gracias', 'Home::gracias');
 
+// Sitemap XML dinámico (SEO)
+$routes->get('sitemap.xml', 'Sitemap::index');
+
 // =============================================================================
 // RUTAS DE AUTENTICACIÓN (Admin)
 // =============================================================================

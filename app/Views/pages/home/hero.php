@@ -12,10 +12,10 @@
             </span>
 
             <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
-                Invitaciones digitales<br>
-                que <span class="gradient-text">enamoran</span><br>
-                y filtros AR que<br>
-                <span class="gradient-text">sorprenden</span>
+                Invitaciones Web con<br>
+                <span class="gradient-text">Cuenta Regresiva</span><br>
+                y Filtros AR para<br>
+                <span class="gradient-text">tu Boda 2026</span>
             </h1>
 
             <p class="hero-description" data-aos="fade-up" data-aos-delay="200">

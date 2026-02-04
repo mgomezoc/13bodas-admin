@@ -1,11 +1,11 @@
 <?= $this->extend('layouts/main') ?>
 
-<?= $this->section('title') ?>Invitaciones Digitales y Filtros AR para Bodas, XV Años y Eventos<?= $this->endSection() ?>
+<?= $this->section('title') ?>Invitaciones Digitales con Cuenta Regresiva y Filtros AR para Bodas 2026<?= $this->endSection() ?>
 
-<?= $this->section('description') ?>Crea invitaciones digitales elegantes y filtros de realidad aumentada personalizados para bodas, XV años y eventos. Sin apps, desde el navegador. Servicio global.<?= $this->endSection() ?>
+<?= $this->section('description') ?>Crea invitaciones web con cuenta regresiva animada y filtros AR personalizados para tu boda o XV años. Sistema RSVP incluido. ¡Diseños desde $2,500 MXN! Entrega en 7 días. Servicio en toda Latinoamérica.<?= $this->endSection() ?>
 
 <?= $this->section('meta_tags') ?>
-<meta name="keywords" content="invitaciones digitales bodas, filtros AR eventos, MagicCam, invitaciones web XV años, realidad aumentada bodas, filtros personalizados eventos">
+<meta name="keywords" content="invitaciones digitales bodas, como hacer invitacion con cuenta regresiva, filtros AR eventos, invitaciones web con RSVP, MagicCam filtros personalizados, invitaciones boda online gratis, crear invitacion digital elegante, filtros realidad aumentada sin app, invitaciones XV años interactivas, wedding website español">
 <?= $this->endSection() ?>
 
 <?= $this->section('structured_data') ?>
