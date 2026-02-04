@@ -56,11 +56,13 @@
                     <div class="phone-notch"></div>
                     <div class="phone-screen">
                         <img
-                            src="<?= base_url('img/demo-preview.png') ?>"
-                            alt="Demo de filtro AR MagicCam en evento"
-                            class="phone-content"
-                            loading="eager"
-                        >
+                        src="<?= base_url('img/demo-preview.png') ?>"
+                        alt="Invitación digital para boda con cuenta regresiva animada y filtro AR MagicCam - Ejemplo 13Bodas"
+                        class="phone-content"
+                        loading="eager"
+                            width="375"
+                    height="812"
+                >
                         <div class="phone-overlay">
                             <div class="ar-badge">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">

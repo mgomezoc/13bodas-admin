@@ -52,8 +52,8 @@
                     <li>✓ Compartir directo a redes</li>
                     <li>✓ Analytics en tiempo real</li>
                 </ul>
-                <a href="https://magiccam.13bodas.com" class="service-link" target="_blank" rel="noopener">
-                    Explorar MagicCam →
+                <a href="https://magiccam.13bodas.com" class="service-link" target="_blank" rel="noopener" title="Ver ejemplos de filtros AR personalizados para eventos">
+                    Ver Filtros AR en Acción →
                 </a>
             </article>
 

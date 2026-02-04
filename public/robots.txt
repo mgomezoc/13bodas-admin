@@ -1,2 +1,15 @@
+# robots.txt para 13Bodas - Invitaciones Digitales
+# Generado automáticamente para optimización SEO
+
 User-agent: *
-Disallow: 
+Disallow: /admin/
+Disallow: /writable/
+Disallow: /vendor/
+Disallow: /tests/
+Allow: /uploads/
+
+# Sitemap XML dinámico
+Sitemap: https://13bodas.com/sitemap.xml
+
+# Crawl-delay para evitar sobrecarga del servidor
+Crawl-delay: 1 

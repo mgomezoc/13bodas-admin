@@ -51,9 +51,11 @@
                     <div class="demo-frame">
                         <img
                             src="<?= base_url('img/demo-preview.png') ?>"
-                            alt="Ejemplo de invitación digital elegante con cuenta regresiva"
+                            alt="Cómo hacer una invitación con cuenta regresiva - Plantilla interactiva MagicCam AR para bodas"
                             class="demo-image"
                             loading="lazy"
+                            width="600"
+                            height="800"
                         >
                         <div class="demo-play">
                             <svg width="64" height="64" viewBox="0 0 64 64" fill="currentColor">

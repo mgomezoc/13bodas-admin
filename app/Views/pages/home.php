@@ -8,6 +8,10 @@
 <meta name="keywords" content="invitaciones digitales bodas, como hacer invitacion con cuenta regresiva, filtros AR eventos, invitaciones web con RSVP, MagicCam filtros personalizados, invitaciones boda online gratis, crear invitacion digital elegante, filtros realidad aumentada sin app, invitaciones XV años interactivas, wedding website español">
 <?= $this->endSection() ?>
 
+<?= $this->section('og_title') ?>Invitaciones con Cuenta Regresiva y Filtros AR | 13Bodas MagicCam<?= $this->endSection() ?>
+
+<?= $this->section('og_description') ?>Crea invitaciones interactivas con cuenta regresiva animada + filtros de realidad aumentada sin apps. Ideal para bodas y XV años. Demo gratis disponible.<?= $this->endSection() ?>
+
 <?= $this->section('structured_data') ?>
 <!-- Structured Data - Organization -->
 <script type="application/ld+json">
@@ -113,6 +117,80 @@
             }
         }
     ]
+}
+</script>
+
+<!-- Structured Data - BreadcrumbList -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Inicio",
+            "item": "<?= base_url() ?>"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Invitaciones Digitales",
+            "item": "<?= base_url('#servicios') ?>"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Filtros AR MagicCam",
+            "item": "https://magiccam.13bodas.com"
+        }
+    ]
+}
+</script>
+
+<!-- Structured Data - Product/Offer -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Invitación Digital con Cuenta Regresiva",
+    "image": "<?= base_url('img/demo-preview.png') ?>",
+    "description": "Invitación web personalizada con cuenta regresiva animada, sistema RSVP, galería de fotos y Google Maps integrado",
+    "brand": {
+        "@type": "Brand",
+        "name": "13Bodas"
+    },
+    "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "MXN",
+        "lowPrice": "2500",
+        "highPrice": "15000",
+        "offerCount": "3",
+        "availability": "https://schema.org/InStock",
+        "url": "<?= base_url('#paquetes') ?>"
+    },
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "47",
+        "bestRating": "5",
+        "worstRating": "1"
+    }
+}
+</script>
+
+<!-- Structured Data - WebSite (para Search Box) -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "13Bodas",
+    "url": "<?= base_url() ?>",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "<?= base_url() ?>?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
 }
 </script>
 <?= $this->endSection() ?>

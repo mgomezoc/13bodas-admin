@@ -3,9 +3,10 @@
         <a href="<?= base_url('#inicio') ?>" class="nav-logo" aria-label="13Bodas - Inicio">
             <img
                 src="<?= base_url('img/13bodas-logo-blanco-transparente.png') ?>"
-                alt="13Bodas Logo"
+                alt="13Bodas - Invitaciones Digitales con Cuenta Regresiva y Filtros AR"
                 width="140"
                 height="40"
+                fetchpriority="high"
             >
         </a>
 

@@ -11,7 +11,7 @@
     <?= $this->renderSection('meta_tags') ?>
     
     <meta name="author" content="13Bodas">
-    <meta name="robots" content="<?= $this->renderSection('robots') ?? 'index, follow, max-image-preview:large' ?>">
+    <meta name="robots" content="<?= $this->renderSection('robots') ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' ?>">
     <link rel="canonical" href="<?= current_url() ?>">
 
     <!-- Geo Tags -->
