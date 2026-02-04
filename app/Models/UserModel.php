@@ -227,4 +227,24 @@ class UserModel extends Model
         
         return null;
     }
+
+    /**
+     * Sincroniza los roles de un usuario (reemplaza todos)
+     */
+    public function syncRoles(string $userId, array $roleIds): bool
+    {
+        $db = \Config\Database::connect();
+        $db->table('user_roles')->where('user_id', $userId)->delete();
+        
+        if (empty($roleIds)) {
+            return true;
+        }
+
+        $data = [];
+        foreach ($roleIds as $roleId) {
+            $data[] = ['user_id' => $userId, 'role_id' => (int)$roleId];
+        }
+
+        return $db->table('user_roles')->insertBatch($data);
+    }
 }

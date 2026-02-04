@@ -42,9 +42,9 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('/', 'Admin\Users::index');
         $routes->get('list', 'Admin\Users::list');
         $routes->get('create', 'Admin\Users::create');
-        $routes->post('store', 'Admin\Users::store');
         $routes->get('edit/(:segment)', 'Admin\Users::edit/$1');
-        $routes->post('update/(:segment)', 'Admin\Users::update/$1');
+        $routes->post('save/(:segment)', 'Admin\Users::save/$1');
+        $routes->post('save', 'Admin\Users::save');
         $routes->post('toggle-status/(:segment)', 'Admin\Users::toggleStatus/$1');
         $routes->post('delete/(:segment)', 'Admin\Users::delete/$1');
     });
