@@ -1,34 +1,30 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use CodeIgniter\Model;
-use CodeIgniter\I18n\Time;
 
 class TemplateModel extends Model
 {
     protected $table            = 'templates';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
-
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
-
-    protected $protectFields = true;
-    protected $allowedFields = [
+    protected $protectFields    = true;
+    protected $allowedFields    = [
         'code',
         'name',
         'description',
         'preview_url',
         'thumbnail_url',
         'is_public',
+        'is_active',
+        'sort_order',
         'schema_json',
-        // created_at / updated_at los maneja CI con $useTimestamps,
-        // pero dejarlos aquí no rompe nada si en algún momento haces inserts manuales.
+        'meta_json',
         'created_at',
-        'updated_at',
+        'updated_at'
     ];
 
     protected $useTimestamps = true;
@@ -36,129 +32,60 @@ class TemplateModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    /**
-     * Obtener templates públicos.
-     */
-    public function getPublic(): array
+    protected $validationRules = [
+        'code' => 'required|max_length[50]|is_unique[templates.code,id,{id}]',
+        'name' => 'required|max_length[100]',
+    ];
+
+    protected $validationMessages = [
+        'code' => [
+            'is_unique' => 'Este código ya está en uso.',
+            'required'  => 'El código es obligatorio.'
+        ],
+        'name' => [
+            'required' => 'El nombre es obligatorio.'
+        ]
+    ];
+
+    protected $skipValidation = false;
+
+    public function isTemplateInUse(int $templateId): array
     {
-        return $this->where('is_public', 1)
-            ->orderBy('id', 'DESC')
-            ->findAll();
-    }
-
-    /**
-     * Obtener template por código.
-     */
-    public function findByCode(string $code): ?array
-    {
-        $code = trim($code);
-        if ($code === '') {
-            return null;
-        }
-
-        return $this->where('code', $code)->first();
-    }
-
-    /**
-     * Asignar template a evento (deja solo 1 activo por evento).
-     *
-     * - Desactiva los templates activos previos del evento
-     * - Activa (o inserta) el template indicado
-     * - Opera en transacción
-     */
-    public function assignToEvent(int $templateId, string $eventId): bool
-    {
-        $eventId = trim($eventId);
-        if ($templateId <= 0 || $eventId === '') {
-            return false;
-        }
-
-        $db = $this->db; // Model ya trae conexión
-
-        $db->transStart();
-
-        // 1) Desactivar el activo actual (si existe)
-        $db->table('event_templates')
-            ->where('event_id', $eventId)
-            ->where('is_active', 1)
-            ->update([
-                'is_active'  => 0,
-                'applied_at' => Time::now()->toDateTimeString(), // opcional: deja traza del cambio
-            ]);
-
-        // 2) Revisar si ya existe la relación (event_id, template_id)
-        $existing = $db->table('event_templates')
-            ->select('event_id, template_id')
-            ->where('event_id', $eventId)
+        $db = \Config\Database::connect();
+        $count = $db->table('event_templates')
             ->where('template_id', $templateId)
-            ->get()
-            ->getRowArray();
+            ->countAllResults();
 
-        if ($existing) {
-            $db->table('event_templates')
-                ->where('event_id', $eventId)
-                ->where('template_id', $templateId)
-                ->update([
-                    'is_active'  => 1,
-                    'applied_at' => Time::now()->toDateTimeString(),
-                ]);
-        } else {
-            $db->table('event_templates')->insert([
-                'event_id'    => $eventId,
-                'template_id' => $templateId,
-                'is_active'   => 1,
-                'applied_at'  => Time::now()->toDateTimeString(),
-            ]);
-        }
-
-        $db->transComplete();
-
-        return $db->transStatus();
+        return [
+            'in_use' => $count > 0,
+            'count'  => $count
+        ];
     }
 
-    /**
-     * Obtener template activo de un evento.
-     */
-    public function getActiveForEvent(string $eventId): ?array
+    public function listWithUsageCount(array $filters = []): array
     {
-        $eventId = trim($eventId);
-        if ($eventId === '') {
-            return null;
+        $builder = $this->select('templates.*, COUNT(event_templates.event_id) as usage_count')
+            ->join('event_templates', 'event_templates.template_id = templates.id', 'left')
+            ->groupBy('templates.id');
+
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                ->like('templates.name', $filters['search'])
+                ->orLike('templates.code', $filters['search'])
+                ->orLike('templates.description', $filters['search'])
+            ->groupEnd();
         }
 
-        $db = $this->db;
-
-        $row = $db->table('event_templates')
-            ->select('templates.*')
-            ->join('templates', 'templates.id = event_templates.template_id')
-            ->where('event_templates.event_id', $eventId)
-            ->where('event_templates.is_active', 1)
-            ->orderBy('event_templates.applied_at', 'DESC')
-            ->limit(1)
-            ->get()
-            ->getRowArray();
-
-        return $row ?: null;
-    }
-
-    /**
-     * (Opcional) Obtener todos los templates vinculados a un evento (histórico).
-     */
-    public function getAllForEvent(string $eventId): array
-    {
-        $eventId = trim($eventId);
-        if ($eventId === '') {
-            return [];
+        if (isset($filters['is_active']) && $filters['is_active'] !== '') {
+            $builder->where('templates.is_active', $filters['is_active']);
         }
 
-        $db = $this->db;
+        if (isset($filters['is_public']) && $filters['is_public'] !== '') {
+            $builder->where('templates.is_public', $filters['is_public']);
+        }
 
-        return $db->table('event_templates')
-            ->select('templates.*, event_templates.is_active, event_templates.applied_at')
-            ->join('templates', 'templates.id = event_templates.template_id')
-            ->where('event_templates.event_id', $eventId)
-            ->orderBy('event_templates.applied_at', 'DESC')
-            ->get()
-            ->getResultArray();
+        return $builder->orderBy('templates.sort_order', 'ASC')
+                       ->orderBy('templates.created_at', 'DESC')
+                       ->findAll();
     }
 }

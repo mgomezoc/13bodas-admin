@@ -148,10 +148,14 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     // ---------------------------------------------------------------------
     $routes->group('templates', function ($routes) {
         $routes->get('/', 'Admin\Templates::index');
+        $routes->get('list', 'Admin\Templates::list');
         $routes->get('create', 'Admin\Templates::create');
-        $routes->post('store', 'Admin\Templates::store');
         $routes->get('edit/(:num)', 'Admin\Templates::edit/$1');
-        $routes->post('update/(:num)', 'Admin\Templates::update/$1');
+        $routes->post('save/(:num)', 'Admin\Templates::save/$1');
+        $routes->post('save', 'Admin\Templates::save');
+        $routes->post('delete/(:num)', 'Admin\Templates::delete/$1');
+        $routes->post('toggle-active/(:num)', 'Admin\Templates::toggleActive/$1');
+        $routes->post('toggle-public/(:num)', 'Admin\Templates::togglePublic/$1');
     });
 
     // ---------------------------------------------------------------------
