@@ -1,3 +1,4 @@
+<!-- ✅ app/Views/admin/events/edit.php (COMPLETO) -->
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?><?= esc($event['couple_title']) ?><?= $this->endSection() ?>
@@ -22,7 +23,7 @@
         <p class="page-subtitle">
             <i class="bi bi-calendar me-1"></i>
             <?= date('d \d\e F, Y - H:i', strtotime($event['event_date_start'])) ?>
-            <?php if ($event['venue_name']): ?>
+            <?php if (!empty($event['venue_name'])): ?>
                 <span class="mx-2">•</span>
                 <i class="bi bi-geo-alt me-1"></i>
                 <?= esc($event['venue_name']) ?>
@@ -45,7 +46,7 @@
         <div class="stat-card">
             <div class="stat-icon bg-primary"><i class="bi bi-people"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $stats['total_guests'] ?></div>
+                <div class="stat-value"><?= (int)($stats['total_guests'] ?? 0) ?></div>
                 <div class="stat-label">Invitados</div>
             </div>
         </div>
@@ -54,7 +55,7 @@
         <div class="stat-card">
             <div class="stat-icon bg-success"><i class="bi bi-check-circle"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $rsvpStats['accepted'] ?></div>
+                <div class="stat-value"><?= (int)($rsvpStats['accepted'] ?? 0) ?></div>
                 <div class="stat-label">Confirmados</div>
             </div>
         </div>
@@ -63,7 +64,7 @@
         <div class="stat-card">
             <div class="stat-icon bg-danger"><i class="bi bi-x-circle"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $rsvpStats['declined'] ?></div>
+                <div class="stat-value"><?= (int)($rsvpStats['declined'] ?? 0) ?></div>
                 <div class="stat-label">No Asisten</div>
             </div>
         </div>
@@ -72,7 +73,7 @@
         <div class="stat-card">
             <div class="stat-icon bg-warning"><i class="bi bi-clock"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $rsvpStats['pending'] ?></div>
+                <div class="stat-value"><?= (int)($rsvpStats['pending'] ?? 0) ?></div>
                 <div class="stat-label">Pendientes</div>
             </div>
         </div>
@@ -124,6 +125,12 @@
         <form id="eventForm" method="POST" action="<?= base_url('admin/events/update/' . $event['id']) ?>">
             <?= csrf_field() ?>
 
+            <!-- ✅ Nota: Hidden flags para que NUNCA se “pierdan” cuando el checkbox va desmarcado -->
+            <?php if (!empty($isAdmin)): ?>
+                <input type="hidden" name="is_demo" value="0">
+                <input type="hidden" name="is_paid" value="0">
+            <?php endif; ?>
+
             <div class="row">
                 <div class="col-lg-8">
                     <!-- Información Principal -->
@@ -136,8 +143,8 @@
                                 <div class="mb-3">
                                     <label class="form-label" for="client_id">Cliente</label>
                                     <select id="client_id" name="client_id" class="form-select select2">
-                                        <?php foreach ($clients as $client): ?>
-                                            <option value="<?= $client['id'] ?>" <?= $event['client_id'] === $client['id'] ? 'selected' : '' ?>>
+                                        <?php foreach (($clients ?? []) as $client): ?>
+                                            <option value="<?= $client['id'] ?>" <?= (string)$event['client_id'] === (string)$client['id'] ? 'selected' : '' ?>>
                                                 <?= esc($client['full_name']) ?> (<?= esc($client['email']) ?>)
                                             </option>
                                         <?php endforeach; ?>
@@ -166,13 +173,14 @@
                                     <label class="form-label" for="event_date_start">Fecha y Hora del Evento <span class="text-danger">*</span></label>
                                     <input type="text" id="event_date_start" name="event_date_start"
                                         class="form-control datetimepicker"
-                                        value="<?= date('Y-m-d H:i', strtotime($event['event_date_start'])) ?>" required>
+                                        value="<?= !empty($event['event_date_start']) ? date('Y-m-d H:i', strtotime($event['event_date_start'])) : '' ?>"
+                                        required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="event_date_end">Hora de Finalización</label>
                                     <input type="text" id="event_date_end" name="event_date_end"
                                         class="form-control datetimepicker"
-                                        value="<?= $event['event_date_end'] ? date('Y-m-d H:i', strtotime($event['event_date_end'])) : '' ?>">
+                                        value="<?= !empty($event['event_date_end']) ? date('Y-m-d H:i', strtotime($event['event_date_end'])) : '' ?>">
                                 </div>
                             </div>
 
@@ -181,14 +189,14 @@
                                     <label class="form-label" for="rsvp_deadline">Fecha Límite para Confirmar</label>
                                     <input type="text" id="rsvp_deadline" name="rsvp_deadline"
                                         class="form-control datetimepicker"
-                                        value="<?= $event['rsvp_deadline'] ? date('Y-m-d H:i', strtotime($event['rsvp_deadline'])) : '' ?>">
+                                        value="<?= !empty($event['rsvp_deadline']) ? date('Y-m-d H:i', strtotime($event['rsvp_deadline'])) : '' ?>">
                                     <div class="form-text">Hasta cuándo pueden los invitados confirmar asistencia</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="time_zone">Zona Horaria</label>
                                     <select id="time_zone" name="time_zone" class="form-select">
-                                        <?php foreach ($timezones as $tz => $label): ?>
-                                            <option value="<?= $tz ?>" <?= $event['time_zone'] === $tz ? 'selected' : '' ?>>
+                                        <?php foreach (($timezones ?? []) as $tz => $label): ?>
+                                            <option value="<?= $tz ?>" <?= ($event['time_zone'] ?? '') === $tz ? 'selected' : '' ?>>
                                                 <?= esc($label) ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -199,7 +207,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="primary_contact_email">Email de Contacto</label>
                                 <input type="email" id="primary_contact_email" name="primary_contact_email"
-                                    class="form-control" value="<?= esc($event['primary_contact_email']) ?>">
+                                    class="form-control" value="<?= esc($event['primary_contact_email'] ?? '') ?>">
                                 <div class="form-text">Recibirá notificaciones de confirmaciones</div>
                             </div>
                         </div>
@@ -214,25 +222,25 @@
                             <div class="mb-3">
                                 <label class="form-label" for="venue_name">Nombre del Lugar</label>
                                 <input type="text" id="venue_name" name="venue_name" class="form-control"
-                                    value="<?= esc($event['venue_name']) ?>" placeholder="Ej: Hacienda San José">
+                                    value="<?= esc($event['venue_name'] ?? '') ?>" placeholder="Ej: Hacienda San José">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label" for="venue_address">Dirección Completa</label>
                                 <textarea id="venue_address" name="venue_address" class="form-control"
-                                    rows="2"><?= esc($event['venue_address']) ?></textarea>
+                                    rows="2"><?= esc($event['venue_address'] ?? '') ?></textarea>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="venue_geo_lat">Latitud</label>
                                     <input type="text" id="venue_geo_lat" name="venue_geo_lat" class="form-control"
-                                        value="<?= esc($event['venue_geo_lat']) ?>" placeholder="Ej: 25.6866">
+                                        value="<?= esc($event['venue_geo_lat'] ?? '') ?>" placeholder="Ej: 25.6866">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="venue_geo_lng">Longitud</label>
                                     <input type="text" id="venue_geo_lng" name="venue_geo_lng" class="form-control"
-                                        value="<?= esc($event['venue_geo_lng']) ?>" placeholder="Ej: -100.3161">
+                                        value="<?= esc($event['venue_geo_lng'] ?? '') ?>" placeholder="Ej: -100.3161">
                                 </div>
                             </div>
                             <div class="form-text">
@@ -244,42 +252,43 @@
                 </div>
 
                 <div class="col-lg-4">
-                    <?php if ($isAdmin): ?>
-                        <!-- Configuración (solo admin) -->
+                    <?php if (!empty($isAdmin)): ?>
+                        <!-- ✅ Configuración (solo admin) -->
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="bi bi-gear"></i> Configuración
                             </div>
                             <div class="card-body">
+                                <!-- ✅ Paso 1 (CRÍTICO) enums corregidos -->
                                 <div class="mb-3">
                                     <label class="form-label" for="service_status">Estado del Servicio</label>
                                     <select id="service_status" name="service_status" class="form-select">
-                                        <option value="draft" <?= $event['service_status'] === 'draft' ? 'selected' : '' ?>>Borrador</option>
-                                        <option value="active" <?= $event['service_status'] === 'active' ? 'selected' : '' ?>>Activo</option>
-                                        <option value="suspended" <?= $event['service_status'] === 'suspended' ? 'selected' : '' ?>>Suspendido</option>
-                                        <option value="archived" <?= $event['service_status'] === 'archived' ? 'selected' : '' ?>>Archivado</option>
+                                        <option value="draft" <?= ($event['service_status'] ?? '') === 'draft' ? 'selected' : '' ?>>Borrador</option>
+                                        <option value="active" <?= ($event['service_status'] ?? '') === 'active' ? 'selected' : '' ?>>Activo</option>
+                                        <option value="suspended" <?= ($event['service_status'] ?? '') === 'suspended' ? 'selected' : '' ?>>Suspendido</option>
+                                        <option value="archived" <?= ($event['service_status'] ?? '') === 'archived' ? 'selected' : '' ?>>Archivado</option>
                                     </select>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label" for="site_mode">Modo del Sitio</label>
                                     <select id="site_mode" name="site_mode" class="form-select">
-                                        <option value="auto" <?= $event['site_mode'] === 'auto' ? 'selected' : '' ?>>Automático</option>
-                                        <option value="pre" <?= $event['site_mode'] === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
-                                        <option value="live" <?= $event['site_mode'] === 'live' ? 'selected' : '' ?>>En vivo</option>
-                                        <option value="post" <?= $event['site_mode'] === 'post' ? 'selected' : '' ?>>Post-evento</option>
+                                        <option value="auto" <?= ($event['site_mode'] ?? '') === 'auto' ? 'selected' : '' ?>>Automático</option>
+                                        <option value="pre" <?= ($event['site_mode'] ?? '') === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
+                                        <option value="live" <?= ($event['site_mode'] ?? '') === 'live' ? 'selected' : '' ?>>En vivo</option>
+                                        <option value="post" <?= ($event['site_mode'] ?? '') === 'post' ? 'selected' : '' ?>>Post-evento</option>
                                     </select>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label" for="visibility">Visibilidad</label>
                                     <select id="visibility" name="visibility" class="form-select">
-                                        <option value="private" <?= $event['visibility'] === 'private' ? 'selected' : '' ?>>Privado</option>
-                                        <option value="public" <?= $event['visibility'] === 'public' ? 'selected' : '' ?>>Público</option>
+                                        <option value="private" <?= ($event['visibility'] ?? '') === 'private' ? 'selected' : '' ?>>Privado</option>
+                                        <option value="public" <?= ($event['visibility'] ?? '') === 'public' ? 'selected' : '' ?>>Público</option>
                                     </select>
                                 </div>
 
-                                <!-- Paso 2: Admin-only directos en events -->
+                                <!-- ✅ Paso 2 (admin-only) campos en events -->
                                 <div class="mb-3">
                                     <label class="form-label" for="access_mode">Modo de Acceso</label>
                                     <select id="access_mode" name="access_mode" class="form-select">
@@ -327,7 +336,7 @@
                                         <select id="template_id" name="template_id" class="form-select">
                                             <option value="">Sin plantilla</option>
                                             <?php foreach ($templates as $template): ?>
-                                                <option value="<?= $template['id'] ?>" <?= ($event['template_id'] ?? '') == $template['id'] ? 'selected' : '' ?>>
+                                                <option value="<?= $template['id'] ?>" <?= (string)($event['template_id'] ?? '') === (string)$template['id'] ? 'selected' : '' ?>>
                                                     <?= esc($template['name']) ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -422,18 +431,21 @@
 
         // UX: si no está pagado, deshabilitar/limpiar paid_until
         function syncPaidUntil() {
-            const isPaid = $('#is_paid').is(':checked');
+            const $isPaid = $('#is_paid');
             const $paidUntil = $('#paid_until');
+
+            if (!$isPaid.length || !$paidUntil.length) return;
+
+            const isPaid = $isPaid.is(':checked');
             if (!isPaid) {
                 $paidUntil.val('').prop('disabled', true);
             } else {
                 $paidUntil.prop('disabled', false);
             }
         }
-        if ($('#is_paid').length && $('#paid_until').length) {
-            syncPaidUntil();
-            $('#is_paid').on('change', syncPaidUntil);
-        }
+
+        syncPaidUntil();
+        $('#is_paid').on('change', syncPaidUntil);
 
         // Guardar formulario
         $('#eventForm').on('submit', function(e) {
@@ -465,7 +477,7 @@
                         });
                     }
                 },
-                error: function(xhr) {
+                error: function() {
                     Toast.fire({
                         icon: 'error',
                         title: 'Error de conexión'
@@ -480,17 +492,16 @@
 
     function checkSlugAvailability(slug, excludeId) {
         $.post('<?= base_url('admin/events/check-slug') ?>', {
-                slug: slug,
-                exclude_id: excludeId
-            })
-            .done(function(response) {
-                const feedback = $('#slugFeedback');
-                if (response.available) {
-                    feedback.html('<span class="text-success small"><i class="bi bi-check-circle me-1"></i>Disponible</span>');
-                } else {
-                    feedback.html('<span class="text-danger small"><i class="bi bi-x-circle me-1"></i>No disponible</span>');
-                }
-            });
+            slug: slug,
+            exclude_id: excludeId
+        }).done(function(response) {
+            const feedback = $('#slugFeedback');
+            if (response.available) {
+                feedback.html('<span class="text-success small"><i class="bi bi-check-circle me-1"></i>Disponible</span>');
+            } else {
+                feedback.html('<span class="text-danger small"><i class="bi bi-x-circle me-1"></i>No disponible</span>');
+            }
+        });
     }
 </script>
 <?= $this->endSection() ?>

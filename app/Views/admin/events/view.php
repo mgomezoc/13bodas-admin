@@ -16,65 +16,36 @@
 <div class="page-header">
     <div>
         <h1 class="page-title"><?= esc($event['couple_title']) ?></h1>
-        <p class="page-subtitle">
+        <p class="page-subtitle mb-0">
             <?php
-            // Enums reales BD:
+            // Enums reales:
             // service_status: draft|active|suspended|archived
-            // site_mode: auto|pre|live|post
-            // visibility: public|private
-
-            $statusClass = match ($event['service_status']) {
+            $statusClass = match ($event['service_status'] ?? 'draft') {
                 'draft'     => 'bg-secondary',
                 'active'    => 'bg-success',
-                'suspended' => 'bg-warning',
+                'suspended' => 'bg-warning text-dark',
                 'archived'  => 'bg-dark',
                 default     => 'bg-secondary'
             };
 
-            $statusLabel = match ($event['service_status']) {
+            $statusLabel = match ($event['service_status'] ?? 'draft') {
                 'draft'     => 'Borrador',
                 'active'    => 'Activo',
                 'suspended' => 'Suspendido',
                 'archived'  => 'Archivado',
-                default     => $event['service_status']
-            };
-
-            $visibilityClass = match ($event['visibility'] ?? '') {
-                'public'  => 'bg-primary',
-                'private' => 'bg-secondary',
-                default   => 'bg-secondary'
-            };
-
-            $visibilityLabel = match ($event['visibility'] ?? '') {
-                'public'  => 'Público',
-                'private' => 'Privado',
-                default   => ($event['visibility'] ?? '')
-            };
-
-            $siteModeClass = match ($event['site_mode'] ?? '') {
-                'auto' => 'bg-info',
-                'pre'  => 'bg-info',
-                'live' => 'bg-success',
-                'post' => 'bg-secondary',
-                default => 'bg-secondary'
-            };
-
-            $siteModeLabel = match ($event['site_mode'] ?? '') {
-                'auto' => 'Auto',
-                'pre'  => 'Pre',
-                'live' => 'Live',
-                'post' => 'Post',
-                default => ($event['site_mode'] ?? '')
+                default     => (string)($event['service_status'] ?? 'draft')
             };
             ?>
-            <span class="badge <?= $statusClass ?>"><?= $statusLabel ?></span>
+            <span class="badge <?= $statusClass ?>"><?= esc($statusLabel) ?></span>
 
-            <?php if (!empty($event['visibility'])): ?>
-                <span class="badge <?= $visibilityClass ?> ms-1"><?= $visibilityLabel ?></span>
-            <?php endif; ?>
-
-            <?php if (!empty($event['site_mode'])): ?>
-                <span class="badge <?= $siteModeClass ?> ms-1"><?= $siteModeLabel ?></span>
+            <?php if (!empty($event['event_date_start'])): ?>
+                <span class="ms-2 text-muted">
+                    <i class="bi bi-calendar me-1"></i>
+                    <?= date('d/m/Y H:i', strtotime($event['event_date_start'])) ?>
+                    <?php if (!empty($event['event_date_end'])): ?>
+                        - <?= date('H:i', strtotime($event['event_date_end'])) ?>
+                    <?php endif; ?>
+                </span>
             <?php endif; ?>
         </p>
     </div>
@@ -92,44 +63,36 @@
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
         <div class="stat-card">
-            <div class="stat-icon bg-primary">
-                <i class="bi bi-people"></i>
-            </div>
+            <div class="stat-icon bg-primary"><i class="bi bi-people"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $stats['total_guests'] ?></div>
+                <div class="stat-value"><?= (int)($stats['total_guests'] ?? 0) ?></div>
                 <div class="stat-label">Invitados</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg-3">
         <div class="stat-card">
-            <div class="stat-icon bg-success">
-                <i class="bi bi-check-circle"></i>
-            </div>
+            <div class="stat-icon bg-success"><i class="bi bi-check-circle"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $rsvpStats['accepted'] ?></div>
+                <div class="stat-value"><?= (int)($rsvpStats['accepted'] ?? 0) ?></div>
                 <div class="stat-label">Confirmados</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg-3">
         <div class="stat-card">
-            <div class="stat-icon bg-danger">
-                <i class="bi bi-x-circle"></i>
-            </div>
+            <div class="stat-icon bg-danger"><i class="bi bi-x-circle"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $rsvpStats['declined'] ?></div>
+                <div class="stat-value"><?= (int)($rsvpStats['declined'] ?? 0) ?></div>
                 <div class="stat-label">No Asisten</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-lg-3">
         <div class="stat-card">
-            <div class="stat-icon bg-warning">
-                <i class="bi bi-clock"></i>
-            </div>
+            <div class="stat-icon bg-warning"><i class="bi bi-clock"></i></div>
             <div class="stat-content">
-                <div class="stat-value"><?= $rsvpStats['pending'] ?></div>
+                <div class="stat-value"><?= (int)($rsvpStats['pending'] ?? 0) ?></div>
                 <div class="stat-label">Pendientes</div>
             </div>
         </div>
@@ -147,30 +110,83 @@
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Cliente</dt>
                     <dd class="col-sm-8">
-                        <a href="<?= base_url('admin/clients/view/' . $event['client_id']) ?>">
-                            <?= esc($event['client_name']) ?>
-                        </a>
-                        <br><small class="text-muted"><?= esc($event['client_email']) ?></small>
-                    </dd>
-
-                    <dt class="col-sm-4">Fecha</dt>
-                    <dd class="col-sm-8">
-                        <?= date('d/m/Y H:i', strtotime($event['event_date_start'])) ?>
-                        <?php if ($event['event_date_end']): ?>
-                            - <?= date('H:i', strtotime($event['event_date_end'])) ?>
+                        <?php if (!empty($event['client_id'])): ?>
+                            <a href="<?= base_url('admin/clients/view/' . $event['client_id']) ?>">
+                                <?= esc($event['client_name'] ?? 'Cliente') ?>
+                            </a>
+                            <?php if (!empty($event['client_email'])): ?>
+                                <br><small class="text-muted"><?= esc($event['client_email']) ?></small>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span class="text-muted">No asignado</span>
                         <?php endif; ?>
                     </dd>
 
+                    <dt class="col-sm-4">URL</dt>
+                    <dd class="col-sm-8">
+                        <code><?= esc($event['slug'] ?? '') ?></code>
+                    </dd>
+
                     <dt class="col-sm-4">Zona Horaria</dt>
-                    <dd class="col-sm-8"><?= esc($event['time_zone']) ?></dd>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['time_zone']) ? esc($event['time_zone']) : '<span class="text-muted">No definido</span>' ?>
+                    </dd>
 
                     <dt class="col-sm-4">RSVP Límite</dt>
                     <dd class="col-sm-8">
-                        <?= $event['rsvp_deadline'] ? date('d/m/Y H:i', strtotime($event['rsvp_deadline'])) : '<span class="text-muted">No definido</span>' ?>
+                        <?= !empty($event['rsvp_deadline'])
+                            ? date('d/m/Y H:i', strtotime($event['rsvp_deadline']))
+                            : '<span class="text-muted">No definido</span>' ?>
                     </dd>
 
                     <dt class="col-sm-4">Creado</dt>
-                    <dd class="col-sm-8"><?= date('d/m/Y', strtotime($event['created_at'])) ?></dd>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['created_at']) ? date('d/m/Y', strtotime($event['created_at'])) : '<span class="text-muted">-</span>' ?>
+                    </dd>
+
+                    <dt class="col-sm-4">Plantilla activa</dt>
+                    <dd class="col-sm-8">
+                        <?php if (!empty($event['template_id'])): ?>
+                            <span class="badge bg-light text-dark">ID <?= (int)$event['template_id'] ?></span>
+                        <?php else: ?>
+                            <span class="text-muted">Sin plantilla</span>
+                        <?php endif; ?>
+                    </dd>
+                </dl>
+
+                <hr class="my-3">
+
+                <!-- Config útil (sin romper roles; si tu layout no manda isAdmin, esto solo muestra lo básico) -->
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Modo</dt>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['site_mode']) ? esc($event['site_mode']) : '<span class="text-muted">-</span>' ?>
+                    </dd>
+
+                    <dt class="col-sm-4">Visibilidad</dt>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['visibility']) ? esc($event['visibility']) : '<span class="text-muted">-</span>' ?>
+                    </dd>
+
+                    <dt class="col-sm-4">Acceso</dt>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['access_mode']) ? esc($event['access_mode']) : '<span class="text-muted">-</span>' ?>
+                    </dd>
+
+                    <dt class="col-sm-4">Demo</dt>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['is_demo']) ? '<span class="badge bg-info">Sí</span>' : '<span class="badge bg-light text-dark">No</span>' ?>
+                    </dd>
+
+                    <dt class="col-sm-4">Pagado</dt>
+                    <dd class="col-sm-8">
+                        <?= !empty($event['is_paid']) ? '<span class="badge bg-success">Sí</span>' : '<span class="badge bg-light text-dark">No</span>' ?>
+                        <?php if (!empty($event['is_paid']) && !empty($event['paid_until'])): ?>
+                            <div class="text-muted small mt-1">
+                                Hasta: <?= date('d/m/Y H:i', strtotime($event['paid_until'])) ?>
+                            </div>
+                        <?php endif; ?>
+                    </dd>
                 </dl>
             </div>
         </div>
@@ -183,12 +199,16 @@
                 <i class="bi bi-geo-alt me-2"></i>Lugar del Evento
             </div>
             <div class="card-body">
-                <?php if ($event['venue_name']): ?>
-                    <h5><?= esc($event['venue_name']) ?></h5>
-                    <p class="text-muted mb-3"><?= nl2br(esc($event['venue_address'])) ?></p>
+                <?php if (!empty($event['venue_name'])): ?>
+                    <h5 class="mb-1"><?= esc($event['venue_name']) ?></h5>
+                    <?php if (!empty($event['venue_address'])): ?>
+                        <p class="text-muted mb-3"><?= nl2br(esc($event['venue_address'])) ?></p>
+                    <?php else: ?>
+                        <p class="text-muted mb-3">Sin dirección</p>
+                    <?php endif; ?>
 
-                    <?php if ($event['venue_geo_lat'] && $event['venue_geo_lng']): ?>
-                        <a href="https://www.google.com/maps?q=<?= $event['venue_geo_lat'] ?>,<?= $event['venue_geo_lng'] ?>"
+                    <?php if (!empty($event['venue_geo_lat']) && !empty($event['venue_geo_lng'])): ?>
+                        <a href="https://www.google.com/maps?q=<?= esc($event['venue_geo_lat']) ?>,<?= esc($event['venue_geo_lng']) ?>"
                             target="_blank"
                             class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-map me-1"></i>Ver en Google Maps
@@ -212,8 +232,8 @@
             <div class="col-lg-8">
                 <label class="form-label small text-muted mb-1">URL de la Invitación</label>
                 <div class="input-group">
-                    <input type="text" class="form-control bg-light" value="<?= $invitationUrl ?>" readonly>
-                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('<?= $invitationUrl ?>')">
+                    <input type="text" class="form-control bg-light" value="<?= esc($invitationUrl) ?>" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('<?= esc($invitationUrl) ?>')">
                         <i class="bi bi-clipboard"></i> Copiar
                     </button>
                 </div>
@@ -250,7 +270,7 @@
     <div class="col-md-4">
         <a href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>" class="card text-decoration-none h-100">
             <div class="card-body text-center py-4">
-                <i class="bi bi-images text-purple" style="font-size: 2rem;"></i>
+                <i class="bi bi-images" style="font-size: 2rem;"></i>
                 <h6 class="mt-2 mb-0">Galería de Fotos</h6>
             </div>
         </a>

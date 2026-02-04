@@ -325,7 +325,7 @@ class Events extends BaseController
                 $eventData['visibility'] = $visibility;
             }
 
-            // Paso 2: directos en events
+            // Paso 2: directos en events (admin-only)
             $accessMode = $this->request->getPost('access_mode');
             if ($accessMode !== null && $accessMode !== '') {
                 $allowed = ['open', 'invite_code'];
@@ -335,7 +335,7 @@ class Events extends BaseController
                 $eventData['access_mode'] = $accessMode;
             }
 
-            // checkboxes: si no vienen, quedan 0
+            // checkboxes: si no vienen, quedan 0 (en UI mandamos hidden 0 para que siempre lleguen)
             $eventData['is_demo'] = $this->request->getPost('is_demo') ? 1 : 0;
 
             $isPaid = $this->request->getPost('is_paid') ? 1 : 0;
@@ -349,23 +349,34 @@ class Events extends BaseController
                 $eventData['paid_until'] = null;
             }
 
-            // JSON libre con validación básica (si viene)
+            // JSON libre con validación básica
+            // ✅ Permite limpiar: si el campo llega vacío => NULL
             $venueConfig = $this->request->getPost('venue_config');
-            if ($venueConfig !== null && $venueConfig !== '') {
-                json_decode($venueConfig);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    return $this->jsonOrRedirect(false, 'venue_config no es JSON válido.');
+            if ($venueConfig !== null) {
+                $venueConfig = trim((string)$venueConfig);
+                if ($venueConfig === '') {
+                    $eventData['venue_config'] = null;
+                } else {
+                    json_decode($venueConfig);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        return $this->jsonOrRedirect(false, 'venue_config no es JSON válido.');
+                    }
+                    $eventData['venue_config'] = $venueConfig;
                 }
-                $eventData['venue_config'] = $venueConfig;
             }
 
             $themeConfig = $this->request->getPost('theme_config');
-            if ($themeConfig !== null && $themeConfig !== '') {
-                json_decode($themeConfig);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    return $this->jsonOrRedirect(false, 'theme_config no es JSON válido.');
+            if ($themeConfig !== null) {
+                $themeConfig = trim((string)$themeConfig);
+                if ($themeConfig === '') {
+                    $eventData['theme_config'] = null;
+                } else {
+                    json_decode($themeConfig);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        return $this->jsonOrRedirect(false, 'theme_config no es JSON válido.');
+                    }
+                    $eventData['theme_config'] = $themeConfig;
                 }
-                $eventData['theme_config'] = $themeConfig;
             }
         }
 
