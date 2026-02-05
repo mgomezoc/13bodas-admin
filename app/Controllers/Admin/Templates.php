@@ -1,240 +1,222 @@
 <?php
 
-namespace App\Controllers\Admin;
+namespace App\Models;
 
-use App\Controllers\BaseController;
-use App\Models\TemplateModel;
+use CodeIgniter\Model;
 
-class Templates extends BaseController
+class TemplateModel extends Model
 {
-    protected TemplateModel $templateModel;
+    protected $table            = 'templates';
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = true;
+    protected $returnType       = 'array';
+    protected $useSoftDeletes   = false;
+    protected $protectFields    = true;
 
-    public function __construct()
-    {
-        $this->templateModel = new TemplateModel();
-    }
+    protected $allowedFields    = [
+        'code',
+        'name',
+        'description',
+        'preview_url',
+        'thumbnail_url',
+        'is_public',
+        'is_active',
+        'sort_order',
+        'schema_json',
+        'meta_json',
+        // Nota: NO incluimos created_at/updated_at para evitar seteos por POST.
+    ];
 
-    public function index()
-    {
-        return view('admin/templates/index', ['pageTitle' => 'Templates']);
-    }
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
 
-    public function list()
+    protected $validationRules = [
+        'code' => 'required|max_length[80]|is_unique[templates.code,id,{id}]',
+        'name' => 'required|max_length[120]',
+    ];
+
+    protected $validationMessages = [
+        'code' => [
+            'is_unique' => 'Este código ya está en uso.',
+            'required'  => 'El código es obligatorio.',
+        ],
+        'name' => [
+            'required' => 'El nombre es obligatorio.',
+        ],
+    ];
+
+    protected $skipValidation = false;
+
+    /**
+     * Indica si un template tiene relaciones en event_templates.
+     * OJO: cuenta histórico, no solo el activo.
+     */
+    public function isTemplateInUse(int $templateId): array
     {
-        $filters = [
-            'search'    => $this->request->getGet('search'),
-            'is_active' => $this->request->getGet('is_active'),
-            'is_public' => $this->request->getGet('is_public'),
+        $db = $this->db ?? \Config\Database::connect();
+
+        $count = $db->table('event_templates')
+            ->where('template_id', $templateId)
+            ->countAllResults();
+
+        return [
+            'in_use' => $count > 0,
+            'count'  => $count,
         ];
-
-        $templates = $this->templateModel->listWithUsageCount($filters);
-
-        return $this->response->setJSON([
-            'total' => count($templates),
-            'rows'  => $templates,
-        ]);
     }
 
-    public function create()
+    /**
+     * Lista templates con conteo de uso:
+     * - usage_count: eventos donde ES ACTIVO actualmente
+     * - usage_count_total: eventos donde existe en historial
+     */
+    public function listWithUsageCount(array $filters = []): array
     {
-        return view('admin/templates/form', [
-            'pageTitle' => 'Nuevo Template',
-            'template'  => null,
-        ]);
+        // MySQL: COUNT(DISTINCT IF(cond, value, NULL))
+        $builder = $this->select([
+            'templates.*',
+            'COUNT(DISTINCT IF(event_templates.is_active = 1, event_templates.event_id, NULL)) AS usage_count',
+            'COUNT(DISTINCT event_templates.event_id) AS usage_count_total',
+        ])
+            ->join('event_templates', 'event_templates.template_id = templates.id', 'left')
+            ->groupBy('templates.id');
+
+        if (!empty($filters['search'])) {
+            $s = trim((string) $filters['search']);
+            $builder->groupStart()
+                ->like('templates.name', $s)
+                ->orLike('templates.code', $s)
+                ->orLike('templates.description', $s)
+                ->groupEnd();
+        }
+
+        if (array_key_exists('is_active', $filters) && $filters['is_active'] !== '' && $filters['is_active'] !== null) {
+            $builder->where('templates.is_active', (int) $filters['is_active']);
+        }
+
+        if (array_key_exists('is_public', $filters) && $filters['is_public'] !== '' && $filters['is_public'] !== null) {
+            $builder->where('templates.is_public', (int) $filters['is_public']);
+        }
+
+        return $builder->orderBy('templates.sort_order', 'ASC')
+            ->orderBy('templates.created_at', 'DESC')
+            ->findAll();
     }
 
-    public function edit(int $id)
+    /**
+     * Obtiene el template activo para un evento usando event_templates.
+     * Acepta:
+     *  - string $eventId (UUID)
+     *  - array $event (con clave 'id')
+     */
+    public function getActiveForEvent($event): ?array
     {
-        $template = $this->templateModel->find($id);
+        $eventId = is_array($event) ? ($event['id'] ?? null) : $event;
 
-        if (!$template) {
-            return redirect()->to(base_url('admin/templates'))->with('error', 'Template no encontrado.');
+        if (!is_string($eventId) || trim($eventId) === '') {
+            return null;
         }
 
-        return view('admin/templates/form', [
-            'pageTitle' => 'Editar Template',
-            'template'  => $template,
-        ]);
+        $db = $this->db ?? \Config\Database::connect();
+
+        // 1) Template marcado como activo para el evento
+        $tpl = $db->table('event_templates et')
+            ->select('t.*')
+            ->join('templates t', 't.id = et.template_id', 'inner')
+            ->where('et.event_id', $eventId)
+            ->where('et.is_active', 1)
+            ->orderBy('et.applied_at', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRowArray();
+
+        if ($tpl) {
+            return $tpl;
+        }
+
+        // 2) Fallback: último aplicado (si por data legacy no hay is_active=1)
+        $tpl = $db->table('event_templates et')
+            ->select('t.*')
+            ->join('templates t', 't.id = et.template_id', 'inner')
+            ->where('et.event_id', $eventId)
+            ->orderBy('et.applied_at', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRowArray();
+
+        if ($tpl) {
+            return $tpl;
+        }
+
+        // 3) Fallback final: primer template activo del catálogo
+        return $this->where('is_active', 1)
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->first();
     }
 
-    public function save(?int $id = null)
+    /**
+     * Deja un solo template activo por evento (manteniendo historial).
+     * - pone is_active=0 a todos los del evento
+     * - hace upsert (event_id, template_id) con is_active=1 y applied_at=NOW()
+     */
+    public function setActiveForEvent(string $eventId, int $templateId): bool
     {
-        $isUpdate = !empty($id);
-
-        $rules = [
-            'code'        => $isUpdate ? "required|max_length[50]|is_unique[templates.code,id,{$id}]" : 'required|max_length[50]|is_unique[templates.code]',
-            'name'        => 'required|max_length[100]',
-            'description' => 'permit_empty|max_length[500]',
-            'preview_url' => 'permit_empty|max_length[255]',
-            'thumbnail_url' => 'permit_empty|max_length[255]',
-            'sort_order'  => 'permit_empty|integer',
-            'is_public'   => 'required|in_list[0,1]',
-            'is_active'   => 'required|in_list[0,1]',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        $eventId = trim($eventId);
+        if ($eventId === '' || $templateId <= 0) {
+            return false;
         }
 
-        $data = [
-            'code'          => $this->request->getPost('code'),
-            'name'          => $this->request->getPost('name'),
-            'description'   => $this->request->getPost('description'),
-            'preview_url'   => $this->request->getPost('preview_url'),
-            'thumbnail_url' => $this->request->getPost('thumbnail_url'),
-            'sort_order'    => $this->request->getPost('sort_order') ?: 0,
-            'is_public'     => $this->request->getPost('is_public'),
-            'is_active'     => $this->request->getPost('is_active'),
-        ];
+        $db = $this->db ?? \Config\Database::connect();
 
-        $schemaJson = trim($this->request->getPost('schema_json'));
-        if (!empty($schemaJson)) {
-            json_decode($schemaJson);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return redirect()->back()->withInput()->with('errors', ['schema_json' => 'El Schema JSON no es válido: ' . json_last_error_msg()]);
-            }
-            $data['schema_json'] = $schemaJson;
-        }
+        $db->transStart();
 
-        $metaJson = trim($this->request->getPost('meta_json'));
-        if (!empty($metaJson)) {
-            json_decode($metaJson);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return redirect()->back()->withInput()->with('errors', ['meta_json' => 'El Meta JSON no es válido: ' . json_last_error_msg()]);
-            }
-            $data['meta_json'] = $metaJson;
-        }
+        // 1) apagar todos
+        $db->table('event_templates')
+            ->where('event_id', $eventId)
+            ->set(['is_active' => 0])
+            ->update();
 
-        if ($isUpdate) {
-            $updated = $this->templateModel->update($id, $data);
-            if ($updated) {
-                return redirect()->to(base_url('admin/templates'))->with('success', 'Template actualizado correctamente.');
-            }
-            return redirect()->back()->withInput()->with('error', 'Error al actualizar el template.');
+        // 2) upsert del seleccionado
+        $exists = $db->table('event_templates')
+            ->where('event_id', $eventId)
+            ->where('template_id', $templateId)
+            ->countAllResults() > 0;
+
+        $now = date('Y-m-d H:i:s');
+
+        if ($exists) {
+            $db->table('event_templates')
+                ->where('event_id', $eventId)
+                ->where('template_id', $templateId)
+                ->set([
+                    'is_active'   => 1,
+                    'applied_at'  => $now,
+                ])
+                ->update();
         } else {
-            $inserted = $this->templateModel->insert($data);
-            if ($inserted) {
-                return redirect()->to(base_url('admin/templates'))->with('success', 'Template creado correctamente.');
-            }
-            return redirect()->back()->withInput()->with('error', 'Error al crear el template.');
-        }
-    }
-
-    public function delete(int $id)
-    {
-        try {
-            $template = $this->templateModel->find($id);
-
-            if (!$template) {
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON([
-                        'success' => false,
-                        'message' => 'Template no encontrado.'
-                    ]);
-                }
-                return redirect()->back()->with('error', 'Template no encontrado.');
-            }
-
-            $usage = $this->templateModel->isTemplateInUse($id);
-
-            if ($usage['in_use']) {
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON([
-                        'success' => false,
-                        'message' => "No se puede eliminar: Este template está siendo usado por {$usage['count']} evento(s)."
-                    ]);
-                }
-                return redirect()->back()->with('error', "No se puede eliminar: Este template está siendo usado por {$usage['count']} evento(s).");
-            }
-
-            $deleted = $this->templateModel->delete($id);
-
-            if ($deleted) {
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON([
-                        'success' => true,
-                        'message' => 'Template eliminado correctamente.'
-                    ]);
-                }
-                return redirect()->to(base_url('admin/templates'))->with('success', 'Template eliminado correctamente.');
-            }
-
-            throw new \Exception('No se pudo eliminar el template.');
-
-        } catch (\Exception $e) {
-            if ($this->request->isAJAX()) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Error al eliminar: ' . $e->getMessage()
-                ]);
-            }
-            return redirect()->back()->with('error', 'Error al eliminar el template.');
-        }
-    }
-
-    public function toggleActive(int $id)
-    {
-        try {
-            $template = $this->templateModel->find($id);
-
-            if (!$template) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Template no encontrado.'
-                ]);
-            }
-
-            $newStatus = $template['is_active'] ? 0 : 1;
-            $updated   = $this->templateModel->update($id, ['is_active' => $newStatus]);
-
-            if ($updated) {
-                return $this->response->setJSON([
-                    'success' => true,
-                    'message' => $newStatus ? 'Template activado.' : 'Template desactivado.',
-                    'is_active' => $newStatus,
-                ]);
-            }
-
-            throw new \Exception('No se pudo cambiar el estado.');
-
-        } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
+            $db->table('event_templates')->insert([
+                'event_id'    => $eventId,
+                'template_id' => $templateId,
+                'is_active'   => 1,
+                'applied_at'  => $now,
             ]);
         }
+
+        $db->transComplete();
+
+        return $db->transStatus();
     }
 
-    public function togglePublic(int $id)
+    public function getByCode(string $code): ?array
     {
-        try {
-            $template = $this->templateModel->find($id);
-
-            if (!$template) {
-                return $this->response->setJSON([
-                    'success' => false,
-                    'message' => 'Template no encontrado.'
-                ]);
-            }
-
-            $newStatus = $template['is_public'] ? 0 : 1;
-            $updated   = $this->templateModel->update($id, ['is_public' => $newStatus]);
-
-            if ($updated) {
-                return $this->response->setJSON([
-                    'success' => true,
-                    'message' => $newStatus ? 'Template público.' : 'Template privado.',
-                    'is_public' => $newStatus,
-                ]);
-            }
-
-            throw new \Exception('No se pudo cambiar la visibilidad.');
-
-        } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
+        $code = trim($code);
+        if ($code === '') {
+            return null;
         }
+
+        return $this->where('code', $code)->first();
     }
 }
