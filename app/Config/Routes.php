@@ -137,6 +137,10 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->group('leads', function ($routes) {
         $routes->get('/', 'Admin\Leads::index');
         $routes->get('list', 'Admin\Leads::list');
+        $routes->get('create', 'Admin\Leads::create');
+        $routes->get('edit/(:segment)', 'Admin\Leads::edit/$1');
+        $routes->post('save/(:segment)', 'Admin\Leads::save/$1');
+        $routes->post('save', 'Admin\Leads::save');
         $routes->get('view/(:segment)', 'Admin\Leads::view/$1');
         $routes->post('update-status/(:segment)', 'Admin\Leads::updateStatus/$1');
         $routes->post('convert/(:segment)', 'Admin\Leads::convert/$1');

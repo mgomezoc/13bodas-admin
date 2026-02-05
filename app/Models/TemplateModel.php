@@ -33,8 +33,8 @@ class TemplateModel extends Model
     protected $updatedField  = 'updated_at';
 
     protected $validationRules = [
-        'code' => 'required|max_length[50]|is_unique[templates.code,id,{id}]',
-        'name' => 'required|max_length[100]',
+        'code' => 'required|max_length[80]|is_unique[templates.code,id,{id}]',
+        'name' => 'required|max_length[120]',
     ];
 
     protected $validationMessages = [
