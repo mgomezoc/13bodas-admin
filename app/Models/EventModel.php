@@ -168,10 +168,10 @@ class EventModel extends Model
         $data['id'] = $eventId;
 
         // Valores por defecto coherentes
-        $data['site_mode']       = $data['site_mode']       ?? 'draft';
+        $data['site_mode']       = $data['site_mode']       ?? 'auto';
         $data['visibility']      = $data['visibility']      ?? 'private';
         $data['access_mode']     = $data['access_mode']     ?? 'open';
-        $data['service_status']  = $data['service_status']  ?? 'pending';
+        $data['service_status']  = $data['service_status']  ?? 'draft';
         $data['is_demo']         = $data['is_demo']         ?? 0;
         $data['is_paid']         = $data['is_paid']         ?? 0;
         $data['time_zone']       = $data['time_zone']       ?? 'America/Mexico_City';

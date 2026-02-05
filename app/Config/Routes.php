@@ -129,6 +129,47 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/party/store', 'Admin\WeddingParty::store/$1');
         $routes->post('(:segment)/party/update/(:segment)', 'Admin\WeddingParty::update/$1/$2');
         $routes->post('(:segment)/party/delete/(:segment)', 'Admin\WeddingParty::delete/$1/$2');
+
+        // Ubicaciones del evento
+        $routes->get('(:segment)/locations', 'Admin\EventLocations::index/$1');
+        $routes->post('(:segment)/locations/store', 'Admin\EventLocations::store/$1');
+        $routes->post('(:segment)/locations/update/(:segment)', 'Admin\EventLocations::update/$1/$2');
+        $routes->post('(:segment)/locations/delete/(:segment)', 'Admin\EventLocations::delete/$1/$2');
+
+        // Agenda / cronograma
+        $routes->get('(:segment)/schedule', 'Admin\EventSchedule::index/$1');
+        $routes->post('(:segment)/schedule/store', 'Admin\EventSchedule::store/$1');
+        $routes->post('(:segment)/schedule/update/(:segment)', 'Admin\EventSchedule::update/$1/$2');
+        $routes->post('(:segment)/schedule/delete/(:segment)', 'Admin\EventSchedule::delete/$1/$2');
+
+        // FAQ
+        $routes->get('(:segment)/faq', 'Admin\EventFaq::index/$1');
+        $routes->post('(:segment)/faq/store', 'Admin\EventFaq::store/$1');
+        $routes->post('(:segment)/faq/update/(:segment)', 'Admin\EventFaq::update/$1/$2');
+        $routes->post('(:segment)/faq/delete/(:segment)', 'Admin\EventFaq::delete/$1/$2');
+
+        // Recomendaciones
+        $routes->get('(:segment)/recommendations', 'Admin\EventRecommendations::index/$1');
+        $routes->post('(:segment)/recommendations/store', 'Admin\EventRecommendations::store/$1');
+        $routes->post('(:segment)/recommendations/update/(:segment)', 'Admin\EventRecommendations::update/$1/$2');
+        $routes->post('(:segment)/recommendations/delete/(:segment)', 'Admin\EventRecommendations::delete/$1/$2');
+
+        // Preguntas RSVP personalizadas
+        $routes->get('(:segment)/rsvp-questions', 'Admin\RsvpQuestions::index/$1');
+        $routes->post('(:segment)/rsvp-questions/store', 'Admin\RsvpQuestions::store/$1');
+        $routes->post('(:segment)/rsvp-questions/update/(:segment)', 'Admin\RsvpQuestions::update/$1/$2');
+        $routes->post('(:segment)/rsvp-questions/delete/(:segment)', 'Admin\RsvpQuestions::delete/$1/$2');
+
+        // Módulos de contenido
+        $routes->get('(:segment)/modules', 'Admin\ContentModules::index/$1');
+        $routes->post('(:segment)/modules/update/(:segment)', 'Admin\ContentModules::update/$1/$2');
+        $routes->post('(:segment)/modules/reorder', 'Admin\ContentModules::reorder/$1');
+
+        // Dominios personalizados
+        $routes->get('(:segment)/domains', 'Admin\EventCustomDomains::index/$1');
+        $routes->post('(:segment)/domains/store', 'Admin\EventCustomDomains::store/$1');
+        $routes->post('(:segment)/domains/update/(:segment)', 'Admin\EventCustomDomains::update/$1/$2');
+        $routes->post('(:segment)/domains/delete/(:segment)', 'Admin\EventCustomDomains::delete/$1/$2');
     });
 
     // ---------------------------------------------------------------------
