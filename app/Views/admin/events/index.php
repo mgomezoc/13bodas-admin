@@ -32,10 +32,10 @@
             <div class="col-auto">
                 <div class="btn-group btn-group-sm" role="group">
                     <button type="button" class="btn btn-outline-secondary active" data-filter="">Todos</button>
-                    <button type="button" class="btn btn-outline-warning" data-filter="pending">Pendiente</button>
+                    <button type="button" class="btn btn-outline-warning" data-filter="draft">Borrador</button>
                     <button type="button" class="btn btn-outline-success" data-filter="active">Activo</button>
-                    <button type="button" class="btn btn-outline-info" data-filter="completed">Completado</button>
-                    <button type="button" class="btn btn-outline-danger" data-filter="cancelled">Cancelado</button>
+                    <button type="button" class="btn btn-outline-info" data-filter="suspended">Suspendido</button>
+                    <button type="button" class="btn btn-outline-danger" data-filter="archived">Archivado</button>
                 </div>
             </div>
         </div>
@@ -116,10 +116,9 @@ function confirmedFormatter(value, row) {
 // Formatear estado del servicio
 function serviceStatusFormatter(value, row) {
     const statusMap = {
-        'pending': { class: 'status-pending', label: 'Pendiente' },
         'active': { class: 'status-active', label: 'Activo' },
-        'completed': { class: 'status-active', label: 'Completado' },
-        'cancelled': { class: 'status-inactive', label: 'Cancelado' },
+        'suspended': { class: 'status-inactive', label: 'Suspendido' },
+        'archived': { class: 'status-inactive', label: 'Archivado' },
         'draft': { class: 'status-draft', label: 'Borrador' }
     };
     const status = statusMap[value] || { class: 'status-draft', label: value };

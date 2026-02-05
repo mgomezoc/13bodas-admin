@@ -204,17 +204,15 @@
                                     <td>
                                         <?php
                                         $statusClass = match($event['service_status']) {
-                                            'pending' => 'status-pending',
                                             'active' => 'status-active',
-                                            'completed' => 'status-active',
-                                            'cancelled' => 'status-inactive',
+                                            'suspended' => 'status-inactive',
+                                            'archived' => 'status-inactive',
                                             default => 'status-draft'
                                         };
                                         $statusLabel = match($event['service_status']) {
-                                            'pending' => 'Pendiente',
                                             'active' => 'Activo',
-                                            'completed' => 'Completado',
-                                            'cancelled' => 'Cancelado',
+                                            'suspended' => 'Suspendido',
+                                            'archived' => 'Archivado',
                                             default => $event['service_status']
                                         };
                                         ?>

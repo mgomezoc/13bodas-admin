@@ -93,6 +93,11 @@
         </a>
     </li>
     <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/groups') ?>">
+            <i class="bi bi-collection"></i> Grupos
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
         <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>">
             <i class="bi bi-check2-square"></i> Confirmaciones
         </a>
@@ -117,6 +122,43 @@
             <i class="bi bi-hearts"></i> Cortejo
         </a>
     </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/locations') ?>">
+            <i class="bi bi-geo"></i> Ubicaciones
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/schedule') ?>">
+            <i class="bi bi-clock"></i> Agenda
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/faq') ?>">
+            <i class="bi bi-question-circle"></i> FAQ
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/recommendations') ?>">
+            <i class="bi bi-star"></i> Recomendaciones
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp-questions') ?>">
+            <i class="bi bi-ui-checks"></i> Preguntas RSVP
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/modules') ?>">
+            <i class="bi bi-grid"></i> Módulos
+        </a>
+    </li>
+    <?php if (!empty($isAdmin)): ?>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/domains') ?>">
+                <i class="bi bi-globe2"></i> Dominios
+            </a>
+        </li>
+    <?php endif; ?>
 </ul>
 
 <!-- Contenido del Tab -->

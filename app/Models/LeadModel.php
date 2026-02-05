@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Model;
 
 class LeadModel extends Model
@@ -53,14 +54,36 @@ class LeadModel extends Model
      */
     public function listWithFilters(array $filters = []): array
     {
-        $builder = $this;
+        $builder = $this->builder();
+        $this->applyFilters($builder, $filters);
 
+        $sortField = $filters['sort'] ?? 'created_at';
+        $sortOrder = $filters['order'] ?? 'DESC';
+        $builder->orderBy($sortField, $sortOrder);
+
+        if (isset($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        }
+
+        return $builder->get()->getResultArray();
+    }
+
+    public function countWithFilters(array $filters = []): int
+    {
+        $builder = $this->builder();
+        $this->applyFilters($builder, $filters);
+
+        return (int) $builder->countAllResults();
+    }
+
+    private function applyFilters(BaseBuilder $builder, array $filters): void
+    {
         if (!empty($filters['search'])) {
             $builder->groupStart()
                 ->like('full_name', $filters['search'])
                 ->orLike('email', $filters['search'])
                 ->orLike('phone', $filters['search'])
-            ->groupEnd();
+                ->groupEnd();
         }
 
         if (!empty($filters['status'])) {
@@ -78,11 +101,6 @@ class LeadModel extends Model
         if (!empty($filters['date_to'])) {
             $builder->where('created_at <=', $filters['date_to'] . ' 23:59:59');
         }
-
-        $sortField = $filters['sort'] ?? 'created_at';
-        $sortOrder = $filters['order'] ?? 'DESC';
-
-        return $builder->orderBy($sortField, $sortOrder)->findAll();
     }
 
     /**

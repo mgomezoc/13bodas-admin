@@ -84,14 +84,21 @@ class Events extends BaseController
 
     public function create()
     {
+        $session   = session();
+        $userRoles = $session->get('user_roles') ?? [];
+        $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
+
         $clients          = $this->clientModel->listWithUsers();
         $selectedClientId = $this->request->getGet('client_id');
+        $templates        = (new TemplateModel())->where('is_public', 1)->findAll();
 
         return view('admin/events/create', [
             'pageTitle'        => 'Nuevo Evento',
             'clients'          => $clients,
             'selectedClientId' => $selectedClientId,
             'timezones'        => $this->getTimezones(),
+            'isAdmin'          => $isAdmin,
+            'templates'        => $templates,
         ]);
     }
 
@@ -123,12 +130,90 @@ class Events extends BaseController
             'rsvp_deadline'         => $this->formatDateTime($this->request->getPost('rsvp_deadline')),
             'venue_name'            => $this->request->getPost('venue_name'),
             'venue_address'         => $this->request->getPost('venue_address'),
+            'venue_geo_lat'         => $this->request->getPost('venue_geo_lat') ?: null,
+            'venue_geo_lng'         => $this->request->getPost('venue_geo_lng') ?: null,
 
             // Defaults correctos
             'service_status'        => 'draft',
             'site_mode'             => 'auto',
             'visibility'            => 'private',
+            'access_mode'           => 'open',
         ];
+
+        $session   = session();
+        $userRoles = $session->get('user_roles') ?? [];
+        $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
+
+        if ($isAdmin) {
+            $serviceStatus = $this->request->getPost('service_status');
+            if (!empty($serviceStatus)) {
+                $allowed = ['draft', 'active', 'suspended', 'archived'];
+                if (!in_array($serviceStatus, $allowed, true)) {
+                    return redirect()->back()->withInput()->with('error', 'service_status inválido.');
+                }
+                $eventData['service_status'] = $serviceStatus;
+            }
+
+            $siteMode = $this->request->getPost('site_mode');
+            if (!empty($siteMode)) {
+                $allowed = ['auto', 'pre', 'live', 'post'];
+                if (!in_array($siteMode, $allowed, true)) {
+                    return redirect()->back()->withInput()->with('error', 'site_mode inválido.');
+                }
+                $eventData['site_mode'] = $siteMode;
+            }
+
+            $visibility = $this->request->getPost('visibility');
+            if (!empty($visibility)) {
+                $allowed = ['public', 'private'];
+                if (!in_array($visibility, $allowed, true)) {
+                    return redirect()->back()->withInput()->with('error', 'visibility inválido.');
+                }
+                $eventData['visibility'] = $visibility;
+            }
+
+            $accessMode = $this->request->getPost('access_mode');
+            if (!empty($accessMode)) {
+                $allowed = ['open', 'invite_code'];
+                if (!in_array($accessMode, $allowed, true)) {
+                    return redirect()->back()->withInput()->with('error', 'access_mode inválido.');
+                }
+                $eventData['access_mode'] = $accessMode;
+            }
+
+            $eventData['is_demo'] = $this->request->getPost('is_demo') ? 1 : 0;
+            $eventData['is_paid'] = $this->request->getPost('is_paid') ? 1 : 0;
+            $paidUntil = $this->request->getPost('paid_until');
+            $eventData['paid_until'] = $eventData['is_paid'] ? $this->formatDateTime($paidUntil) : null;
+
+            $venueConfig = $this->request->getPost('venue_config');
+            if ($venueConfig !== null) {
+                $venueConfig = trim((string) $venueConfig);
+                if ($venueConfig === '') {
+                    $eventData['venue_config'] = null;
+                } else {
+                    json_decode($venueConfig);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        return redirect()->back()->withInput()->with('error', 'venue_config no es JSON válido.');
+                    }
+                    $eventData['venue_config'] = $venueConfig;
+                }
+            }
+
+            $themeConfig = $this->request->getPost('theme_config');
+            if ($themeConfig !== null) {
+                $themeConfig = trim((string) $themeConfig);
+                if ($themeConfig === '') {
+                    $eventData['theme_config'] = null;
+                } else {
+                    json_decode($themeConfig);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        return redirect()->back()->withInput()->with('error', 'theme_config no es JSON válido.');
+                    }
+                    $eventData['theme_config'] = $themeConfig;
+                }
+            }
+        }
 
         $eventId = $this->eventModel->createEvent($eventData);
 

@@ -32,6 +32,10 @@
 
 <form action="<?= base_url('admin/events/store') ?>" method="POST" class="needs-validation" novalidate>
     <?= csrf_field() ?>
+    <?php if (!empty($isAdmin)): ?>
+        <input type="hidden" name="is_demo" value="0">
+        <input type="hidden" name="is_paid" value="0">
+    <?php endif; ?>
     
     <div class="row">
         <div class="col-lg-8">
@@ -156,11 +160,111 @@
                                   rows="2"
                                   placeholder="Calle, número, colonia, ciudad, estado, CP"><?= old('venue_address') ?></textarea>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="venue_geo_lat">Latitud</label>
+                            <input type="text"
+                                   id="venue_geo_lat"
+                                   name="venue_geo_lat"
+                                   class="form-control"
+                                   value="<?= old('venue_geo_lat') ?>"
+                                   placeholder="Ej: 25.6866">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="venue_geo_lng">Longitud</label>
+                            <input type="text"
+                                   id="venue_geo_lng"
+                                   name="venue_geo_lng"
+                                   class="form-control"
+                                   value="<?= old('venue_geo_lng') ?>"
+                                   placeholder="Ej: -100.3161">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="col-lg-4">
+            <?php if (!empty($isAdmin)): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-gear me-2"></i>Configuración (Admin)
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="service_status">Estado del Servicio</label>
+                            <select id="service_status" name="service_status" class="form-select">
+                                <option value="draft" <?= old('service_status', 'draft') === 'draft' ? 'selected' : '' ?>>Borrador</option>
+                                <option value="active" <?= old('service_status') === 'active' ? 'selected' : '' ?>>Activo</option>
+                                <option value="suspended" <?= old('service_status') === 'suspended' ? 'selected' : '' ?>>Suspendido</option>
+                                <option value="archived" <?= old('service_status') === 'archived' ? 'selected' : '' ?>>Archivado</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="site_mode">Modo del Sitio</label>
+                            <select id="site_mode" name="site_mode" class="form-select">
+                                <option value="auto" <?= old('site_mode', 'auto') === 'auto' ? 'selected' : '' ?>>Automático</option>
+                                <option value="pre" <?= old('site_mode') === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
+                                <option value="live" <?= old('site_mode') === 'live' ? 'selected' : '' ?>>En vivo</option>
+                                <option value="post" <?= old('site_mode') === 'post' ? 'selected' : '' ?>>Post-evento</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="visibility">Visibilidad</label>
+                            <select id="visibility" name="visibility" class="form-select">
+                                <option value="private" <?= old('visibility', 'private') === 'private' ? 'selected' : '' ?>>Privado</option>
+                                <option value="public" <?= old('visibility') === 'public' ? 'selected' : '' ?>>Público</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="access_mode">Modo de Acceso</label>
+                            <select id="access_mode" name="access_mode" class="form-select">
+                                <option value="open" <?= old('access_mode', 'open') === 'open' ? 'selected' : '' ?>>Abierto</option>
+                                <option value="invite_code" <?= old('access_mode') === 'invite_code' ? 'selected' : '' ?>>Con código</option>
+                            </select>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="is_demo" name="is_demo" value="1"
+                                <?= old('is_demo') ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="is_demo">Es demo</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_paid" name="is_paid" value="1"
+                                <?= old('is_paid') ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="is_paid">Pagado</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="paid_until">Pagado hasta</label>
+                            <input type="text" id="paid_until" name="paid_until"
+                                   class="form-control datetimepicker"
+                                   value="<?= old('paid_until') ?>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="venue_config">Venue config (JSON)</label>
+                            <textarea id="venue_config" name="venue_config" class="form-control" rows="4"
+                                placeholder='{"example":true}'><?= old('venue_config') ?></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="theme_config">Theme config (JSON)</label>
+                            <textarea id="theme_config" name="theme_config" class="form-control" rows="4"
+                                placeholder='{"colors":{"primary":"#000"}}'><?= old('theme_config') ?></textarea>
+                        </div>
+                        <?php if (!empty($templates)): ?>
+                            <div class="mb-0">
+                                <label class="form-label" for="template_id">Plantilla de Diseño</label>
+                                <select id="template_id" name="template_id" class="form-select">
+                                    <option value="">Sin plantilla</option>
+                                    <?php foreach ($templates as $template): ?>
+                                        <option value="<?= $template['id'] ?>" <?= old('template_id') == $template['id'] ? 'selected' : '' ?>>
+                                            <?= esc($template['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
             <!-- Contacto -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -232,6 +336,20 @@ $(document).ready(function() {
         }
     });
 });
+
+function syncPaidUntil() {
+    const $isPaid = $('#is_paid');
+    const $paidUntil = $('#paid_until');
+    if (!$isPaid.length || !$paidUntil.length) return;
+    if (!$isPaid.is(':checked')) {
+        $paidUntil.val('').prop('disabled', true);
+    } else {
+        $paidUntil.prop('disabled', false);
+    }
+}
+
+syncPaidUntil();
+$('#is_paid').on('change', syncPaidUntil);
 
 function checkSlugAvailability(slug) {
     $.post('<?= base_url('admin/events/check-slug') ?>', { slug: slug })
