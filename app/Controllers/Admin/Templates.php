@@ -67,16 +67,16 @@ class Templates extends BaseController
         $isUpdate = !empty($id);
 
         $rules = [
-            'code'          => $isUpdate
+            'code'         => $isUpdate
                 ? "required|max_length[80]|is_unique[templates.code,id,{$id}]"
                 : 'required|max_length[80]|is_unique[templates.code]',
-            'name'          => 'required|max_length[120]',
-            'description'   => 'permit_empty|max_length[500]',
-            'preview_url'   => 'permit_empty|valid_url',
-            'thumbnail_url' => 'permit_empty|valid_url',
-            'sort_order'    => 'permit_empty|integer',
-            'is_public'     => 'required|in_list[0,1]',
-            'is_active'     => 'required|in_list[0,1]',
+            'name'         => 'required|max_length[120]',
+            'description'  => 'permit_empty|max_length[500]',
+            'preview_url'  => 'permit_empty|valid_url',
+            'thumbnail_url'=> 'permit_empty|valid_url',
+            'sort_order'   => 'permit_empty|integer',
+            'is_public'    => 'required|in_list[0,1]',
+            'is_active'    => 'required|in_list[0,1]',
         ];
 
         if (!$this->validate($rules)) {
