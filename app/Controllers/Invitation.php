@@ -244,6 +244,12 @@ class Invitation extends BaseController
             $templateMeta = json_decode($template['meta_json'], true) ?: [];
         }
 
+        // Parsear venue_config
+        $venueConfig = [];
+        if (!empty($event['venue_config'])) {
+            $venueConfig = json_decode($event['venue_config'], true) ?: [];
+        }
+
         // Preparar datos para la vista
         $data = [
             'event'           => $event,
@@ -251,6 +257,7 @@ class Invitation extends BaseController
             'template'        => $template,
             'templateMeta'    => $templateMeta,
             'theme'           => json_decode($event['theme_config'] ?? '{}', true),
+            'venueConfig'     => $venueConfig,
             'mediaByCategory' => $mediaByCategory,
 
             'galleryAssets'   => $galleryAssets,
