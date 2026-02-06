@@ -24,7 +24,7 @@
 <?php $activeTab = 'modules'; ?>
 <?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="modulesList" class="card">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -126,7 +126,7 @@ $('#moduleForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#modulesList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }

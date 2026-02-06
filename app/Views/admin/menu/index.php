@@ -26,7 +26,7 @@
 <?php $activeTab = 'menu'; ?>
 <?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="menuList" class="card">
     <div class="card-body">
         <?php if (empty($options)): ?>
             <div class="empty-state py-5">
@@ -172,7 +172,7 @@ $('#optionForm').on('submit', function(e) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
                 modal.hide();
-                setTimeout(() => location.reload(), 1000);
+                refreshModuleSection('#menuList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
@@ -206,7 +206,7 @@ function deleteOption(optionId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 1000);
+                        refreshModuleSection('#menuList');
                     }
                 });
         }

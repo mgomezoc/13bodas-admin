@@ -27,6 +27,7 @@
 <?php $activeTab = 'party'; ?>
 <?= $this->include('admin/events/partials/modules_tabs') ?>
 
+<div id="partyList">
 <?php if (empty($members)): ?>
 <div class="card">
     <div class="card-body">
@@ -82,6 +83,7 @@
     </div>
 </div>
 <?php endif; ?>
+</div>
 
 <div class="modal fade" id="memberModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -175,7 +177,7 @@ $('#memberForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#partyList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -200,7 +202,7 @@ function deleteMember(memberId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#partyList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }

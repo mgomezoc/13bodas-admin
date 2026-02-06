@@ -27,7 +27,7 @@
 <?php $activeTab = 'faq'; ?>
 <?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="faqList" class="card">
     <div class="card-body">
         <div class="accordion" id="faqAccordion">
             <?php foreach ($items as $index => $item): ?>
@@ -133,7 +133,7 @@ $('#faqForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#faqList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -158,7 +158,7 @@ function deleteFaq(itemId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#faqList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }

@@ -39,6 +39,7 @@
     Aquí verás en tiempo real quién confirmó, quién no asistirá y quién aún no ha respondido.</p>
 </div>
 
+<div id="rsvpSection">
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
@@ -178,6 +179,7 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
     </div>
 </div>
 <?php endif; ?>
+</div>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -234,7 +236,7 @@ function updateStatus(guestId, status) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
                 $('#rsvpTable').bootstrapTable('refresh');
-                setTimeout(() => location.reload(), 1000);
+                refreshModuleSection('#rsvpSection');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }

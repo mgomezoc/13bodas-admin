@@ -43,50 +43,52 @@
 </div>
 
 <!-- Galería -->
-<?php if (empty($images)): ?>
-<div class="card">
-    <div class="card-body">
-        <div class="empty-state py-5">
-            <i class="bi bi-images empty-state-icon"></i>
-            <h4 class="empty-state-title">Sin fotos todavía</h4>
-            <p class="empty-state-text">Sube las primeras fotos de la pareja para mostrar en la invitación.</p>
-            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                <i class="bi bi-upload me-2"></i>Subir Primera Foto
-            </button>
+<div id="gallerySection">
+    <?php if (empty($images)): ?>
+    <div class="card">
+        <div class="card-body">
+            <div class="empty-state py-5">
+                <i class="bi bi-images empty-state-icon"></i>
+                <h4 class="empty-state-title">Sin fotos todavía</h4>
+                <p class="empty-state-text">Sube las primeras fotos de la pareja para mostrar en la invitación.</p>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    <i class="bi bi-upload me-2"></i>Subir Primera Foto
+                </button>
+            </div>
         </div>
     </div>
-</div>
-<?php else: ?>
-<div class="row g-3" id="galleryGrid">
-    <?php foreach ($images as $image): ?>
-    <div class="col-6 col-md-4 col-lg-3" data-id="<?= $image['id'] ?>">
-        <div class="card h-100 shadow-sm">
-            <div class="ratio ratio-4x3 bg-light">
-                <img src="<?= base_url($image['file_url_original']) ?>"
-                     class="w-100 h-100 object-fit-cover"
-                     alt="<?= esc($image['alt_text']) ?>">
-            </div>
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-center gap-2">
-                    <div class="text-truncate">
-                        <div class="fw-semibold small text-truncate"><?= esc($image['alt_text']) ?></div>
-                        <div class="text-muted small"><?= date('d/m/Y', strtotime($image['created_at'])) ?></div>
-                    </div>
-                    <div class="btn-group btn-group-sm">
-                        <a class="btn btn-outline-secondary" href="<?= base_url($image['file_url_original']) ?>" target="_blank" title="Ver">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <button type="button" class="btn btn-outline-danger" onclick="deleteImage('<?= $image['id'] ?>')" title="Eliminar">
-                            <i class="bi bi-trash"></i>
-                        </button>
+    <?php else: ?>
+    <div class="row g-3" id="galleryGrid">
+        <?php foreach ($images as $image): ?>
+        <div class="col-6 col-md-4 col-lg-3" data-id="<?= $image['id'] ?>">
+            <div class="card h-100 shadow-sm">
+                <div class="ratio ratio-4x3 bg-light">
+                    <img src="<?= base_url($image['file_url_original']) ?>"
+                         class="w-100 h-100 object-fit-cover"
+                         alt="<?= esc($image['alt_text']) ?>">
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <div class="text-truncate">
+                            <div class="fw-semibold small text-truncate"><?= esc($image['alt_text']) ?></div>
+                            <div class="text-muted small"><?= date('d/m/Y', strtotime($image['created_at'])) ?></div>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <a class="btn btn-outline-secondary" href="<?= base_url($image['file_url_original']) ?>" target="_blank" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" onclick="deleteImage('<?= $image['id'] ?>')" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <?php endforeach; ?>
     </div>
-    <?php endforeach; ?>
+    <?php endif; ?>
 </div>
-<?php endif; ?>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -198,7 +200,7 @@ function uploadFiles(files) {
             }
 
             if (response.success) {
-                location.reload();
+                refreshModuleSection('#gallerySection');
             } else {
                 resetDropZone();
             }
@@ -258,7 +260,7 @@ function deleteImage(imageId) {
                         $(`[data-id="${imageId}"]`).fadeOut(300, function() {
                             $(this).remove();
                             if ($('#galleryGrid [data-id]').length === 0) {
-                                location.reload();
+                                refreshModuleSection('#gallerySection');
                             }
                         });
                     } else {

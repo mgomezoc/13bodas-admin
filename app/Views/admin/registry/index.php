@@ -67,6 +67,7 @@
 <?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Lista de Regalos -->
+<div id="registrySection">
 <?php if (empty($items)): ?>
 <div class="card">
     <div class="card-body">
@@ -134,6 +135,7 @@
     <?php endforeach; ?>
 </div>
 <?php endif; ?>
+</div>
 
 <!-- Modal Agregar Regalo -->
 <div class="modal fade" id="addItemModal" tabindex="-1">
@@ -200,7 +202,7 @@ $('#addItemForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                location.reload();
+                refreshModuleSection('#registrySection');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
@@ -212,7 +214,7 @@ function toggleClaimed(itemId) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                location.reload();
+                refreshModuleSection('#registrySection');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
