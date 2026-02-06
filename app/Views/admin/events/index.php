@@ -138,6 +138,9 @@ function actionsFormatter(value, row) {
             <a href="${BASE_URL}admin/events/edit/${row.id}" class="btn btn-sm btn-outline-primary" title="Editar">
                 <i class="bi bi-pencil"></i>
             </a>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteEventSwal('${row.id}')" title="Eliminar">
+                <i class="bi bi-trash"></i>
+            </button>
         </div>
     `;
 }
@@ -149,5 +152,65 @@ $(document).on('click', '[data-filter]', function() {
     currentFilter = $(this).data('filter');
     $('#eventsTable').bootstrapTable('refresh');
 });
+
+function deleteEventSwal(eventId) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Eliminando...',
+                text: 'Por favor espera',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch(`${BASE_URL}admin/events/delete/${eventId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Eliminado!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        $('#eventsTable').bootstrapTable('refresh');
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor'
+                });
+            });
+        }
+    });
+}
 </script>
 <?= $this->endSection() ?>
