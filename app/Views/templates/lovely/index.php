@@ -7,6 +7,8 @@ $modules       = $modules ?? [];
 $galleryAssets = $galleryAssets ?? [];
 $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
+$menuOptions   = $menuOptions ?? [];
+$weddingParty  = $weddingParty ?? [];
 
 $slug        = esc($event['slug'] ?? '');
 $coupleTitle = esc($event['couple_title'] ?? 'Nuestra Boda');
@@ -80,6 +82,33 @@ function moneyFmt($val, string $currency = 'MXN'): string
 function safeText($v): string
 {
     return esc(trim((string)$v));
+}
+
+function parseSocialLinks($raw): array
+{
+    if (empty($raw)) {
+        return [];
+    }
+
+    if (is_array($raw)) {
+        return $raw;
+    }
+
+    $decoded = json_decode((string)$raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+$partyLabels = [
+    'bride_side' => 'Lado de la novia',
+    'groom_side' => 'Lado del novio',
+    'officiant'  => 'Oficiante',
+    'other'      => 'Otros',
+];
+
+$partyByCategory = [];
+foreach ($weddingParty as $member) {
+    $cat = $member['category'] ?? 'other';
+    $partyByCategory[$cat][] = $member;
 }
 ?>
 <!DOCTYPE html>
@@ -329,7 +358,13 @@ function safeText($v): string
                             <li class="nav-item"><a class="nav-link" href="#couple">Nosotros</a></li>
                             <li class="nav-item"><a class="nav-link" href="#story">Historia</a></li>
                             <li class="nav-item"><a class="nav-link" href="#events">Evento</a></li>
+                            <?php if (!empty($weddingParty)): ?>
+                                <li class="nav-item"><a class="nav-link" href="#people">Cortejo</a></li>
+                            <?php endif; ?>
                             <li class="nav-item"><a class="nav-link" href="#gallery">Galería</a></li>
+                            <?php if (!empty($menuOptions)): ?>
+                                <li class="nav-item"><a class="nav-link" href="#menu">Menú</a></li>
+                            <?php endif; ?>
                             <li class="nav-item"><a class="nav-link" href="#registry">Regalos</a></li>
                             <li class="nav-item"><a class="nav-link" href="#rsvp">Confirmación</a></li>
                         </ul>
@@ -496,6 +531,107 @@ function safeText($v): string
             </div>
         </section>
 
+        <?php if (!empty($weddingParty)): ?>
+            <!-- WEDDING PARTY -->
+            <section class="inportant-people-section section-padding" id="people">
+                <div class="container">
+                    <div class="row">
+                        <div class="col col-xs-12">
+                            <div class="section-title">
+                                <div class="vertical-line"><span><i class="fi flaticon-two"></i></span></div>
+                                <h2>Cortejo nupcial</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col col-xs-12">
+                            <div class="inportant-people-content">
+                                <div class="tablist">
+                                    <ul class="nav nav-pills" role="tablist">
+                                        <?php
+                                        $tabs = array_keys(array_intersect_key($partyLabels, $partyByCategory));
+                                        $tabs = !empty($tabs) ? $tabs : array_keys($partyByCategory);
+                                        $firstTab = $tabs[0] ?? null;
+                                        ?>
+                                        <?php foreach ($tabs as $tab): ?>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link <?= $tab === $firstTab ? 'active' : '' ?>"
+                                                    id="tab-<?= esc($tab) ?>"
+                                                    data-bs-toggle="pill"
+                                                    data-bs-target="#pane-<?= esc($tab) ?>"
+                                                    type="button"
+                                                    role="tab"
+                                                    aria-selected="<?= $tab === $firstTab ? 'true' : 'false' ?>">
+                                                    <?= esc($partyLabels[$tab] ?? 'Integrantes') ?>
+                                                </button>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+
+                                <div class="tab-content">
+                                    <?php foreach ($tabs as $tab): ?>
+                                        <div class="tab-pane fade <?= $tab === $firstTab ? 'show active' : '' ?> grid-wrapper"
+                                            id="pane-<?= esc($tab) ?>">
+                                            <?php foreach (($partyByCategory[$tab] ?? []) as $idx => $member): ?>
+                                                <?php
+                                                $memberName = safeText($member['full_name'] ?? 'Integrante');
+                                                $memberRole = safeText($member['role'] ?? '');
+                                                $memberBio  = safeText($member['bio'] ?? '');
+                                                $memberImg  = safeText($member['image_url'] ?? '');
+                                                $socialLinks = parseSocialLinks($member['social_links'] ?? '');
+                                                $fallbackImg = $assetsBase . '/images/groomsmen/img-' . (($idx % 6) + 1) . '.jpg';
+                                                ?>
+                                                <div class="grid">
+                                                    <div class="img-holder">
+                                                        <a href="<?= $memberImg ?: $fallbackImg ?>" class="popup-image">
+                                                            <img src="<?= $memberImg ?: $fallbackImg ?>" alt="<?= $memberName ?>" class="img img-fluid">
+                                                        </a>
+                                                    </div>
+                                                    <div class="details">
+                                                        <h3><?= $memberName ?></h3>
+                                                        <?php if ($memberRole): ?>
+                                                            <span><?= $memberRole ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if ($memberBio): ?>
+                                                            <p style="margin-top:10px;"><?= $memberBio ?></p>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($socialLinks)): ?>
+                                                            <ul class="social-links">
+                                                                <?php foreach ($socialLinks as $key => $link): ?>
+                                                                    <?php
+                                                                    $url = is_array($link) ? ($link['url'] ?? '') : $link;
+                                                                    $label = is_array($link) ? ($link['label'] ?? '') : $key;
+                                                                    $iconKey = strtolower((string)$label);
+                                                                    $iconMap = [
+                                                                        'facebook' => 'facebook',
+                                                                        'instagram' => 'instagram',
+                                                                        'twitter' => 'twitter',
+                                                                        'tiktok' => 'music',
+                                                                        'youtube' => 'youtube-play',
+                                                                        'web' => 'globe',
+                                                                    ];
+                                                                    $icon = $iconMap[$iconKey] ?? 'link';
+                                                                    if (!$url) continue;
+                                                                    ?>
+                                                                    <li><a href="<?= esc($url) ?>" target="_blank" rel="noopener"><i class="fa fa-<?= esc($icon) ?>"></i></a></li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
         <!-- GALLERY (DINÁMICA) -->
         <section class="gallery-section section-padding" id="gallery">
             <div class="container">
@@ -540,6 +676,38 @@ function safeText($v): string
                 </div>
             </div>
         </section>
+
+        <?php if (!empty($menuOptions)): ?>
+            <!-- MENU -->
+            <section class="getting-there-section section-padding" id="menu">
+                <div class="container">
+                    <div class="row">
+                        <div class="col col-xs-12">
+                            <div class="section-title-white">
+                                <div class="vertical-line"><span><i class="fi flaticon-two"></i></span></div>
+                                <h2>Menú</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row content">
+                        <?php foreach ($menuOptions as $option): ?>
+                            <div class="col col-lg-4 col-md-6">
+                                <h3><?= esc($option['name'] ?? 'Platillo') ?></h3>
+                                <?php if (!empty($option['description'])): ?>
+                                    <p><?= esc($option['description']) ?></p>
+                                <?php endif; ?>
+                                <ul style="margin-top:10px;">
+                                    <?php if (!empty($option['is_vegan'])): ?><li>Vegano</li><?php endif; ?>
+                                    <?php if (!empty($option['is_gluten_free'])): ?><li>Sin gluten</li><?php endif; ?>
+                                    <?php if (!empty($option['is_kid_friendly'])): ?><li>Opción para niños</li><?php endif; ?>
+                                </ul>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <!-- REGALOS (DINÁMICO) -->
         <section class="getting-there-section section-padding" id="registry">
@@ -699,6 +867,10 @@ function safeText($v): string
                             </div>
 
                             <div class="col-md-6 mb-4">
+                                <input type="text" name="phone" class="form-control" placeholder="Teléfono (opcional)">
+                            </div>
+
+                            <div class="col-md-6 mb-4">
                                 <select class="form-control" name="attending" required>
                                     <option disabled selected>¿Asistirás?*</option>
                                     <option value="accepted">Sí, asistiré</option>
@@ -714,6 +886,9 @@ function safeText($v): string
 
                             <div class="col-md-12 mb-4">
                                 <textarea class="form-control" name="message" placeholder="Mensaje para los novios (opcional)"></textarea>
+                            </div>
+                            <div class="col-md-12 mb-4">
+                                <input type="text" name="song_request" class="form-control" placeholder="¿Qué canción no puede faltar? (opcional)">
                             </div>
 
                             <div class="col-md-12 mb-4 submit-btn">
