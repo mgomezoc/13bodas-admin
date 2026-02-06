@@ -79,8 +79,8 @@ class Gallery extends BaseController
                     continue;
                 }
 
-                if ($file->getSize() > 5 * 1024 * 1024) {
-                    $errors[] = $file->getClientName() . ': El archivo excede 5MB';
+                if ($file->getSize() > 10 * 1024 * 1024) {
+                    $errors[] = $file->getClientName() . ': El archivo excede 10MB';
                     continue;
                 }
 
@@ -105,11 +105,17 @@ class Gallery extends BaseController
             }
         }
 
+        $uploadedCount = count($uploaded);
+        $message = $uploadedCount . ' imagen(es) subida(s) correctamente';
+        if (!empty($errors)) {
+            $message .= '. ' . count($errors) . ' archivo(s) con error.';
+        }
+
         return $this->response->setJSON([
-            'success' => count($uploaded) > 0,
+            'success' => $uploadedCount > 0,
             'uploaded' => $uploaded,
             'errors' => $errors,
-            'message' => count($uploaded) . ' imagen(es) subida(s) correctamente'
+            'message' => $message,
         ]);
     }
 
