@@ -215,21 +215,52 @@ class Invitation extends BaseController
             $weddingPartyMembers = [];
         }
 
-        // 6) Preparar datos para la vista
-        $data = [
-            'event'         => $event,
-            'modules'       => $modules,
-            'template'      => $template,
-            'theme'         => json_decode($event['theme_config'] ?? '{}', true),
+        /**
+         * 7) Media assets por categoría (hero, bride, groom, etc.)
+         */
+        $mediaByCategory = [];
+        try {
+            $allMedia = $db->table('media_assets')
+                ->where('event_id', $event['id'])
+                ->where('is_private', 0)
+                ->orderBy('sort_order', 'ASC')
+                ->orderBy('created_at', 'ASC')
+                ->get()
+                ->getResultArray();
 
-            'galleryAssets' => $galleryAssets,
-            'registryItems' => $registryItems,
-            'registryStats' => $registryStats,
-            'guestGroups'   => $guestGroups,
-            'guests'        => $guests,
-            'rsvpResponses' => $rsvpResponses,
-            'menuOptions'   => $menuOptions,
-            'weddingParty'  => $weddingPartyMembers,
+            foreach ($allMedia as $m) {
+                $cat = $m['category'] ?? 'other';
+                $mediaByCategory[$cat][] = $m;
+            }
+        } catch (\Throwable $e) {
+            $mediaByCategory = [];
+        }
+
+        /**
+         * 8) Template meta/defaults
+         */
+        $templateMeta = [];
+        if (!empty($template['meta_json'])) {
+            $templateMeta = json_decode($template['meta_json'], true) ?: [];
+        }
+
+        // Preparar datos para la vista
+        $data = [
+            'event'           => $event,
+            'modules'         => $modules,
+            'template'        => $template,
+            'templateMeta'    => $templateMeta,
+            'theme'           => json_decode($event['theme_config'] ?? '{}', true),
+            'mediaByCategory' => $mediaByCategory,
+
+            'galleryAssets'   => $galleryAssets,
+            'registryItems'   => $registryItems,
+            'registryStats'   => $registryStats,
+            'guestGroups'     => $guestGroups,
+            'guests'          => $guests,
+            'rsvpResponses'   => $rsvpResponses,
+            'menuOptions'     => $menuOptions,
+            'weddingParty'    => $weddingPartyMembers,
         ];
 
         // 7) Cargar la vista basada en el CÓDIGO del template

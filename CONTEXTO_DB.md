@@ -39,6 +39,8 @@
   - client_id (UUID) - Propietario del evento
   - slug (varchar, UNIQUE) - URL amigable (ej: ana-y-juan)
   - couple_title (varchar) - Título de la pareja (ej: "Ana & Juan")
+  - bride_name (varchar) - Nombre de la novia
+  - groom_name (varchar) - Nombre del novio
   - primary_contact_email (varchar) - Email de contacto
   - time_zone (varchar) - Zona horaria (default: America/Mexico_City)
   - event_date_start (datetime) - Fecha/hora inicio evento

@@ -330,6 +330,8 @@ class Events extends BaseController
 
         $eventData = [
             'couple_title'          => $this->request->getPost('couple_title'),
+            'bride_name'            => $this->request->getPost('bride_name') ?: null,
+            'groom_name'            => $this->request->getPost('groom_name') ?: null,
             'slug'                  => $this->request->getPost('slug'),
             'primary_contact_email' => $this->request->getPost('primary_contact_email'),
             'time_zone'             => $this->request->getPost('time_zone') ?: 'America/Mexico_City',

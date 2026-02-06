@@ -20,6 +20,8 @@ class EventModel extends Model
         'client_id',
         'slug',
         'couple_title',
+        'bride_name',
+        'groom_name',
         'primary_contact_email',
         'time_zone',
         'event_date_start',
