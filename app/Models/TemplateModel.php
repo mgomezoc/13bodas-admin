@@ -116,4 +116,17 @@ class TemplateModel extends Model
             ->orderBy('templates.created_at', 'DESC')
             ->findAll();
     }
+
+    /**
+     * Devuelve el template activo para un evento (o null si no hay).
+     */
+    public function getActiveForEvent(string $eventId): ?array
+    {
+        return $this->select('templates.*')
+            ->join('event_templates', 'event_templates.template_id = templates.id', 'inner')
+            ->where('event_templates.event_id', $eventId)
+            ->where('event_templates.is_active', 1)
+            ->orderBy('event_templates.applied_at', 'DESC')
+            ->first();
+    }
 }
