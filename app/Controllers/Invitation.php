@@ -156,6 +156,65 @@ class Invitation extends BaseController
             $registryStats = ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0.0];
         }
 
+        /**
+         * 6) Datos relacionados adicionales
+         */
+        $guestGroups = [];
+        $guests = [];
+        $rsvpResponses = [];
+        $menuOptions = [];
+        $weddingPartyMembers = [];
+
+        try {
+            $guestGroups = $db->table('guest_groups')
+                ->where('event_id', $event['id'])
+                ->orderBy('created_at', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            $guestGroups = [];
+        }
+
+        try {
+            $guests = $db->table('guests')
+                ->where('event_id', $event['id'])
+                ->orderBy('created_at', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            $guests = [];
+        }
+
+        try {
+            $rsvpResponses = $db->table('rsvp_responses')
+                ->where('event_id', $event['id'])
+                ->orderBy('responded_at', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            $rsvpResponses = [];
+        }
+
+        try {
+            $menuOptions = $db->table('menu_options')
+                ->where('event_id', $event['id'])
+                ->orderBy('sort_order', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            $menuOptions = [];
+        }
+
+        try {
+            $weddingPartyMembers = $db->table('wedding_party_members')
+                ->where('event_id', $event['id'])
+                ->orderBy('sort_order', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            $weddingPartyMembers = [];
+        }
+
         // 6) Preparar datos para la vista
         $data = [
             'event'         => $event,
@@ -166,6 +225,11 @@ class Invitation extends BaseController
             'galleryAssets' => $galleryAssets,
             'registryItems' => $registryItems,
             'registryStats' => $registryStats,
+            'guestGroups'   => $guestGroups,
+            'guests'        => $guests,
+            'rsvpResponses' => $rsvpResponses,
+            'menuOptions'   => $menuOptions,
+            'weddingParty'  => $weddingPartyMembers,
         ];
 
         // 7) Cargar la vista basada en el CÓDIGO del template
