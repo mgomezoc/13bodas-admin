@@ -200,6 +200,19 @@
                                     value="<?= esc($event['couple_title']) ?>" required>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="bride_name">Nombre de la Novia</label>
+                                    <input type="text" id="bride_name" name="bride_name" class="form-control"
+                                        value="<?= esc($event['bride_name'] ?? '') ?>" placeholder="Ej: María">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="groom_name">Nombre del Novio</label>
+                                    <input type="text" id="groom_name" name="groom_name" class="form-control"
+                                        value="<?= esc($event['groom_name'] ?? '') ?>" placeholder="Ej: Carlos">
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label" for="slug">URL Personalizada <span class="text-danger">*</span></label>
                                 <div class="input-group">
