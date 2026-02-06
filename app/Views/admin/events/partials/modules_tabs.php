@@ -101,13 +101,35 @@ if ($isAdmin) {
 }
 ?>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <?php foreach ($tabs as $tab): ?>
-        <?php $isActive = $activeTab === $tab['key']; ?>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link <?= $isActive ? 'active' : '' ?>" href="<?= esc($tab['url']) ?>">
-                <i class="bi <?= esc($tab['icon']) ?>"></i> <?= esc($tab['label']) ?>
-            </a>
-        </li>
-    <?php endforeach; ?>
-</ul>
+<style>
+    .event-module-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        scrollbar-width: thin;
+    }
+
+    .event-module-tabs .nav-item {
+        flex: 0 0 auto;
+    }
+
+    .event-module-tabs .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+</style>
+
+<div class="event-module-tabs-wrapper mb-4">
+    <ul class="nav nav-tabs event-module-tabs" role="tablist">
+        <?php foreach ($tabs as $tab): ?>
+            <?php $isActive = $activeTab === $tab['key']; ?>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link <?= $isActive ? 'active' : '' ?>" href="<?= esc($tab['url']) ?>">
+                    <i class="bi <?= esc($tab['icon']) ?>"></i> <?= esc($tab['label']) ?>
+                </a>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
