@@ -29,10 +29,12 @@ class ContentModuleModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    // Tipos de módulos disponibles
+    // Tipos de módulos disponibles (genéricos + por template)
     const MODULE_TYPES = [
+        // Genéricos (cross-template)
         'couple_info'    => 'Información de la Pareja',
         'timeline'       => 'Línea de Tiempo',
+        'story'          => 'Historia / Timeline',
         'gallery'        => 'Galería de Fotos',
         'venue'          => 'Lugar del Evento',
         'countdown'      => 'Cuenta Regresiva',
@@ -43,7 +45,10 @@ class ContentModuleModel extends Model
         'accommodation'  => 'Alojamiento',
         'faq'            => 'Preguntas Frecuentes',
         'music'          => 'Música de Fondo',
-        'custom_html'    => 'Contenido Personalizado'
+        'custom_html'    => 'Contenido Personalizado',
+        // Template-specific: Lovely
+        'lovely.copy'    => '[Lovely] Textos editables',
+        'lovely.couple'  => '[Lovely] Info de pareja',
     ];
 
     /**

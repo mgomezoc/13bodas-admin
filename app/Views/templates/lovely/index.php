@@ -18,8 +18,19 @@ $menuOptions   = $menuOptions ?? [];
 $weddingParty  = $weddingParty ?? [];
 
 // --- Defaults from template meta_json ---
-$defaults = $templateMeta['defaults'] ?? [];
-$tplAssets = $templateMeta['assets'] ?? [];
+// Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
+$rawDefaults = $templateMeta['defaults'] ?? [];
+if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
+    // Nueva estructura: defaults.copy + defaults.assets
+    $defaults  = $rawDefaults['copy'];
+    $tplAssets = $rawDefaults['assets'] ?? [];
+} else {
+    // Estructura legacy: defaults plano + assets como hermano
+    $defaults  = $rawDefaults;
+    $tplAssets = $templateMeta['assets'] ?? [];
+}
+// Section visibility (override desde theme_config del evento)
+$sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $slug        = esc($event['slug'] ?? '');
 $coupleTitle = esc($event['couple_title'] ?? 'Nuestra Boda');
@@ -59,13 +70,20 @@ $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];
 }
-$schemaFonts  = $schema['fonts']  ?? ['Great Vibes', 'Dosis'];
-$schemaColors = $schema['colors'] ?? ['#86B1A1', '#F5F0EB'];
+// Retrocompatibilidad: soportar tanto estructura plana como anidada (theme_defaults)
+$themeDefaults = $schema['theme_defaults'] ?? [];
+$schemaFonts  = !empty($themeDefaults['fonts'])
+    ? [$themeDefaults['fonts']['heading'] ?? 'Great Vibes', $themeDefaults['fonts']['body'] ?? 'Dosis']
+    : ($schema['fonts'] ?? ['Great Vibes', 'Dosis']);
+$schemaColors = !empty($themeDefaults['colors'])
+    ? [$themeDefaults['colors']['primary'] ?? '#86B1A1', $themeDefaults['colors']['accent'] ?? '#F5F0EB']
+    : ($schema['colors'] ?? ['#86B1A1', '#F5F0EB']);
 
-$fontHeading  = $theme['font_heading'] ?? ($schemaFonts[0] ?? 'Great Vibes');
-$fontBody     = $theme['font_body']    ?? ($schemaFonts[1] ?? 'Dosis');
-$colorPrimary = $theme['primary']      ?? ($schemaColors[0] ?? '#86B1A1');
-$colorAccent  = $theme['accent']       ?? ($schemaColors[1] ?? '#F5F0EB');
+// Retrocompatibilidad: soportar tanto estructura plana como anidada
+$fontHeading  = $theme['fonts']['heading'] ?? ($theme['font_heading'] ?? ($schemaFonts[0] ?? 'Great Vibes'));
+$fontBody     = $theme['fonts']['body']    ?? ($theme['font_body']    ?? ($schemaFonts[1] ?? 'Dosis'));
+$colorPrimary = $theme['colors']['primary'] ?? ($theme['primary']     ?? ($schemaColors[0] ?? '#86B1A1'));
+$colorAccent  = $theme['colors']['accent']  ?? ($theme['accent']      ?? ($schemaColors[1] ?? '#F5F0EB'));
 
 // --- Module finder (busca por module_type, NO por code) ---
 function findModule(array $modules, string $type): ?array
@@ -116,14 +134,14 @@ $brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La
 $groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
 $storyTitle        = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
 $eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$galleryTitle      = getText($copyPayload, $defaults, 'Galería', 'gallery_title');
+$galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
 $registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
 $partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
 
 $brideBio = esc($couplePayload['bride']['bio']
-    ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.'));
+    ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));
 $groomBio = esc($couplePayload['groom']['bio']
-    ?? ($defaults['groom_bio_default'] ?? 'Estamos muy felices de compartir contigo este día tan especial.'));
+    ?? ($defaults['groom_bio'] ?? ($defaults['groom_bio_default'] ?? 'Estamos muy felices de compartir contigo este día tan especial.')));
 
 // --- Media helpers ---
 function getMediaUrl(array $mediaByCategory, string $category, int $index = 0, string $size = 'original'): string
@@ -650,7 +668,7 @@ foreach ($weddingParty as $member) {
                 <div class="col col-xs-12">
                     <div class="section-title">
                         <div class="vertical-line"><span><i class="fi flaticon-two"></i></span></div>
-                        <h2>Galería</h2>
+                        <h2><?= $galleryTitle ?></h2>
                     </div>
                 </div>
             </div>
