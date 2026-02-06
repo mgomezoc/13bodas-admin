@@ -403,9 +403,6 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                                     <?php foreach ($guestGroups as $group): ?>
                                         <li>
                                             <?= esc($group['group_name'] ?? $group['name'] ?? 'Grupo') ?>
-                                            <?php if (!empty($group['access_code'])): ?>
-                                                <span class="muted">· <?= esc($group['access_code']) ?></span>
-                                            <?php endif; ?>
                                         </li>
                                     <?php endforeach; ?>
                                 </ul>
