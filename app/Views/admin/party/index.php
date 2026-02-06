@@ -24,14 +24,8 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people me-1"></i>Invitados</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>"><i class="bi bi-check2-square me-1"></i>RSVPs</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>"><i class="bi bi-images me-1"></i>Galería</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/registry') ?>"><i class="bi bi-gift me-1"></i>Regalos</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-hearts me-1"></i>Cortejo</button></li>
-</ul>
+<?php $activeTab = 'party'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <?php if (empty($members)): ?>
 <div class="card">

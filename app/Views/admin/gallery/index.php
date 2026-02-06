@@ -26,14 +26,8 @@
 <!-- Input oculto para subir -->
 <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
-<!-- Tabs -->
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle"></i> Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people"></i> Invitados</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>"><i class="bi bi-check2-square"></i> Confirmaciones</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-images"></i> Galería</button></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/registry') ?>"><i class="bi bi-gift"></i> Regalos</a></li>
-</ul>
+<?php $activeTab = 'gallery'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Zona de drop -->
 <div id="dropZone" class="card mb-4" style="border: 2px dashed var(--border-color); background: var(--bg-body);">
