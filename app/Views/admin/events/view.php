@@ -146,8 +146,8 @@
 
                     <dt class="col-sm-4">Plantilla activa</dt>
                     <dd class="col-sm-8">
-                        <?php if (!empty($event['template_id'])): ?>
-                            <span class="badge bg-light text-dark">ID <?= (int)$event['template_id'] ?></span>
+                        <?php if (!empty($activeTemplate['name'])): ?>
+                            <span class="badge bg-light text-dark"><?= esc($activeTemplate['name']) ?></span>
                         <?php else: ?>
                             <span class="text-muted">Sin plantilla</span>
                         <?php endif; ?>
@@ -208,7 +208,19 @@
                     <?php endif; ?>
 
                     <?php if (!empty($event['venue_geo_lat']) && !empty($event['venue_geo_lng'])): ?>
-                        <a href="https://www.google.com/maps?q=<?= esc($event['venue_geo_lat']) ?>,<?= esc($event['venue_geo_lng']) ?>"
+                        <?php
+                        $lat = $event['venue_geo_lat'];
+                        $lng = $event['venue_geo_lng'];
+                        ?>
+                        <div class="ratio ratio-16x9 mb-3">
+                            <iframe
+                                src="https://maps.google.com/maps?q=<?= esc($lat) ?>,<?= esc($lng) ?>&z=15&output=embed"
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <a href="https://www.google.com/maps?q=<?= esc($lat) ?>,<?= esc($lng) ?>"
                             target="_blank"
                             class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-map me-1"></i>Ver en Google Maps
@@ -250,30 +262,107 @@
 </div>
 
 <!-- Acciones -->
+<?php
+$actionCards = [
+    [
+        'label' => 'Gestionar Invitados',
+        'icon'  => 'bi-people',
+        'class' => 'text-primary',
+        'url'   => base_url('admin/events/' . $event['id'] . '/guests'),
+    ],
+    [
+        'label' => 'Grupos de Invitados',
+        'icon'  => 'bi-collection',
+        'class' => 'text-info',
+        'url'   => base_url('admin/events/' . $event['id'] . '/groups'),
+    ],
+    [
+        'label' => 'Ver Confirmaciones',
+        'icon'  => 'bi-check2-square',
+        'class' => 'text-success',
+        'url'   => base_url('admin/events/' . $event['id'] . '/rsvp'),
+    ],
+    [
+        'label' => 'Galería de Fotos',
+        'icon'  => 'bi-images',
+        'class' => 'text-secondary',
+        'url'   => base_url('admin/events/' . $event['id'] . '/gallery'),
+    ],
+    [
+        'label' => 'Lista de Regalos',
+        'icon'  => 'bi-gift',
+        'class' => 'text-warning',
+        'url'   => base_url('admin/events/' . $event['id'] . '/registry'),
+    ],
+    [
+        'label' => 'Opciones de Menú',
+        'icon'  => 'bi-egg-fried',
+        'class' => 'text-danger',
+        'url'   => base_url('admin/events/' . $event['id'] . '/menu'),
+    ],
+    [
+        'label' => 'Cortejo',
+        'icon'  => 'bi-hearts',
+        'class' => 'text-danger',
+        'url'   => base_url('admin/events/' . $event['id'] . '/party'),
+    ],
+    [
+        'label' => 'Ubicaciones',
+        'icon'  => 'bi-geo',
+        'class' => 'text-primary',
+        'url'   => base_url('admin/events/' . $event['id'] . '/locations'),
+    ],
+    [
+        'label' => 'Agenda',
+        'icon'  => 'bi-clock',
+        'class' => 'text-info',
+        'url'   => base_url('admin/events/' . $event['id'] . '/schedule'),
+    ],
+    [
+        'label' => 'FAQ',
+        'icon'  => 'bi-question-circle',
+        'class' => 'text-secondary',
+        'url'   => base_url('admin/events/' . $event['id'] . '/faq'),
+    ],
+    [
+        'label' => 'Recomendaciones',
+        'icon'  => 'bi-star',
+        'class' => 'text-warning',
+        'url'   => base_url('admin/events/' . $event['id'] . '/recommendations'),
+    ],
+    [
+        'label' => 'Preguntas RSVP',
+        'icon'  => 'bi-ui-checks',
+        'class' => 'text-success',
+        'url'   => base_url('admin/events/' . $event['id'] . '/rsvp-questions'),
+    ],
+    [
+        'label' => 'Módulos',
+        'icon'  => 'bi-grid',
+        'class' => 'text-primary',
+        'url'   => base_url('admin/events/' . $event['id'] . '/modules'),
+    ],
+];
+
+if (!empty($isAdmin)) {
+    $actionCards[] = [
+        'label' => 'Dominios',
+        'icon'  => 'bi-globe2',
+        'class' => 'text-dark',
+        'url'   => base_url('admin/events/' . $event['id'] . '/domains'),
+    ];
+}
+?>
 <div class="row mt-4 g-3">
-    <div class="col-md-4">
-        <a href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>" class="card text-decoration-none h-100">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">Gestionar Invitados</h6>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>" class="card text-decoration-none h-100">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-check2-square text-success" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">Ver Confirmaciones</h6>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>" class="card text-decoration-none h-100">
-            <div class="card-body text-center py-4">
-                <i class="bi bi-images" style="font-size: 2rem;"></i>
-                <h6 class="mt-2 mb-0">Galería de Fotos</h6>
-            </div>
-        </a>
-    </div>
+    <?php foreach ($actionCards as $card): ?>
+        <div class="col-md-4 col-lg-3">
+            <a href="<?= esc($card['url']) ?>" class="card text-decoration-none h-100">
+                <div class="card-body text-center py-4">
+                    <i class="bi <?= esc($card['icon']) ?> <?= esc($card['class']) ?>" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2 mb-0"><?= esc($card['label']) ?></h6>
+                </div>
+            </a>
+        </div>
+    <?php endforeach; ?>
 </div>
 <?= $this->endSection() ?>

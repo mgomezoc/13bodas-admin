@@ -248,15 +248,22 @@ class Events extends BaseController
 
         $stats     = $this->eventModel->getEventStats($id);
         $rsvpStats = (new GuestModel())->getRsvpStatsByEvent($id);
+        $activeTemplate = (new TemplateModel())->getActiveForEvent($id);
 
         // plantilla activa
         $event['template_id'] = $this->eventTemplateModel->getActiveTemplateId($id);
+
+        $session   = session();
+        $userRoles = $session->get('user_roles') ?? [];
+        $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
 
         return view('admin/events/view', [
             'pageTitle'     => $event['couple_title'],
             'event'         => $event,
             'stats'         => $stats,
             'rsvpStats'     => $rsvpStats,
+            'activeTemplate' => $activeTemplate,
+            'isAdmin'       => $isAdmin,
             'invitationUrl' => base_url('i/' . $event['slug']),
         ]);
     }
