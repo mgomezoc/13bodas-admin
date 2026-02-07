@@ -187,7 +187,9 @@ function getMediaUrl(array $mediaByCategory, string $category, int $index = 0, s
     $fieldMap = ['original' => 'file_url_original', 'large' => 'file_url_large', 'thumb' => 'file_url_thumbnail'];
     $field = $fieldMap[$size] ?? 'file_url_original';
 
-    $url = $m[$field] ?? ($m['file_url_original'] ?? '');
+    $url = $m[$field]
+        ?? ($m['file_url_original']
+            ?? ($m['file_url_large'] ?? ($m['file_url_thumbnail'] ?? '')));
     if ($url !== '' && !preg_match('#^https?://#i', $url)) $url = base_url($url);
     return $url;
 }
