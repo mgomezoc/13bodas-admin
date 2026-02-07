@@ -14,6 +14,7 @@ $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' =>
 $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
 $venueConfig = $venueConfig ?? [];
+$eventLocations = $eventLocations ?? [];
 
 $tz = $event['time_zone'] ?? 'America/Mexico_City';
 
@@ -154,7 +155,7 @@ $eventDateHuman = soleneDateEs($eventDateStart, $tz);
 $storyItems = $timelinePayload['items'] ?? ($storyPayload['items'] ?? []);
 $galleryList = $galleryAssets;
 
-$venueLocations = $venueConfig['locations'] ?? [];
+$venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
 $venueName = $event['venue_name'] ?? ($venueLocations[0]['name'] ?? ($venuePayload['title'] ?? ''));
 $venueAddress = $event['venue_address'] ?? ($venueLocations[0]['address'] ?? '');
 
@@ -388,6 +389,15 @@ $slug = $event['slug'] ?? '';
                     <?php if (!empty($venueLocations)): ?>
                         <?php foreach ($venueLocations as $location): ?>
                             <div class="solene-venue-card">
+                                <?php
+                                    $locImage = $location['image_url'] ?? '';
+                                    if ($locImage !== '' && !preg_match('#^https?://#i', $locImage)) {
+                                        $locImage = base_url($locImage);
+                                    }
+                                ?>
+                                <?php if (!empty($locImage)): ?>
+                                    <img data-src="<?= esc($locImage) ?>" src="<?= esc($locImage) ?>" alt="<?= esc($location['name'] ?? '') ?>">
+                                <?php endif; ?>
                                 <h3><?= esc($location['name'] ?? '') ?></h3>
                                 <?php if (!empty($location['address'])): ?><p><?= esc($location['address']) ?></p><?php endif; ?>
                                 <?php if (!empty($location['time'])): ?><p class="solene-muted"><?= esc($location['time']) ?></p><?php endif; ?>
@@ -407,8 +417,10 @@ $slug = $event['slug'] ?? '';
             </div>
             <?php
             $mapSrc = '';
-            if (!empty($event['venue_geo_lat']) && !empty($event['venue_geo_lng'])) {
-                $mapSrc = 'https://maps.google.com/maps?q=' . urlencode($event['venue_geo_lat'] . ',' . $event['venue_geo_lng']) . '&z=15&output=embed';
+            $mapLat = $venueLocations[0]['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
+            $mapLng = $venueLocations[0]['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
+            if (!empty($mapLat) && !empty($mapLng)) {
+                $mapSrc = 'https://maps.google.com/maps?q=' . urlencode($mapLat . ',' . $mapLng) . '&z=15&output=embed';
             } elseif ($venueAddress) {
                 $mapSrc = 'https://maps.google.com/maps?q=' . urlencode($venueAddress) . '&z=15&output=embed';
             }
@@ -429,11 +441,16 @@ $slug = $event['slug'] ?? '';
                     <h2>Artículos para inspirarte</h2>
                 </header>
                 <div class="solene-articles">
-                    <?php foreach ($storyItems as $item): ?>
+                    <?php foreach ($storyItems as $index => $item): ?>
                         <?php if (!is_array($item)) continue; ?>
                         <article class="solene-article-card">
-                            <?php if (!empty($item['image'])): ?>
-                                <img data-src="<?= esc($item['image']) ?>" src="<?= esc($item['image']) ?>" alt="<?= esc($item['title'] ?? '') ?>">
+                            <?php
+                                $fallbackImage = soleneGetMediaUrl($mediaByCategory, 'story', $index);
+                                $itemImage = trim((string)($item['image'] ?? ''));
+                                $storyImage = $itemImage !== '' ? $itemImage : $fallbackImage;
+                            ?>
+                            <?php if (!empty($storyImage)): ?>
+                                <img data-src="<?= esc($storyImage) ?>" src="<?= esc($storyImage) ?>" alt="<?= esc($item['title'] ?? '') ?>">
                             <?php endif; ?>
                             <span class="solene-muted"><?= esc($item['year'] ?? ($item['date'] ?? '')) ?></span>
                             <h3><?= esc($item['title'] ?? '') ?></h3>

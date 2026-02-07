@@ -6,6 +6,8 @@ $event    = $event ?? [];
 $template = $template ?? [];
 $theme    = $theme ?? [];
 $modules  = $modules ?? [];
+$mediaByCategory = $mediaByCategory ?? [];
+$eventLocations  = $eventLocations ?? [];
 
 // NUEVO (alineado a Invitation.php)
 $galleryAssets = $galleryAssets ?? ($gallery ?? []);   // compat fallback
@@ -22,10 +24,11 @@ $startRaw     = $event['event_date_start'] ?? null;
 $endRaw       = $event['event_date_end'] ?? null;
 $rsvpDeadline = $event['rsvp_deadline'] ?? null;
 
-$venueName = esc($event['venue_name'] ?? '');
-$venueAddr = esc($event['venue_address'] ?? '');
-$lat       = $event['venue_geo_lat'] ?? '';
-$lng       = $event['venue_geo_lng'] ?? '';
+$primaryLocation = $eventLocations[0] ?? [];
+$venueName = esc($primaryLocation['name'] ?? ($event['venue_name'] ?? ''));
+$venueAddr = esc($primaryLocation['address'] ?? ($event['venue_address'] ?? ''));
+$lat       = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
+$lng       = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
 
 // ===========================
 // Helpers
@@ -53,10 +56,45 @@ function moneyFmt($amount, string $currency = 'MXN'): string
     return ($currency === 'MXN' ? '$' : '') . $formatted . ($currency !== 'MXN' ? " {$currency}" : '');
 }
 
+function decodePayload(?string $payload): array
+{
+    if (!$payload) return [];
+    $decoded = json_decode($payload, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function getMediaUrl(array $mediaByCategory, string $category, int $index = 0): string
+{
+    $items = $mediaByCategory[$category] ?? [];
+    if (!isset($items[$index]) || !is_array($items[$index])) {
+        return '';
+    }
+
+    $candidate = (string)($items[$index]['file_url_large'] ?? $items[$index]['file_url_thumbnail'] ?? $items[$index]['file_url_original'] ?? '');
+    if ($candidate === '') {
+        return '';
+    }
+
+    if (!preg_match('#^https?://#i', $candidate)) {
+        $candidate = base_url($candidate);
+    }
+
+    return $candidate;
+}
+
 $eventDateLabel    = fmtDate($startRaw, 'd M Y');
 $eventTimeRange    = trim(fmtTime($startRaw) . ($endRaw ? ' - ' . fmtTime($endRaw) : ''));
 $eventDateISO      = $startRaw ? date('c', strtotime($startRaw)) : '';
 $rsvpDeadlineLabel = fmtDate($rsvpDeadline, 'd M Y');
+
+$moduleData = [];
+foreach ($modules as $module) {
+    $type = $module['module_type'] ?? 'custom';
+    $moduleData[$type] = decodePayload($module['content_payload'] ?? null);
+}
+
+$storyItems = $moduleData['story']['items'] ?? ($moduleData['timeline']['items'] ?? ($moduleData['timeline']['events'] ?? []));
+$storyItems = array_values(array_filter($storyItems, 'is_array'));
 
 // Base de assets del template (public/templates/weddingo/...)
 $assetsBase = base_url('templates/weddingo');
@@ -105,6 +143,8 @@ $fontBody  = $theme['font_body'] ?? ($schemaTheme['font_body']['default'] ?? 'In
 $mapsHref = '';
 if ($lat !== '' && $lng !== '') $mapsHref = 'https://www.google.com/maps?q=' . urlencode($lat . ',' . $lng);
 elseif ($venueAddr) $mapsHref = 'https://www.google.com/maps?q=' . urlencode($venueAddr);
+
+$eventImage = $primaryLocation['image_url'] ?? getMediaUrl($mediaByCategory, 'event');
 
 // ===========================
 // Normalización Galería (por si viene en formato viejo)
@@ -267,22 +307,34 @@ if (!empty($registryItems) && is_array($registryItems)) {
             <div class="w-container">
                 <div class="w-section-head" data-reveal>
                     <h2>Nuestra historia</h2>
-                    <p>Este bloque queda listo para conectarse a <code>content_modules</code> (module_type: <code>story</code>, <code>notes</code>, etc.).</p>
+                    <p>Momentos y recuerdos que marcaron nuestro camino.</p>
                 </div>
 
                 <div class="w-story-grid">
-                    <article class="w-card" data-reveal>
-                        <h3>Cómo empezó</h3>
-                        <p>Primer encuentro, primera cita, cómo se fue dando…</p>
-                    </article>
-                    <article class="w-card" data-reveal>
-                        <h3>La propuesta</h3>
-                        <p>Fecha, lugar, anécdota y detalle especial.</p>
-                    </article>
-                    <article class="w-card" data-reveal>
-                        <h3>El gran día</h3>
-                        <p>Notas para invitados: dress code, hashtag, estacionamiento, niños, etc.</p>
-                    </article>
+                    <?php if (!empty($storyItems)): ?>
+                        <?php foreach ($storyItems as $index => $item): ?>
+                            <?php
+                                $storyImage = $item['image'] ?? $item['image_url'] ?? getMediaUrl($mediaByCategory, 'story', $index);
+                                $storyTitle = $item['title'] ?? 'Momento especial';
+                                $storyText = $item['text'] ?? ($item['description'] ?? '');
+                            ?>
+                            <article class="w-card" data-reveal>
+                                <?php if (!empty($storyImage)): ?>
+                                    <img src="<?= esc($storyImage) ?>" alt="<?= esc($storyTitle) ?>" class="w-story-media">
+                                <?php endif; ?>
+                                <h3><?= esc($storyTitle) ?></h3>
+                                <?php if (!empty($item['year'] ?? $item['date'] ?? '')): ?>
+                                    <p class="w-muted"><?= esc($item['year'] ?? $item['date'] ?? '') ?></p>
+                                <?php endif; ?>
+                                <?php if ($storyText): ?><p><?= esc($storyText) ?></p><?php endif; ?>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <article class="w-card" data-reveal>
+                            <h3>Comparte tu historia</h3>
+                            <p>Muy pronto verás aquí los momentos más especiales de la pareja.</p>
+                        </article>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
@@ -319,7 +371,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
                             </div>
                         </div>
 
-                        <div class="w-event-aside" aria-hidden="true"></div>
+                        <div class="w-event-aside" aria-hidden="true"<?= $eventImage ? ' style="background-image:url(' . esc($eventImage) . ')"' : '' ?>></div>
                     </div>
                 </div>
             </div>

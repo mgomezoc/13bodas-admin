@@ -18,6 +18,7 @@ $menuOptions   = $menuOptions ?? [];
 $weddingParty  = $weddingParty ?? [];
 $faqs          = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
+$eventLocations = $eventLocations ?? [];
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -43,10 +44,11 @@ $startRaw     = $event['event_date_start'] ?? null;
 $endRaw       = $event['event_date_end'] ?? null;
 $rsvpDeadline = $event['rsvp_deadline'] ?? null;
 
-$venueName = esc($event['venue_name'] ?? '');
-$venueAddr = esc($event['venue_address'] ?? '');
-$lat       = $event['venue_geo_lat'] ?? '';
-$lng       = $event['venue_geo_lng'] ?? '';
+$primaryLocation = $eventLocations[0] ?? [];
+$venueName = esc($primaryLocation['name'] ?? ($event['venue_name'] ?? ''));
+$venueAddr = esc($primaryLocation['address'] ?? ($event['venue_address'] ?? ''));
+$lat       = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
+$lng       = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
 
 // --- Helper functions ---
 function formatDateLabel(?string $dt, string $fmt = 'd M Y'): string
@@ -222,7 +224,11 @@ if (!$bridePhoto) $bridePhoto = $assetsBase . '/' . ($tplAssets['couple_images']
 $countdownBg = getMediaUrl($mediaByCategory, 'countdown_bg') ?: ($assetsBase . '/' . ($tplAssets['countdown_bg'] ?? 'images/countdown-bg.jpg'));
 $ctaBg       = getMediaUrl($mediaByCategory, 'cta_bg') ?: ($assetsBase . '/' . ($tplAssets['cta_bg'] ?? 'images/cta-bg.jpg'));
 $rsvpBg      = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/' . ($tplAssets['rsvp_bg'] ?? 'images/rsvp-bg.jpg'));
-$eventImg    = getMediaUrl($mediaByCategory, 'event') ?: ($assetsBase . '/' . ($tplAssets['event_image'] ?? 'images/events/img-1.jpg'));
+$eventImg = $primaryLocation['image_url'] ?? '';
+if ($eventImg !== '' && !preg_match('#^https?://#i', $eventImg)) {
+    $eventImg = base_url($eventImg);
+}
+$eventImg = $eventImg ?: (getMediaUrl($mediaByCategory, 'event') ?: ($assetsBase . '/' . ($tplAssets['event_image'] ?? 'images/events/img-1.jpg')));
 
 // --- Small helpers ---
 function moneyFmt($val, string $currency = 'MXN'): string
@@ -559,7 +565,9 @@ foreach ($weddingParty as $member) {
                             <?php foreach ($storyItems as $idx => $item): ?>
                                 <?php
                                 $isEven = ($idx % 2 === 0);
-                                $storyImg = $assetsBase . '/images/story/img-' . (($idx % 8) + 1) . '.jpg';
+                                $fallbackImg = getMediaUrl($mediaByCategory, 'story', $idx) ?: ($assetsBase . '/images/story/img-' . (($idx % 8) + 1) . '.jpg');
+                                $itemImg = trim((string)($item['image'] ?? ''));
+                                $storyImg = $itemImg !== '' ? $itemImg : $fallbackImg;
                                 ?>
                                 <div class="row <?= $isEven ? '' : 'row-reverse' ?>">
                                     <?php if ($isEven): ?>
@@ -572,13 +580,13 @@ foreach ($weddingParty as $member) {
                                         </div>
                                         <div class="col col-lg-6">
                                             <div class="img-holder">
-                                                <img src="<?= esc($item['image'] ?? $storyImg) ?>" alt="" class="img img-fluid">
+                                                <img src="<?= esc($storyImg) ?>" alt="" class="img img-fluid">
                                             </div>
                                         </div>
                                     <?php else: ?>
                                         <div class="col col-lg-6">
                                             <div class="img-holder">
-                                                <img src="<?= esc($item['image'] ?? $storyImg) ?>" alt="" class="img img-fluid">
+                                                <img src="<?= esc($storyImg) ?>" alt="" class="img img-fluid">
                                             </div>
                                         </div>
                                         <div class="col col-lg-6">

@@ -1,3 +1,13 @@
+<?php
+$event = $event ?? [];
+$modules = $modules ?? [];
+$mediaByCategory = $mediaByCategory ?? [];
+$eventLocations = $eventLocations ?? [];
+$scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
+$galleryAssets = $galleryAssets ?? ($event['gallery_items'] ?? []);
+$registryItems = $registryItems ?? ($event['registry_items'] ?? []);
+$weddingParty = $weddingParty ?? ($event['party_members'] ?? []);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,12 +69,12 @@
     <?= $this->include('templates/majestic/sections/countdown') ?>
     
     <!-- Story Section -->
-    <?php if (!empty($event['content_modules'])): ?>
+    <?php if (!empty($modules)): ?>
         <?= $this->include('templates/majestic/sections/story') ?>
     <?php endif; ?>
     
     <!-- Schedule Section -->
-    <?php if (!empty($event['schedule_items'])): ?>
+    <?php if (!empty($scheduleItems)): ?>
         <?= $this->include('templates/majestic/sections/schedule') ?>
     <?php endif; ?>
     
@@ -72,17 +82,17 @@
     <?= $this->include('templates/majestic/sections/location') ?>
     
     <!-- Gallery Section -->
-    <?php if (!empty($event['gallery_items'])): ?>
+    <?php if (!empty($galleryAssets)): ?>
         <?= $this->include('templates/majestic/sections/gallery') ?>
     <?php endif; ?>
     
     <!-- Registry Section -->
-    <?php if (!empty($event['registry_items'])): ?>
+    <?php if (!empty($registryItems)): ?>
         <?= $this->include('templates/majestic/sections/registry') ?>
     <?php endif; ?>
     
     <!-- Party Section -->
-    <?php if (!empty($event['party_members'])): ?>
+    <?php if (!empty($weddingParty)): ?>
         <?= $this->include('templates/majestic/sections/party') ?>
     <?php endif; ?>
     
@@ -104,12 +114,17 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <?php
+    $primaryLocation = $eventLocations[0] ?? [];
+    $venueLat = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? 0);
+    $venueLng = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? 0);
+    ?>
     <script>
         const EVENT_DATA = {
             eventDate: '<?= $event['event_date_start'] ?>',
-            venueLat: <?= $event['venue_geo_lat'] ?? 0 ?>,
-            venueLng: <?= $event['venue_geo_lng'] ?? 0 ?>,
-            venueName: '<?= esc($event['venue_name'] ?? '') ?>',
+            venueLat: <?= $venueLat ?: 0 ?>,
+            venueLng: <?= $venueLng ?: 0 ?>,
+            venueName: '<?= esc($primaryLocation['name'] ?? ($event['venue_name'] ?? '')) ?>',
             eventId: '<?= $event['id'] ?>'
         };
     </script>
