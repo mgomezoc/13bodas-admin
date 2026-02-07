@@ -200,7 +200,9 @@ function uploadFiles(files) {
             }
 
             if (response.success) {
-                refreshModuleSection('#gallerySection');
+                refreshModuleSection('#gallerySection').always(function() {
+                    resetDropZone();
+                });
             } else {
                 resetDropZone();
             }
