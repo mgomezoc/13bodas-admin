@@ -8,7 +8,7 @@ if ($activeTab === '') {
     $path = service('uri')->getPath();
     $path = trim((string) $path, '/');
     $segments = explode('/', $path);
-    $activeFromPath = $segments[3] ?? '';
+    $activeFromPath = end($segments) ?: '';
     $map = [
         'guests' => 'guests',
         'groups' => 'groups',

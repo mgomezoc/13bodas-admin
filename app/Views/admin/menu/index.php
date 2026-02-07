@@ -45,7 +45,9 @@
                             <th>Opción</th>
                             <th>Descripción</th>
                             <th class="text-center">Características</th>
-                            <th class="text-center">Estado</th>
+                            <?php if (!empty($hasIsActive)): ?>
+                                <th class="text-center">Estado</th>
+                            <?php endif; ?>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -65,13 +67,15 @@
                                     <span class="badge bg-info me-1" title="Para Niños"><i class="bi bi-emoji-smile"></i></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center">
-                                <?php if ($option['is_active']): ?>
-                                    <span class="badge bg-success">Activo</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                <?php endif; ?>
-                            </td>
+                            <?php if (!empty($hasIsActive)): ?>
+                                <td class="text-center">
+                                    <?php if (!empty($option['is_active'])): ?>
+                                        <span class="badge bg-success">Activo</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
                             <td class="text-end">
                                 <div class="action-buttons">
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="editOption(<?= htmlspecialchars(json_encode($option)) ?>)">
@@ -129,12 +133,14 @@
                         </div>
                     </div>
                     
-                    <div id="activeField" class="mb-3" style="display: none;">
-                        <div class="form-check">
-                            <input type="checkbox" id="isActive" name="is_active" class="form-check-input" value="1" checked>
-                            <label class="form-check-label" for="isActive">Activo</label>
+                    <?php if (!empty($hasIsActive)): ?>
+                        <div id="activeField" class="mb-3" style="display: none;">
+                            <div class="form-check">
+                                <input type="checkbox" id="isActive" name="is_active" class="form-check-input" value="1" checked>
+                                <label class="form-check-label" for="isActive">Activo</label>
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
