@@ -79,7 +79,7 @@ $eventDateISO   = $startRaw ? date('c', strtotime($startRaw)) : '';
 $eventTimeRange = trim(formatTimeLabel($startRaw) . ($endRaw ? ' - ' . formatTimeLabel($endRaw) : ''));
 $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
-$assetsBase = base_url('templates/lovelove');
+$assetsBase = base_url('templates/lovely');
 
 // --- Theme (schema_json + theme_config overrides) ---
 $schema = [];
