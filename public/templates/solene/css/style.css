@@ -332,14 +332,25 @@ a:hover{ opacity: .85; }
 .solene-gallery-grid{
   margin-top: 28px;
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-auto-rows: 160px;
+  grid-auto-flow: dense;
   gap: 16px;
 }
 .solene-gallery-item{
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow);
+  position: relative;
 }
+.solene-gallery-item img{
+  transition: transform 0.4s ease;
+}
+.solene-gallery-item:hover img{
+  transform: scale(1.05);
+}
+.solene-gallery-item.is-wide{ grid-column: span 2; }
+.solene-gallery-item.is-tall{ grid-row: span 2; }
 .solene-gallery-item img{ display:block; width:100%; height:100%; object-fit:cover; }
 .solene-gallery-item--placeholder{
   background: #e2e8f0;
