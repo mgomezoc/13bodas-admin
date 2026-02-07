@@ -70,7 +70,7 @@ class MenuOptions extends BaseController
             'sort_order' => $this->menuModel->where('event_id', $eventId)->countAllResults() + 1
         ];
 
-        $optionId = $this->menuModel->insert($optionData);
+        $optionId = $this->menuModel->createOption($optionData);
 
         if ($optionId) {
             return $this->response->setJSON([

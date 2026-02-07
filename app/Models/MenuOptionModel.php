@@ -20,6 +20,7 @@ class MenuOptionModel extends Model
         'is_vegan',
         'is_gluten_free',
         'is_kid_friendly',
+        'is_active',
         'sort_order',
         'created_at'
     ];
@@ -47,6 +48,7 @@ class MenuOptionModel extends Model
         $data['is_vegan'] = $data['is_vegan'] ?? 0;
         $data['is_gluten_free'] = $data['is_gluten_free'] ?? 0;
         $data['is_kid_friendly'] = $data['is_kid_friendly'] ?? 0;
+        $data['is_active'] = $data['is_active'] ?? 1;
         $data['created_at'] = date('Y-m-d H:i:s');
         
         // Obtener siguiente orden
