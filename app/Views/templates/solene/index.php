@@ -43,6 +43,8 @@ $text    = $theme['text_color'] ?? '#232323';
 $muted   = $theme['muted_text_color'] ?? '#6B6B6B';
 $hFont   = $theme['font_heading'] ?? 'Playfair Display';
 $bFont   = $theme['font_body'] ?? 'Inter';
+$slug    = $event['slug'] ?? '';
+$galleryAssets = $galleryAssets ?? [];
 $faqs          = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 
@@ -100,6 +102,13 @@ $faqs = !empty($faqs)
     ? $faqs
     : ($faqPayload['items'] ?? []);
 
+$couplePayload = solenePayload(soleneFindModule($modules, 'couple_info'));
+$heroImage = $couplePayload['hero_image_url'] ?? '';
+$brideBio = $couplePayload['bride_bio'] ?? ($couplePayload['bride']['bio'] ?? '');
+$groomBio = $couplePayload['groom_bio'] ?? ($couplePayload['groom']['bio'] ?? '');
+$bridePhoto = $couplePayload['bride_photo'] ?? ($couplePayload['bride']['photo'] ?? '');
+$groomPhoto = $couplePayload['groom_photo'] ?? ($couplePayload['groom']['photo'] ?? '');
+
 $eventDateHuman = soleneDateEs($event['event_date_start'], $tz);
 $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz)))->format('c'); // ISO con offset
 ?>
@@ -126,257 +135,185 @@ $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz
             --solene-font-heading: <?= esc($hFont) ?>;
             --solene-font-body: <?= esc($bFont) ?>;
         }
-        .solene-card {
-            background: #fff;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-            margin-bottom: 20px;
-        }
-        .solene-grid {
-            display: grid;
-            gap: 24px;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        }
-        .solene-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            background: rgba(15, 23, 42, 0.08);
-            color: #0f172a;
-        }
-        .solene-faq {
-            background: #fff;
-            border-radius: 16px;
-            padding: 16px 18px;
-            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
-            margin-bottom: 16px;
-        }
-        .solene-faq__question {
-            width: 100%;
-            border: none;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: 700;
-            font-size: 15px;
-            color: #0f172a;
-            padding: 0;
-        }
-        .solene-faq__question span[aria-hidden="true"] {
-            transition: transform 0.2s ease;
-        }
-        .solene-faq__answer {
-            display: none;
-            margin-top: 10px;
-            color: #374151;
-        }
-        .solene-faq.is-open .solene-faq__answer { display: block; }
-        .solene-faq.is-open .solene-faq__question span[aria-hidden="true"] { transform: rotate(180deg); }
     </style>
 </head>
 
 <body class="solene">
-    <header class="solene-header">
-        <nav class="solene-nav" aria-label="Navegación principal">
+    <header class="solene-header solene-header--overlay">
+        <nav class="solene-nav solene-nav--overlay" aria-label="Navegación principal">
             <a class="solene-brand" href="#hero">13Bodas</a>
             <div class="solene-nav-links">
-                <a href="#historia">Historia</a>
-                <a href="#countdown">Cuenta regresiva</a>
-                <?php if (!empty($scheduleItems)): ?>
-                    <a href="#agenda">Agenda</a>
-                <?php endif; ?>
-                <?php if (!empty($faqs)): ?>
-                    <a href="#faqs">FAQs</a>
-                <?php endif; ?>
-                <?php if (!empty($event['venue_name'])): ?>
-                    <a href="#lugar">Lugar</a>
-                <?php endif; ?>
+                <a href="#couple">Bride &amp; Groom</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#rsvp">RSVP</a>
+                <a href="#lugar">When &amp; Where</a>
             </div>
         </nav>
     </header>
 
     <main>
-        <?php foreach ($modules as $module): ?>
-            <?php
-            $type = $module['module_type'] ?? '';
-            $cssId = $module['css_id'] ?? '';
-            $payload = [];
-
-            if (!empty($module['content_payload'])) {
-                $decoded = json_decode($module['content_payload'], true);
-                $payload = is_array($decoded) ? $decoded : [];
-            }
-            ?>
-
-            <?php if ($type === 'couple_info'): ?>
-                <?php
-                $heroImage = $payload['hero_image_url'] ?? '';
-                $headline = $payload['headline'] ?? '';
-                $subheadline = $payload['subheadline'] ?? '';
-                $ctaLabel = $payload['cta_label'] ?? '';
-                $ctaTarget = $payload['cta_target'] ?? '#historia';
-                ?>
-                <section id="<?= esc($cssId ?: 'hero') ?>" class="solene-hero" aria-label="Portada">
-                    <div class="solene-hero-media" role="img" aria-label="Fotografía principal"
-                        style="<?= $heroImage ? 'background-image:url(' . esc($heroImage) . ');' : '' ?>">
+        <section id="hero" class="solene-hero solene-hero--full">
+            <div class="solene-hero-media" role="img" aria-label="Fotografía principal"
+                style="<?= $heroImage ? 'background-image:url(' . esc($heroImage) . ');' : '' ?>">
+                <div class="solene-hero-overlay"></div>
+                <div class="solene-hero-inner">
+                    <p class="solene-eyebrow">13Bodas presenta</p>
+                    <h1 class="solene-title"><?= esc($event['couple_title']) ?></h1>
+                    <p class="solene-subtitle"><?= esc($eventDateHuman) ?></p>
+                    <div class="solene-countdown-inline" data-solene-countdown data-target="<?= esc($eventDateISO) ?>">
+                        <div><span data-part="days">00</span><small>Días</small></div>
+                        <div><span data-part="hours">00</span><small>Horas</small></div>
+                        <div><span data-part="minutes">00</span><small>Min</small></div>
+                        <div><span data-part="seconds">00</span><small>Seg</small></div>
                     </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="solene-hero-content">
-                        <?php if ($headline): ?><p class="solene-eyebrow"><?= esc($headline) ?></p><?php endif; ?>
-                        <h1 class="solene-title"><?= esc($event['couple_title']) ?></h1>
+        <section id="couple" class="solene-section solene-section--light">
+            <div class="solene-container">
+                <h2 class="solene-h2 solene-center">Bride &amp; Groom</h2>
+                <div class="solene-divider solene-divider--center" aria-hidden="true"></div>
+                <div class="solene-couple-grid">
+                    <article class="solene-couple-card">
+                        <div class="solene-couple-photo" style="<?= $bridePhoto ? 'background-image:url(' . esc($bridePhoto) . ');' : '' ?>"></div>
+                        <h3 class="solene-h3"><?= esc($event['bride_name'] ?? 'Bride') ?></h3>
+                        <p class="solene-text"><?= esc($brideBio ?: 'Estamos emocionados de compartir este momento contigo.') ?></p>
+                    </article>
+                    <article class="solene-couple-card solene-couple-card--center">
+                        <h3 class="solene-h3">The wedding day</h3>
+                        <p class="solene-text">Nos encantaría que seas parte de nuestra historia.</p>
+                    </article>
+                    <article class="solene-couple-card">
+                        <div class="solene-couple-photo" style="<?= $groomPhoto ? 'background-image:url(' . esc($groomPhoto) . ');' : '' ?>"></div>
+                        <h3 class="solene-h3"><?= esc($event['groom_name'] ?? 'Groom') ?></h3>
+                        <p class="solene-text"><?= esc($groomBio ?: 'Gracias por acompañarnos en este día especial.') ?></p>
+                    </article>
+                </div>
+            </div>
+        </section>
 
-                        <div class="solene-meta" aria-label="Detalles del evento">
-                            <span><?= esc($eventDateHuman) ?></span>
-                            <?php if (!empty($event['venue_name'])): ?>
-                                <span class="solene-dot" aria-hidden="true">•</span>
-                                <span><?= esc($event['venue_name']) ?></span>
+        <section id="gallery" class="solene-section">
+            <div class="solene-container">
+                <h2 class="solene-h2 solene-center">Our Wedding Gallery</h2>
+                <div class="solene-divider solene-divider--center" aria-hidden="true"></div>
+                <div class="solene-gallery-grid">
+                    <?php if (!empty($galleryAssets)): ?>
+                        <?php foreach ($galleryAssets as $asset): ?>
+                            <?php $img = $asset['thumb'] ?? $asset['full'] ?? ''; ?>
+                            <?php if ($img): ?>
+                                <figure class="solene-gallery-item">
+                                    <img src="<?= esc($img) ?>" alt="<?= esc($asset['alt'] ?? $event['couple_title']) ?>">
+                                </figure>
                             <?php endif; ?>
-                        </div>
-
-                        <?php if ($subheadline): ?>
-                            <p class="solene-subtitle"><?= esc($subheadline) ?></p>
-                        <?php endif; ?>
-
-                        <?php if ($ctaLabel): ?>
-                            <a class="solene-btn" href="<?= esc($ctaTarget) ?>"><?= esc($ctaLabel) ?></a>
-                        <?php endif; ?>
-                    </div>
-                </section>
-
-            <?php elseif ($type === 'timeline'): ?>
-                <?php
-                $title = $payload['title'] ?? 'Nuestra historia';
-                $items = $payload['items'] ?? [];
-                $items = is_array($items) ? $items : [];
-                ?>
-                <section id="<?= esc($cssId ?: 'historia') ?>" class="solene-section" aria-label="Historia">
-                    <div class="solene-container">
-                        <h2 class="solene-h2"><?= esc($title) ?></h2>
-                        <div class="solene-divider" aria-hidden="true"></div>
-
-                        <?php if ($items): ?>
-                            <div class="solene-timeline">
-                                <?php foreach ($items as $it): ?>
-                                    <?php
-                                    $itTitle = is_array($it) ? ($it['title'] ?? '') : '';
-                                    $itDate  = is_array($it) ? ($it['date'] ?? '') : '';
-                                    $itText  = is_array($it) ? ($it['text'] ?? '') : '';
-                                    ?>
-                                    <article class="solene-timeline-item">
-                                        <div class="solene-timeline-mark" aria-hidden="true"></div>
-                                        <div class="solene-timeline-body">
-                                            <header class="solene-timeline-head">
-                                                <?php if ($itTitle): ?><h3 class="solene-h3"><?= esc($itTitle) ?></h3><?php endif; ?>
-                                                <?php if ($itDate): ?><p class="solene-muted"><?= esc($itDate) ?></p><?php endif; ?>
-                                            </header>
-                                            <?php if ($itText): ?><p class="solene-text"><?= esc($itText) ?></p><?php endif; ?>
-                                        </div>
-                                    </article>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <p class="solene-text solene-muted">Próximamente compartiremos nuestra historia.</p>
-                        <?php endif; ?>
-                    </div>
-                </section>
-
-            <?php elseif ($type === 'countdown'): ?>
-                <?php
-                $title = $payload['title'] ?? 'Cuenta regresiva';
-                $subtitle = $payload['subtitle'] ?? '';
-                ?>
-                <section id="<?= esc($cssId ?: 'countdown') ?>" class="solene-section solene-countdown" aria-label="Cuenta regresiva">
-                    <div class="solene-container">
-                        <h2 class="solene-h2"><?= esc($title) ?></h2>
-                        <?php if ($subtitle): ?><p class="solene-text solene-muted"><?= esc($subtitle) ?></p><?php endif; ?>
-
-                        <div class="solene-countdown-grid" data-solene-countdown data-target="<?= esc($eventDateISO) ?>">
-                            <div class="solene-count-box">
-                                <div class="solene-count" data-part="days">--</div>
-                                <div class="solene-label">Días</div>
-                            </div>
-                            <div class="solene-count-box">
-                                <div class="solene-count" data-part="hours">--</div>
-                                <div class="solene-label">Horas</div>
-                            </div>
-                            <div class="solene-count-box">
-                                <div class="solene-count" data-part="minutes">--</div>
-                                <div class="solene-label">Min</div>
-                            </div>
-                            <div class="solene-count-box">
-                                <div class="solene-count" data-part="seconds">--</div>
-                                <div class="solene-label">Seg</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-            <?php endif; ?>
-        <?php endforeach; ?>
-
-        <?php if (!empty($scheduleItems)): ?>
-            <section id="agenda" class="solene-section" aria-label="Agenda">
-                <div class="solene-container">
-                    <h2 class="solene-h2">Agenda</h2>
-                    <div class="solene-divider" aria-hidden="true"></div>
-                    <div class="solene-grid">
-                        <?php foreach ($scheduleItems as $item): ?>
-                            <?php
-                            $title = esc($item['title'] ?? 'Actividad');
-                            $desc = esc($item['description'] ?? '');
-                            $timeLabel = soleneScheduleLabel($item, $tz);
-                            ?>
-                            <article class="solene-card">
-                                <span class="solene-pill"><?= $timeLabel ?: 'Horario por confirmar' ?></span>
-                                <h3 class="solene-h3" style="margin-top:12px;"><?= $title ?></h3>
-                                <?php if ($desc): ?><p class="solene-text"><?= $desc ?></p><?php endif; ?>
-                            </article>
                         <?php endforeach; ?>
-                    </div>
+                    <?php else: ?>
+                        <?php for ($i = 0; $i < 8; $i++): ?>
+                            <div class="solene-gallery-item solene-gallery-item--placeholder"></div>
+                        <?php endfor; ?>
+                    <?php endif; ?>
                 </div>
-            </section>
-        <?php endif; ?>
+            </div>
+        </section>
 
-        <?php if (!empty($faqs)): ?>
-            <section id="faqs" class="solene-section" aria-label="Preguntas frecuentes">
-                <div class="solene-container">
-                    <h2 class="solene-h2">Preguntas frecuentes</h2>
-                    <div class="solene-divider" aria-hidden="true"></div>
-                    <div class="solene-grid">
-                        <?php foreach ($faqs as $faq): ?>
-                            <div class="solene-faq" data-faq>
-                                <button class="solene-faq__question" type="button" data-faq-trigger aria-expanded="false">
-                                    <span><?= esc($faq['question'] ?? 'Pregunta') ?></span>
-                                    <span aria-hidden="true">⌄</span>
-                                </button>
-                                <div class="solene-faq__answer" data-faq-content>
-                                    <p class="solene-text"><?= esc($faq['answer'] ?? '') ?></p>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+        <section id="rsvp" class="solene-section solene-section--light">
+            <div class="solene-container solene-rsvp-grid">
+                <form class="solene-rsvp-card" method="post" action="<?= site_url("i/{$slug}/rsvp") ?>">
+                    <?= csrf_field() ?>
+                    <h3 class="solene-h3">Will you attend?</h3>
+                    <input class="solene-input" name="name" placeholder="Nombre*" required>
+                    <input class="solene-input" type="email" name="email" placeholder="Email (opcional)">
+                    <select class="solene-input" name="attending" required>
+                        <option value="" disabled selected>¿Asistirás?*</option>
+                        <option value="accepted">Sí, asistiré</option>
+                        <option value="declined">No podré asistir</option>
+                    </select>
+                    <textarea class="solene-input" name="message" rows="3" placeholder="Mensaje para los novios"></textarea>
+                    <button class="solene-btn solene-btn--solid" type="submit">Enviar</button>
+                </form>
+                <div class="solene-rsvp-copy">
+                    <h3 class="solene-h3">It's a Wedding Rehearsal!</h3>
+                    <p class="solene-text solene-muted">Gracias por acompañarnos. Confirma tu asistencia y comparte tus mejores deseos.</p>
+                    <a class="solene-btn" href="#lugar">Read more</a>
                 </div>
-            </section>
-        <?php endif; ?>
+            </div>
+        </section>
+
+        <section class="solene-section">
+            <div class="solene-container">
+                <h2 class="solene-h2 solene-center">Partners</h2>
+                <div class="solene-divider solene-divider--center" aria-hidden="true"></div>
+                <div class="solene-partners">
+                    <span>Confidante</span>
+                    <span>Love Story</span>
+                    <span>Wedding Studio</span>
+                    <span>Simply Romance</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="solene-date-banner">
+            <div class="solene-container">
+                <h2 class="solene-h2"><?= esc($eventDateHuman) ?></h2>
+                <p class="solene-text solene-muted">Únete a nosotros para celebrar.</p>
+                <a class="solene-btn solene-btn--solid" href="#rsvp">RSVP</a>
+            </div>
+        </section>
 
         <?php if (!empty($event['venue_name'])): ?>
             <section id="lugar" class="solene-section" aria-label="Lugar">
                 <div class="solene-container">
-                    <h2 class="solene-h2">Lugar</h2>
-                    <div class="solene-divider" aria-hidden="true"></div>
-                    <p class="solene-text"><strong><?= esc($event['venue_name']) ?></strong></p>
-                    <?php if (!empty($event['venue_address'])): ?>
-                        <p class="solene-text solene-muted"><?= esc($event['venue_address']) ?></p>
-                    <?php endif; ?>
+                    <h2 class="solene-h2 solene-center">When &amp; Where</h2>
+                    <div class="solene-divider solene-divider--center" aria-hidden="true"></div>
+                    <div class="solene-when-grid">
+                        <div class="solene-card">
+                            <h3 class="solene-h3">Ceremonia</h3>
+                            <p class="solene-text"><?= esc($eventDateHuman) ?></p>
+                            <p class="solene-text solene-muted"><?= esc($event['venue_name']) ?></p>
+                        </div>
+                        <div class="solene-card">
+                            <h3 class="solene-h3">Recepción</h3>
+                            <p class="solene-text"><?= esc($eventDateHuman) ?></p>
+                            <p class="solene-text solene-muted"><?= esc($event['venue_address'] ?? 'Dirección por confirmar') ?></p>
+                        </div>
+                        <div class="solene-card">
+                            <h3 class="solene-h3">Detalles</h3>
+                            <p class="solene-text solene-muted">Dress code, estacionamiento y recomendaciones.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         <?php endif; ?>
+
+        <section class="solene-section">
+            <div class="solene-container">
+                <h2 class="solene-h2 solene-center">Articles to Inspire You</h2>
+                <div class="solene-divider solene-divider--center" aria-hidden="true"></div>
+                <div class="solene-articles">
+                    <?php for ($i = 0; $i < 4; $i++): ?>
+                        <article class="solene-article-card">
+                            <div class="solene-article-media"></div>
+                            <h3 class="solene-h3">Wedding Inspiration</h3>
+                            <p class="solene-text solene-muted">Ideas para tu gran día.</p>
+                        </article>
+                    <?php endfor; ?>
+                </div>
+            </div>
+        </section>
+
+        <section class="solene-map">
+            <?php
+            $mapSrc = '';
+            if (!empty($event['venue_geo_lat']) && !empty($event['venue_geo_lng'])) {
+                $mapSrc = 'https://maps.google.com/maps?q=' . urlencode($event['venue_geo_lat'] . ',' . $event['venue_geo_lng']) . '&z=15&output=embed';
+            } elseif (!empty($event['venue_address'])) {
+                $mapSrc = 'https://maps.google.com/maps?q=' . urlencode($event['venue_address']) . '&z=15&output=embed';
+            }
+            ?>
+            <?php if ($mapSrc): ?>
+                <iframe title="Mapa" src="<?= esc($mapSrc) ?>" loading="lazy"></iframe>
+            <?php endif; ?>
+        </section>
     </main>
 
     <footer class="solene-footer">
@@ -386,19 +323,6 @@ $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz
     </footer>
 
     <script src="<?= base_url('templates/solene/js/main.js') ?>" defer></script>
-    <script>
-        (function() {
-            const items = document.querySelectorAll('[data-faq]');
-            items.forEach((item) => {
-                const trigger = item.querySelector('[data-faq-trigger]');
-                if (!trigger) return;
-                trigger.addEventListener('click', () => {
-                    const open = item.classList.toggle('is-open');
-                    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-                });
-            });
-        })();
-    </script>
 </body>
 
 </html>
