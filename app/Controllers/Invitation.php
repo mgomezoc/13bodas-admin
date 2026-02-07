@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\EventModel;
+use App\Models\EventFaqItemModel;
+use App\Models\EventScheduleItemModel;
 use App\Models\ContentModuleModel;
 use App\Models\TemplateModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -164,6 +166,8 @@ class Invitation extends BaseController
         $rsvpResponses = [];
         $menuOptions = [];
         $weddingPartyMembers = [];
+        $faqs = [];
+        $scheduleItems = [];
 
         try {
             $guestGroups = $db->table('guest_groups')
@@ -213,6 +217,27 @@ class Invitation extends BaseController
                 ->getResultArray();
         } catch (\Throwable $e) {
             $weddingPartyMembers = [];
+        }
+
+        try {
+            $faqModel = new EventFaqItemModel();
+            $faqs = $faqModel->where('event_id', $event['id'])
+                ->where('is_visible', 1)
+                ->orderBy('sort_order', 'ASC')
+                ->findAll();
+        } catch (\Throwable $e) {
+            $faqs = [];
+        }
+
+        try {
+            $scheduleModel = new EventScheduleItemModel();
+            $scheduleItems = $scheduleModel->where('event_id', $event['id'])
+                ->where('is_visible', 1)
+                ->orderBy('sort_order', 'ASC')
+                ->orderBy('starts_at', 'ASC')
+                ->findAll();
+        } catch (\Throwable $e) {
+            $scheduleItems = [];
         }
 
         /**
@@ -268,6 +293,8 @@ class Invitation extends BaseController
             'rsvpResponses'   => $rsvpResponses,
             'menuOptions'     => $menuOptions,
             'weddingParty'    => $weddingPartyMembers,
+            'faqs'            => $faqs,
+            'scheduleItems'   => $scheduleItems,
         ];
 
         // 7) Cargar la vista basada en el CÓDIGO del template
