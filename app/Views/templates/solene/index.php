@@ -43,6 +43,62 @@ $text    = $theme['text_color'] ?? '#232323';
 $muted   = $theme['muted_text_color'] ?? '#6B6B6B';
 $hFont   = $theme['font_heading'] ?? 'Playfair Display';
 $bFont   = $theme['font_body'] ?? 'Inter';
+$faqs          = $faqs ?? ($event['faqs'] ?? []);
+$scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
+
+function soleneFindModule(array $modules, string $type): ?array
+{
+    foreach ($modules as $module) {
+        if (($module['module_type'] ?? '') === $type) {
+            return $module;
+        }
+    }
+    return null;
+}
+
+function solenePayload(?array $module): array
+{
+    if (!$module || empty($module['content_payload'])) {
+        return [];
+    }
+    $decoded = json_decode($module['content_payload'], true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function soleneFormatTime(?string $dt, string $tz): string
+{
+    if (!$dt) return '';
+    try {
+        $date = new DateTime($dt, new DateTimeZone($tz));
+        return $date->format('H:i');
+    } catch (Exception $e) {
+        return $dt;
+    }
+}
+
+function soleneScheduleLabel(array $item, string $tz): string
+{
+    if (!empty($item['time'])) {
+        return (string)$item['time'];
+    }
+    $start = $item['starts_at'] ?? null;
+    $end = $item['ends_at'] ?? null;
+    if (!$start) return '';
+    $startLabel = soleneFormatTime($start, $tz);
+    $endLabel = $end ? soleneFormatTime($end, $tz) : '';
+    return trim($startLabel . ($endLabel ? ' - ' . $endLabel : ''));
+}
+
+$schedulePayload = solenePayload(soleneFindModule($modules, 'schedule'));
+$faqPayload = solenePayload(soleneFindModule($modules, 'faq'));
+
+$scheduleItems = !empty($scheduleItems)
+    ? $scheduleItems
+    : ($schedulePayload['items'] ?? ($schedulePayload['events'] ?? []));
+
+$faqs = !empty($faqs)
+    ? $faqs
+    : ($faqPayload['items'] ?? []);
 
 $eventDateHuman = soleneDateEs($event['event_date_start'], $tz);
 $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz)))->format('c'); // ISO con offset
@@ -70,6 +126,58 @@ $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz
             --solene-font-heading: <?= esc($hFont) ?>;
             --solene-font-body: <?= esc($bFont) ?>;
         }
+        .solene-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            margin-bottom: 20px;
+        }
+        .solene-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+        .solene-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.08);
+            color: #0f172a;
+        }
+        .solene-faq {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px 18px;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+            margin-bottom: 16px;
+        }
+        .solene-faq__question {
+            width: 100%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+            padding: 0;
+        }
+        .solene-faq__question span[aria-hidden="true"] {
+            transition: transform 0.2s ease;
+        }
+        .solene-faq__answer {
+            display: none;
+            margin-top: 10px;
+            color: #374151;
+        }
+        .solene-faq.is-open .solene-faq__answer { display: block; }
+        .solene-faq.is-open .solene-faq__question span[aria-hidden="true"] { transform: rotate(180deg); }
     </style>
 </head>
 
@@ -80,6 +188,12 @@ $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz
             <div class="solene-nav-links">
                 <a href="#historia">Historia</a>
                 <a href="#countdown">Cuenta regresiva</a>
+                <?php if (!empty($scheduleItems)): ?>
+                    <a href="#agenda">Agenda</a>
+                <?php endif; ?>
+                <?php if (!empty($faqs)): ?>
+                    <a href="#faqs">FAQs</a>
+                <?php endif; ?>
                 <?php if (!empty($event['venue_name'])): ?>
                     <a href="#lugar">Lugar</a>
                 <?php endif; ?>
@@ -206,6 +320,51 @@ $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz
             <?php endif; ?>
         <?php endforeach; ?>
 
+        <?php if (!empty($scheduleItems)): ?>
+            <section id="agenda" class="solene-section" aria-label="Agenda">
+                <div class="solene-container">
+                    <h2 class="solene-h2">Agenda</h2>
+                    <div class="solene-divider" aria-hidden="true"></div>
+                    <div class="solene-grid">
+                        <?php foreach ($scheduleItems as $item): ?>
+                            <?php
+                            $title = esc($item['title'] ?? 'Actividad');
+                            $desc = esc($item['description'] ?? '');
+                            $timeLabel = soleneScheduleLabel($item, $tz);
+                            ?>
+                            <article class="solene-card">
+                                <span class="solene-pill"><?= $timeLabel ?: 'Horario por confirmar' ?></span>
+                                <h3 class="solene-h3" style="margin-top:12px;"><?= $title ?></h3>
+                                <?php if ($desc): ?><p class="solene-text"><?= $desc ?></p><?php endif; ?>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <?php if (!empty($faqs)): ?>
+            <section id="faqs" class="solene-section" aria-label="Preguntas frecuentes">
+                <div class="solene-container">
+                    <h2 class="solene-h2">Preguntas frecuentes</h2>
+                    <div class="solene-divider" aria-hidden="true"></div>
+                    <div class="solene-grid">
+                        <?php foreach ($faqs as $faq): ?>
+                            <div class="solene-faq" data-faq>
+                                <button class="solene-faq__question" type="button" data-faq-trigger aria-expanded="false">
+                                    <span><?= esc($faq['question'] ?? 'Pregunta') ?></span>
+                                    <span aria-hidden="true">⌄</span>
+                                </button>
+                                <div class="solene-faq__answer" data-faq-content>
+                                    <p class="solene-text"><?= esc($faq['answer'] ?? '') ?></p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
         <?php if (!empty($event['venue_name'])): ?>
             <section id="lugar" class="solene-section" aria-label="Lugar">
                 <div class="solene-container">
@@ -227,6 +386,19 @@ $eventDateISO   = (new DateTime($event['event_date_start'], new DateTimeZone($tz
     </footer>
 
     <script src="<?= base_url('templates/solene/js/main.js') ?>" defer></script>
+    <script>
+        (function() {
+            const items = document.querySelectorAll('[data-faq]');
+            items.forEach((item) => {
+                const trigger = item.querySelector('[data-faq-trigger]');
+                if (!trigger) return;
+                trigger.addEventListener('click', () => {
+                    const open = item.classList.toggle('is-open');
+                    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+            });
+        })();
+    </script>
 </body>
 
 </html>
