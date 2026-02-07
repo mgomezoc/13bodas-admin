@@ -314,3 +314,17 @@ a{color:inherit}
   .countdown{grid-template-columns: repeat(2, 1fr)}
   .nav-links{display:none}
 }
+
+/* Responsive media helpers */
+img,
+video,
+iframe,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  width: 100%;
+}

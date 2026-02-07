@@ -229,3 +229,17 @@ a:hover{ opacity: .85; }
   .solene-countdown-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .solene-hero-content{ margin-top: -48px; }
 }
+
+/* Responsive media helpers */
+img,
+video,
+iframe,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  width: 100%;
+}
