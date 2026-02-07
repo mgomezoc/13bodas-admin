@@ -145,6 +145,11 @@ if ($lat !== '' && $lng !== '') $mapsHref = 'https://www.google.com/maps?q=' . u
 elseif ($venueAddr) $mapsHref = 'https://www.google.com/maps?q=' . urlencode($venueAddr);
 
 $eventImage = $primaryLocation['image_url'] ?? getMediaUrl($mediaByCategory, 'event');
+if ($eventImage !== '' && !preg_match('#^https?://#i', $eventImage)) {
+    $eventImage = base_url($eventImage);
+}
+
+$heroImage = getMediaUrl($mediaByCategory, 'hero') ?: $eventImage;
 
 // ===========================
 // Normalización Galería (por si viene en formato viejo)
@@ -168,6 +173,13 @@ if (!empty($galleryAssets) && is_array($galleryAssets)) {
         }
 
         if ($full === '') continue;
+
+        if ($full !== '' && !preg_match('#^https?://#i', $full)) {
+            $full = base_url($full);
+        }
+        if ($thumb !== '' && !preg_match('#^https?://#i', $thumb)) {
+            $thumb = base_url($thumb);
+        }
 
         $gallery[] = [
             'full'  => $full,
@@ -268,7 +280,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
     <?php if (!empty($enabled['hero'])): ?>
         <!-- HERO -->
         <section id="home" class="w-hero">
-            <div class="w-hero-bg" aria-hidden="true"></div>
+            <div class="w-hero-bg" aria-hidden="true"<?= $heroImage ? ' style="background-image:url(' . esc($heroImage) . ')"' : '' ?>></div>
 
             <div class="w-hero-inner w-container">
                 <p class="w-kicker" data-reveal>13Bodas presenta</p>
@@ -315,6 +327,9 @@ if (!empty($registryItems) && is_array($registryItems)) {
                         <?php foreach ($storyItems as $index => $item): ?>
                             <?php
                                 $storyImage = $item['image'] ?? $item['image_url'] ?? getMediaUrl($mediaByCategory, 'story', $index);
+                                if ($storyImage !== '' && !preg_match('#^https?://#i', $storyImage)) {
+                                    $storyImage = base_url($storyImage);
+                                }
                                 $storyTitle = $item['title'] ?? 'Momento especial';
                                 $storyText = $item['text'] ?? ($item['description'] ?? '');
                             ?>
@@ -373,6 +388,33 @@ if (!empty($registryItems) && is_array($registryItems)) {
 
                         <div class="w-event-aside" aria-hidden="true"<?= $eventImage ? ' style="background-image:url(' . esc($eventImage) . ')"' : '' ?>></div>
                     </div>
+                    <?php if (count($eventLocations) > 1): ?>
+                        <div class="w-story-grid" style="margin-top:24px;">
+                            <?php foreach (array_slice($eventLocations, 1) as $index => $location): ?>
+                                <?php
+                                $locationName = $location['name'] ?? 'Evento';
+                                $locationAddress = $location['address'] ?? '';
+                                $locationTime = $location['time'] ?? '';
+                                $locationImage = $location['image_url'] ?? getMediaUrl($mediaByCategory, 'event', $index + 1);
+                                if ($locationImage !== '' && !preg_match('#^https?://#i', $locationImage)) {
+                                    $locationImage = base_url($locationImage);
+                                }
+                                $locationMaps = $location['maps_url'] ?? '';
+                                ?>
+                                <article class="w-card" data-reveal>
+                                    <?php if (!empty($locationImage)): ?>
+                                        <img src="<?= esc($locationImage) ?>" alt="<?= esc($locationName) ?>" class="w-story-media">
+                                    <?php endif; ?>
+                                    <h3><?= esc($locationName) ?></h3>
+                                    <?php if (!empty($locationTime)): ?><p class="w-muted"><?= esc($locationTime) ?></p><?php endif; ?>
+                                    <?php if (!empty($locationAddress)): ?><p><?= esc($locationAddress) ?></p><?php endif; ?>
+                                    <?php if (!empty($locationMaps)): ?>
+                                        <a class="w-btn w-btn-sm w-btn-ghost" target="_blank" rel="noopener" href="<?= esc($locationMaps) ?>">Ver mapa</a>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
