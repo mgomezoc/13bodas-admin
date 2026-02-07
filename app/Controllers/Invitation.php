@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\EventModel;
+use App\Models\EventFaqItemModel;
+use App\Models\EventScheduleItemModel;
 use App\Models\ContentModuleModel;
 use App\Models\TemplateModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -164,6 +166,8 @@ class Invitation extends BaseController
         $rsvpResponses = [];
         $menuOptions = [];
         $weddingPartyMembers = [];
+        $faqs = [];
+        $scheduleItems = [];
 
         try {
             $guestGroups = $db->table('guest_groups')
@@ -215,6 +219,27 @@ class Invitation extends BaseController
             $weddingPartyMembers = [];
         }
 
+        try {
+            $faqModel = new EventFaqItemModel();
+            $faqs = $faqModel->where('event_id', $event['id'])
+                ->where('is_visible', 1)
+                ->orderBy('sort_order', 'ASC')
+                ->findAll();
+        } catch (\Throwable $e) {
+            $faqs = [];
+        }
+
+        try {
+            $scheduleModel = new EventScheduleItemModel();
+            $scheduleItems = $scheduleModel->where('event_id', $event['id'])
+                ->where('is_visible', 1)
+                ->orderBy('sort_order', 'ASC')
+                ->orderBy('starts_at', 'ASC')
+                ->findAll();
+        } catch (\Throwable $e) {
+            $scheduleItems = [];
+        }
+
         /**
          * 7) Media assets por categoría (hero, bride, groom, etc.)
          */
@@ -250,6 +275,10 @@ class Invitation extends BaseController
             $venueConfig = json_decode($event['venue_config'], true) ?: [];
         }
 
+        // Adjuntar FAQs y agenda al evento para templates legacy
+        $event['faqs'] = $faqs;
+        $event['schedule_items'] = $scheduleItems;
+
         // Preparar datos para la vista
         $data = [
             'event'           => $event,
@@ -268,6 +297,8 @@ class Invitation extends BaseController
             'rsvpResponses'   => $rsvpResponses,
             'menuOptions'     => $menuOptions,
             'weddingParty'    => $weddingPartyMembers,
+            'faqs'            => $faqs,
+            'scheduleItems'   => $scheduleItems,
         ];
 
         // 7) Cargar la vista basada en el CÓDIGO del template

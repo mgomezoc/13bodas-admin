@@ -24,13 +24,10 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/locations') ?>"><i class="bi bi-geo me-1"></i>Ubicaciones</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-clock me-1"></i>Agenda</button></li>
-</ul>
+<?php $activeTab = 'schedule'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="scheduleList" class="card">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -87,11 +84,15 @@
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label class="form-label">Título <span class="text-danger">*</span></label>
-                            <input type="text" name="title" id="title" class="form-control" required>
+                            <input type="text" name="title" id="title" class="form-control" required placeholder="Ej: Ceremonia, Brindis, Banquete">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Icono</label>
-                            <input type="text" name="icon" id="icon" class="form-control" placeholder="bi-alarm">
+                            <div class="input-group">
+                                <span class="input-group-text"><i id="iconPreview" class="bi bi-clock"></i></span>
+                                <input type="text" name="icon" id="icon" class="form-control" placeholder="bi-alarm">
+                            </div>
+                            <div class="form-text">Usa iconos de Bootstrap (ej: bi-alarm, bi-heart, bi-camera).</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Inicio <span class="text-danger">*</span></label>
@@ -125,6 +126,26 @@
                             <label class="form-label">Descripción</label>
                             <textarea name="description" id="description" class="form-control" rows="3"></textarea>
                         </div>
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-icon="bi-heart">
+                                    <i class="bi bi-heart me-1"></i>Ceremonia
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-icon="bi-cup-straw">
+                                    <i class="bi bi-cup-straw me-1"></i>Brindis
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-icon="bi-camera">
+                                    <i class="bi bi-camera me-1"></i>Fotos
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-icon="bi-music-note-beamed">
+                                    <i class="bi bi-music-note-beamed me-1"></i>Baile
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-icon="bi-egg-fried">
+                                    <i class="bi bi-egg-fried me-1"></i>Banquete
+                                </button>
+                            </div>
+                            <div class="form-text mt-2">Puedes elegir un icono sugerido o escribir uno propio.</div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -142,12 +163,36 @@
 <?= $this->section('scripts') ?>
 <script>
 const eventId = '<?= $event['id'] ?>';
+const scheduleModalEl = document.getElementById('scheduleModal');
+const scheduleModal = new bootstrap.Modal(scheduleModalEl);
+
+function syncIconPreview(value) {
+    const iconClass = value && value.trim() !== '' ? value.trim() : 'bi-clock';
+    $('#iconPreview').attr('class', `bi ${iconClass}`);
+}
+
+$('#icon').on('input', function() {
+    syncIconPreview($(this).val());
+});
+
+$(document).on('click', '[data-icon]', function() {
+    const icon = $(this).data('icon');
+    $('#icon').val(icon);
+    syncIconPreview(icon);
+});
+
+$('#scheduleModal').on('hidden.bs.modal', function() {
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
+});
 
 function openScheduleModal(item = null) {
     $('#scheduleForm')[0].reset();
     $('#item_id').val('');
     $('#scheduleModalTitle').text(item ? 'Editar Actividad' : 'Nueva Actividad');
     $('#is_visible').prop('checked', true);
+    $('#icon').val('');
+    syncIconPreview('');
 
     if (item) {
         $('#item_id').val(item.id);
@@ -155,14 +200,14 @@ function openScheduleModal(item = null) {
         $('#icon').val(item.icon);
         $('#starts_at').val(item.starts_at);
         $('#ends_at').val(item.ends_at);
-        $('#location_id').val(item.location_id);
+        $('#location_id').val(item.location_id).trigger('change');
         $('#sort_order').val(item.sort_order);
         $('#is_visible').prop('checked', parseInt(item.is_visible) === 1);
         $('#description').val(item.description);
+        syncIconPreview(item.icon);
     }
 
-    const modal = new bootstrap.Modal(document.getElementById('scheduleModal'));
-    modal.show();
+    scheduleModal.show();
 }
 
 $('#scheduleForm').on('submit', function(e) {
@@ -176,7 +221,8 @@ $('#scheduleForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#scheduleList');
+                scheduleModal.hide();
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -201,7 +247,7 @@ function deleteScheduleItem(itemId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#scheduleList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }

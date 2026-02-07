@@ -57,10 +57,24 @@ class MenuOptionModel extends Model
             $data['sort_order'] = ($maxOrder['sort_order'] ?? 0) + 1;
         }
 
+        $data = $this->filterExistingFields($data);
+
         if ($this->insert($data)) {
             return $optionId;
         }
         
         return null;
+    }
+
+    public function hasColumn(string $column): bool
+    {
+        $fields = $this->db->getFieldNames($this->table);
+        return in_array($column, $fields, true);
+    }
+
+    protected function filterExistingFields(array $data): array
+    {
+        $fields = $this->db->getFieldNames($this->table);
+        return array_intersect_key($data, array_flip($fields));
     }
 }

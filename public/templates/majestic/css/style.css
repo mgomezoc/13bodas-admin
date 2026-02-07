@@ -746,3 +746,17 @@ h1, h2, h3, h4, h5, h6 {
     .schedule-item { flex-direction: column; }
     .rsvp-form-container { padding: 25px; }
 }
+
+/* Responsive media helpers */
+img,
+video,
+iframe,
+canvas,
+svg {
+    max-width: 100%;
+    height: auto;
+}
+
+table {
+    width: 100%;
+}

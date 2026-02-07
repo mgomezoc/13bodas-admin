@@ -17,6 +17,7 @@
     <div>
         <h1 class="page-title">Galería de Fotos</h1>
         <p class="page-subtitle"><?= esc($event['couple_title']) ?> • <?= count($images) ?> imagen(es)</p>
+        <p class="text-muted small mb-0">Estas fotos alimentan la galería pública del template.</p>
     </div>
     <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
         <i class="bi bi-upload me-2"></i>Subir Fotos
@@ -26,71 +27,68 @@
 <!-- Input oculto para subir -->
 <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
-<!-- Tabs -->
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle"></i> Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people"></i> Invitados</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>"><i class="bi bi-check2-square"></i> Confirmaciones</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-images"></i> Galería</button></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/registry') ?>"><i class="bi bi-gift"></i> Regalos</a></li>
-</ul>
+<?php $activeTab = 'gallery'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Zona de drop -->
 <div id="dropZone" class="card mb-4" style="border: 2px dashed var(--border-color); background: var(--bg-body);">
     <div class="card-body text-center py-5">
         <i class="bi bi-cloud-upload text-muted" style="font-size: 3rem;"></i>
         <p class="mt-3 mb-1">Arrastra y suelta tus fotos aquí</p>
-        <p class="text-muted small">o haz clic en "Subir Fotos" • Máx 5MB por imagen • JPG, PNG, WebP</p>
+        <p class="text-muted small mb-3">o haz clic en "Subir Fotos" • Máx 10MB por imagen • JPG, PNG, WebP</p>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('fileInput').click()">
+            <i class="bi bi-upload me-2"></i>Seleccionar Fotos
+        </button>
     </div>
 </div>
 
 <!-- Galería -->
-<?php if (empty($images)): ?>
-<div class="card">
-    <div class="card-body">
-        <div class="empty-state py-5">
-            <i class="bi bi-images empty-state-icon"></i>
-            <h4 class="empty-state-title">Sin fotos todavía</h4>
-            <p class="empty-state-text">Sube las primeras fotos de la pareja para mostrar en la invitación.</p>
-            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                <i class="bi bi-upload me-2"></i>Subir Primera Foto
-            </button>
+<div id="gallerySection">
+    <?php if (empty($images)): ?>
+    <div class="card">
+        <div class="card-body">
+            <div class="empty-state py-5">
+                <i class="bi bi-images empty-state-icon"></i>
+                <h4 class="empty-state-title">Sin fotos todavía</h4>
+                <p class="empty-state-text">Sube las primeras fotos de la pareja para mostrar en la invitación.</p>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    <i class="bi bi-upload me-2"></i>Subir Primera Foto
+                </button>
+            </div>
         </div>
     </div>
-</div>
-<?php else: ?>
-<div class="row g-3" id="galleryGrid">
-    <?php foreach ($images as $image): ?>
-    <div class="col-6 col-md-4 col-lg-3" data-id="<?= $image['id'] ?>">
-        <div class="card h-100">
-            <img src="<?= base_url($image['file_url_original']) ?>" 
-                 class="card-img-top" 
-                 alt="<?= esc($image['alt_text']) ?>"
-                 style="height: 180px; object-fit: cover;">
-            <div class="card-body p-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted text-truncate"><?= esc($image['alt_text']) ?></small>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-link text-muted p-0" data-bs-toggle="dropdown">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="<?= base_url($image['file_url_original']) ?>" target="_blank">
-                                <i class="bi bi-eye me-2"></i>Ver Original
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteImage('<?= $image['id'] ?>')">
-                                <i class="bi bi-trash me-2"></i>Eliminar
-                            </a></li>
-                        </ul>
+    <?php else: ?>
+    <div class="row g-3" id="galleryGrid">
+        <?php foreach ($images as $image): ?>
+        <div class="col-6 col-md-4 col-lg-3" data-id="<?= $image['id'] ?>">
+            <div class="card h-100 shadow-sm">
+                <div class="ratio ratio-4x3 bg-light">
+                    <img src="<?= base_url($image['file_url_original']) ?>"
+                         class="w-100 h-100 object-fit-cover"
+                         alt="<?= esc($image['alt_text']) ?>">
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <div class="text-truncate">
+                            <div class="fw-semibold small text-truncate"><?= esc($image['alt_text']) ?></div>
+                            <div class="text-muted small"><?= date('d/m/Y', strtotime($image['created_at'])) ?></div>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <a class="btn btn-outline-secondary" href="<?= base_url($image['file_url_original']) ?>" target="_blank" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" onclick="deleteImage('<?= $image['id'] ?>')" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <?php endforeach; ?>
     </div>
-    <?php endforeach; ?>
+    <?php endif; ?>
 </div>
-<?php endif; ?>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -98,6 +96,8 @@
 const eventId = '<?= $event['id'] ?>';
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+const maxFileSizeMb = 10;
+const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 // Drag & Drop
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -132,10 +132,39 @@ function handleFiles() {
 
 function uploadFiles(files) {
     if (files.length === 0) return;
-    
+
     const formData = new FormData();
+    const skipped = [];
+
     for (let i = 0; i < files.length; i++) {
-        formData.append('images[]', files[i]);
+        const file = files[i];
+
+        if (!allowedTypes.includes(file.type)) {
+            skipped.push(`${file.name}: tipo no permitido`);
+            continue;
+        }
+
+        if (file.size > maxFileSizeMb * 1024 * 1024) {
+            skipped.push(`${file.name}: excede ${maxFileSizeMb}MB`);
+            continue;
+        }
+
+        formData.append('images[]', file);
+    }
+
+    if (!formData.has('images[]')) {
+        Toast.fire({
+            icon: 'warning',
+            title: 'No hay archivos válidos para subir.',
+        });
+        if (skipped.length) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Archivos omitidos',
+                html: `<ul class="text-start mb-0">${skipped.map(item => `<li>${item}</li>`).join('')}</ul>`
+            });
+        }
+        return;
     }
     
     // Loading
@@ -150,15 +179,40 @@ function uploadFiles(files) {
         success: function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                location.reload();
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al subir' });
+            }
+
+            if (response.errors && response.errors.length) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Archivos con error',
+                    html: `<ul class="text-start mb-0">${response.errors.map(item => `<li>${item}</li>`).join('')}</ul>`
+                });
+            }
+
+            if (skipped.length) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Archivos omitidos',
+                    html: `<ul class="text-start mb-0">${skipped.map(item => `<li>${item}</li>`).join('')}</ul>`
+                });
+            }
+
+            if (response.success) {
+                refreshModuleSection('#gallerySection').always(function() {
+                    resetDropZone();
+                });
+            } else {
                 resetDropZone();
             }
         },
         error: function() {
             Toast.fire({ icon: 'error', title: 'Error de conexión' });
             resetDropZone();
+        },
+        complete: function() {
+            fileInput.value = '';
         }
     });
 }
@@ -168,7 +222,10 @@ function resetDropZone() {
         <div class="card-body text-center py-5">
             <i class="bi bi-cloud-upload text-muted" style="font-size: 3rem;"></i>
             <p class="mt-3 mb-1">Arrastra y suelta tus fotos aquí</p>
-            <p class="text-muted small">o haz clic en "Subir Fotos" • Máx 5MB por imagen • JPG, PNG, WebP</p>
+            <p class="text-muted small mb-3">o haz clic en "Subir Fotos" • Máx ${maxFileSizeMb}MB por imagen • JPG, PNG, WebP</p>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('fileInput').click()">
+                <i class="bi bi-upload me-2"></i>Seleccionar Fotos
+            </button>
         </div>
     `;
 }
@@ -184,14 +241,42 @@ function deleteImage(imageId) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Eliminando...',
+                text: 'Por favor espera',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             $.post(`${BASE_URL}admin/events/${eventId}/gallery/delete/${imageId}`)
                 .done(function(response) {
                     if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        $(`[data-id="${imageId}"]`).fadeOut(300, function() { $(this).remove(); });
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        $(`[data-id="${imageId}"]`).fadeOut(300, function() {
+                            $(this).remove();
+                            if ($('#galleryGrid [data-id]').length === 0) {
+                                refreshModuleSection('#gallerySection');
+                            }
+                        });
                     } else {
-                        Toast.fire({ icon: 'error', title: response.message });
+                        Swal.fire({
+                            icon: 'error',
+                            title: response.message
+                        });
                     }
+                })
+                .fail(function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de conexión'
+                    });
                 });
         }
     });

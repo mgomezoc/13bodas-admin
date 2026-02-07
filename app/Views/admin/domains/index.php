@@ -24,12 +24,10 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-globe2 me-1"></i>Dominios</button></li>
-</ul>
+<?php $activeTab = 'domains'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="domainsList" class="card">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -126,7 +124,7 @@ $('#domainForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#domainsList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -151,7 +149,7 @@ function deleteDomain(domainId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#domainsList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }

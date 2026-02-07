@@ -248,15 +248,22 @@ class Events extends BaseController
 
         $stats     = $this->eventModel->getEventStats($id);
         $rsvpStats = (new GuestModel())->getRsvpStatsByEvent($id);
+        $activeTemplate = (new TemplateModel())->getActiveForEvent($id);
 
         // plantilla activa
         $event['template_id'] = $this->eventTemplateModel->getActiveTemplateId($id);
+
+        $session   = session();
+        $userRoles = $session->get('user_roles') ?? [];
+        $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
 
         return view('admin/events/view', [
             'pageTitle'     => $event['couple_title'],
             'event'         => $event,
             'stats'         => $stats,
             'rsvpStats'     => $rsvpStats,
+            'activeTemplate' => $activeTemplate,
+            'isAdmin'       => $isAdmin,
             'invitationUrl' => base_url('i/' . $event['slug']),
         ]);
     }
@@ -491,6 +498,64 @@ class Events extends BaseController
         }
 
         return $this->jsonOrRedirect(true, 'Evento actualizado correctamente.');
+    }
+
+    public function delete(string $id)
+    {
+        try {
+            $event = $this->eventModel->find($id);
+
+            if (!$event) {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'Evento no encontrado.',
+                    ]);
+                }
+
+                return redirect()->back()->with('error', 'Evento no encontrado.');
+            }
+
+            $session   = session();
+            $userRoles = $session->get('user_roles') ?? [];
+            $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
+
+            if (!$isAdmin) {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'success' => false,
+                        'message' => 'Sin acceso.',
+                    ]);
+                }
+
+                return redirect()->back()->with('error', 'Sin acceso.');
+            }
+
+            $deleted = $this->eventModel->delete($id);
+
+            if ($deleted) {
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'success' => true,
+                        'message' => 'Evento eliminado correctamente.',
+                    ]);
+                }
+
+                return redirect()->to(base_url('admin/events'))
+                    ->with('success', 'Evento eliminado correctamente.');
+            }
+
+            throw new \Exception('No se pudo eliminar el evento.');
+        } catch (\Exception $e) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Error al eliminar: ' . $e->getMessage(),
+                ]);
+            }
+
+            return redirect()->back()->with('error', 'Error al eliminar el evento.');
+        }
     }
 
     public function checkSlug()

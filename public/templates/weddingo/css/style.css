@@ -453,3 +453,17 @@ body{
 
   .w-photo{ grid-column: span 12; }
 }
+
+/* Responsive media helpers */
+img,
+video,
+iframe,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  width: 100%;
+}

@@ -4157,4 +4157,18 @@ a:focus {
   border-radius: 0;
 }
 
-/*# sourceMappingURL=style.css.map 
+/* Responsive media helpers */
+img,
+video,
+iframe,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  width: 100%;
+}
+
+/*# sourceMappingURL=style.css.map

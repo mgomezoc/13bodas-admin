@@ -24,13 +24,10 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/recommendations') ?>"><i class="bi bi-star me-1"></i>Recomendaciones</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-question-circle me-1"></i>FAQ</button></li>
-</ul>
+<?php $activeTab = 'faq'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="faqList" class="card">
     <div class="card-body">
         <div class="accordion" id="faqAccordion">
             <?php foreach ($items as $index => $item): ?>
@@ -136,7 +133,7 @@ $('#faqForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#faqList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -161,7 +158,7 @@ function deleteFaq(itemId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#faqList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }

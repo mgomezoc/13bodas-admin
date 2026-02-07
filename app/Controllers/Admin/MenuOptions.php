@@ -36,7 +36,8 @@ class MenuOptions extends BaseController
         $data = [
             'pageTitle' => 'Opciones de Menú: ' . $event['couple_title'],
             'event' => $event,
-            'options' => $options
+            'options' => $options,
+            'hasIsActive' => $this->menuModel->hasColumn('is_active'),
         ];
 
         return view('admin/menu/index', $data);
@@ -66,11 +67,10 @@ class MenuOptions extends BaseController
             'is_vegan' => $this->request->getPost('is_vegan') ? 1 : 0,
             'is_gluten_free' => $this->request->getPost('is_gluten_free') ? 1 : 0,
             'is_kid_friendly' => $this->request->getPost('is_kid_friendly') ? 1 : 0,
-            'is_active' => 1,
             'sort_order' => $this->menuModel->where('event_id', $eventId)->countAllResults() + 1
         ];
 
-        $optionId = $this->menuModel->insert($optionData);
+        $optionId = $this->menuModel->createOption($optionData);
 
         if ($optionId) {
             return $this->response->setJSON([
@@ -103,8 +103,11 @@ class MenuOptions extends BaseController
             'is_vegan' => $this->request->getPost('is_vegan') ? 1 : 0,
             'is_gluten_free' => $this->request->getPost('is_gluten_free') ? 1 : 0,
             'is_kid_friendly' => $this->request->getPost('is_kid_friendly') ? 1 : 0,
-            'is_active' => $this->request->getPost('is_active') ? 1 : 0,
         ];
+
+        if ($this->menuModel->hasColumn('is_active')) {
+            $optionData['is_active'] = $this->request->getPost('is_active') ? 1 : 0;
+        }
 
         $this->menuModel->update($optionId, $optionData);
 

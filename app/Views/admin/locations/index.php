@@ -24,14 +24,10 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people me-1"></i>Invitados</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/schedule') ?>"><i class="bi bi-clock me-1"></i>Agenda</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-geo me-1"></i>Ubicaciones</button></li>
-</ul>
+<?php $activeTab = 'locations'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="locationsList" class="card">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -165,7 +161,7 @@ $('#locationForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#locationsList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -190,7 +186,7 @@ function deleteLocation(locationId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#locationsList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }
