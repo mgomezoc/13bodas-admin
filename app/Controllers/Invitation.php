@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\EventModel;
@@ -275,6 +277,21 @@ class Invitation extends BaseController
             $venueConfig = json_decode($event['venue_config'], true) ?: [];
         }
 
+        /**
+         * 8.5) Event Locations (tabla event_locations)
+         */
+        $eventLocations = [];
+        try {
+            $eventLocations = $db->table('event_locations')
+                ->where('event_id', $event['id'])
+                ->orderBy('sort_order', 'ASC')
+                ->orderBy('name', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            $eventLocations = [];
+        }
+
         // Adjuntar FAQs y agenda al evento para templates legacy
         $event['faqs'] = $faqs;
         $event['schedule_items'] = $scheduleItems;
@@ -299,6 +316,7 @@ class Invitation extends BaseController
             'weddingParty'    => $weddingPartyMembers,
             'faqs'            => $faqs,
             'scheduleItems'   => $scheduleItems,
+            'eventLocations'  => $eventLocations,
         ];
 
         // 7) Cargar la vista basada en el CÓDIGO del template

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -23,6 +25,7 @@ class EventLocationModel extends Model
         'geo_lng',
         'maps_url',
         'waze_url',
+        'image_url',
         'notes',
         'sort_order',
     ];

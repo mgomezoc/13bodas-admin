@@ -30,6 +30,27 @@
 <?php $activeTab = 'gallery'; ?>
 <?= $this->include('admin/events/partials/modules_tabs') ?>
 
+<!-- Category Nav -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <nav class="d-flex flex-wrap gap-2" aria-label="Categorías de media">
+            <?php foreach (($allowedCategories ?? ['gallery' => 'Galería']) as $catKey => $catLabel): ?>
+                <?php
+                    $isActive = ($currentCategory ?? 'gallery') === $catKey;
+                    $count = $categoryCounts[$catKey] ?? 0;
+                ?>
+                <a href="<?= base_url("admin/events/{$event['id']}/gallery?category={$catKey}") ?>"
+                   class="btn btn-sm <?= $isActive ? 'btn-primary' : 'btn-outline-secondary' ?>">
+                    <?= esc($catLabel) ?>
+                    <?php if ($count > 0): ?>
+                        <span class="badge <?= $isActive ? 'bg-white text-primary' : 'bg-secondary' ?> ms-1"><?= $count ?></span>
+                    <?php endif; ?>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+    </div>
+</div>
+
 <!-- Zona de drop -->
 <div id="dropZone" class="card mb-4" style="border: 2px dashed var(--border-color); background: var(--bg-body);">
     <div class="card-body text-center py-5">
@@ -151,6 +172,7 @@ function uploadFiles(files) {
 
         formData.append('images[]', file);
     }
+    formData.append('category', '<?= $currentCategory ?? "gallery" ?>');
 
     if (!formData.has('images[]')) {
         Toast.fire({

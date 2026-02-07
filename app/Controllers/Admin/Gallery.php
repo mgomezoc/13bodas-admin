@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
@@ -18,7 +20,7 @@ class Gallery extends BaseController
     }
 
     /**
-     * Galería del evento
+     * Galería del evento (soporta ?category= para hero, bride, groom, story, event, etc.)
      */
     public function index(string $eventId)
     {
@@ -29,20 +31,59 @@ class Gallery extends BaseController
                 ->with('error', 'Evento no encontrado.');
         }
 
+        // Categoría activa (default: gallery)
+        $category = $this->request->getGet('category') ?? 'gallery';
+        $allowedCategories = [
+            'gallery'      => 'Galería',
+            'hero'         => 'Portada (Hero)',
+            'bride'        => 'Foto Novia',
+            'groom'        => 'Foto Novio',
+            'story'        => 'Historia (Story)',
+            'event'        => 'Lugar del Evento',
+            'countdown_bg' => 'Fondo Countdown',
+            'cta_bg'       => 'Fondo CTA',
+            'rsvp_bg'      => 'Fondo RSVP',
+        ];
+
+        if (!array_key_exists($category, $allowedCategories)) {
+            $category = 'gallery';
+        }
+
         $images = $this->mediaModel
             ->where('event_id', $eventId)
-            ->where('category', 'gallery')
+            ->where('category', $category)
             ->orderBy('sort_order', 'ASC')
             ->orderBy('created_at', 'DESC')
             ->findAll();
 
+        // Contar assets por categoría para badges
+        $categoryCounts = [];
+        try {
+            $countsRaw = \Config\Database::connect()
+                ->table('media_assets')
+                ->select('category, COUNT(*) as total')
+                ->where('event_id', $eventId)
+                ->where('is_private', 0)
+                ->groupBy('category')
+                ->get()
+                ->getResultArray();
+            foreach ($countsRaw as $row) {
+                $categoryCounts[$row['category']] = (int) $row['total'];
+            }
+        } catch (\Throwable $e) {
+            $categoryCounts = [];
+        }
+
         $stats = $this->eventModel->getEventStats($eventId);
 
         return view('admin/gallery/index', [
-            'pageTitle' => 'Galería: ' . $event['couple_title'],
+            'pageTitle' => $allowedCategories[$category] . ': ' . $event['couple_title'],
             'event' => $event,
             'images' => $images,
-            'stats' => $stats
+            'stats' => $stats,
+            'currentCategory' => $category,
+            'allowedCategories' => $allowedCategories,
+            'categoryCounts' => $categoryCounts,
         ]);
     }
 
@@ -61,7 +102,30 @@ class Gallery extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'No se seleccionaron archivos.']);
         }
 
-        $uploadPath = FCPATH . 'uploads/events/' . $eventId . '/gallery/';
+        $category = $this->request->getPost('category') ?? 'gallery';
+        $allowedCategories = [
+            'gallery',
+            'hero',
+            'bride',
+            'groom',
+            'story',
+            'event',
+            'countdown_bg',
+            'cta_bg',
+            'rsvp_bg',
+        ];
+
+        if (!in_array($category, $allowedCategories, true)) {
+            $category = 'gallery';
+        }
+
+        $subfolder = match ($category) {
+            'bride', 'groom' => 'couple',
+            'countdown_bg', 'cta_bg', 'rsvp_bg' => 'backgrounds',
+            default => $category,
+        };
+
+        $uploadPath = FCPATH . 'uploads/events/' . $eventId . '/' . $subfolder . '/';
         
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
@@ -89,8 +153,8 @@ class Gallery extends BaseController
 
                 $mediaId = $this->mediaModel->createMedia([
                     'event_id' => $eventId,
-                    'category' => 'gallery',
-                    'file_url_original' => 'uploads/events/' . $eventId . '/gallery/' . $newName,
+                    'category' => $category,
+                    'file_url_original' => 'uploads/events/' . $eventId . '/' . $subfolder . '/' . $newName,
                     'alt_text' => pathinfo($file->getClientName(), PATHINFO_FILENAME),
                     'sort_order' => 999
                 ]);
@@ -98,7 +162,7 @@ class Gallery extends BaseController
                 if ($mediaId) {
                     $uploaded[] = [
                         'id' => $mediaId,
-                        'url' => base_url('uploads/events/' . $eventId . '/gallery/' . $newName),
+                        'url' => base_url('uploads/events/' . $eventId . '/' . $subfolder . '/' . $newName),
                         'name' => $file->getClientName()
                     ];
                 }

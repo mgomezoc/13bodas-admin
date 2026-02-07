@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -49,6 +51,9 @@ class ContentModuleModel extends Model
         // Template-specific: Lovely
         'lovely.copy'    => '[Lovely] Textos editables',
         'lovely.couple'  => '[Lovely] Info de pareja',
+        // Template-specific: Sukun
+        'sukun.copy'     => '[Sukun] Textos editables',
+        'sukun.couple'   => '[Sukun] Info de pareja',
     ];
 
     /**
