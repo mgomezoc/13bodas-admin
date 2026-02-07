@@ -178,6 +178,44 @@ function initDeleteConfirmation() {
  * AJAX Setup
  */
 function initAjaxSetup() {
+    let ajaxLoadingCount = 0;
+
+    function ensureGlobalLoader() {
+        if ($('#ajaxGlobalLoader').length) return;
+        const loaderHtml = `
+            <div id="ajaxGlobalLoader" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);z-index:2000;">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 text-muted small">Procesando...</div>
+                </div>
+            </div>
+        `;
+        $('body').append(loaderHtml);
+    }
+
+    function showGlobalLoading() {
+        ensureGlobalLoader();
+        $('#ajaxGlobalLoader').fadeIn(150);
+    }
+
+    function hideGlobalLoading() {
+        $('#ajaxGlobalLoader').fadeOut(150);
+    }
+
+    $(document).ajaxSend(function(event, xhr, settings) {
+        if (settings.showLoader === false) return;
+        ajaxLoadingCount += 1;
+        showGlobalLoading();
+    });
+
+    $(document).ajaxComplete(function(event, xhr, settings) {
+        if (settings.showLoader === false) return;
+        ajaxLoadingCount = Math.max(ajaxLoadingCount - 1, 0);
+        if (ajaxLoadingCount === 0) {
+            hideGlobalLoading();
+        }
+    });
+
     $.ajaxSetup({
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
@@ -192,6 +230,31 @@ function initAjaxSetup() {
                 } else {
                     settings.data.csrf_token = CSRF_TOKEN;
                 }
+            }
+        }
+    });
+}
+
+/**
+ * Refresh a module section without full page reload.
+ */
+function refreshModuleSection(selector) {
+    return $.get(window.location.href, function(html) {
+        const $html = $('<div>').append($.parseHTML(html));
+        const $newSection = $html.find(selector).first();
+        if ($newSection.length) {
+            $(selector).replaceWith($newSection);
+            if (typeof initSelect2 === 'function') {
+                initSelect2();
+            }
+            if (typeof initFlatpickr === 'function') {
+                initFlatpickr();
+            }
+            if (typeof initFormValidation === 'function') {
+                initFormValidation();
+            }
+            if (typeof $.fn.bootstrapTable === 'function') {
+                $newSection.find('[data-toggle="table"]').bootstrapTable();
             }
         }
     });

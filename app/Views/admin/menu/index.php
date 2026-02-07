@@ -23,17 +23,10 @@
     </button>
 </div>
 
-<!-- Tabs -->
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people me-1"></i>Invitados</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>"><i class="bi bi-check2-square me-1"></i>RSVPs</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>"><i class="bi bi-images me-1"></i>Galería</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/registry') ?>"><i class="bi bi-gift me-1"></i>Regalos</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-cup-hot me-1"></i>Menú</button></li>
-</ul>
+<?php $activeTab = 'menu'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="menuList" class="card">
     <div class="card-body">
         <?php if (empty($options)): ?>
             <div class="empty-state py-5">
@@ -52,7 +45,9 @@
                             <th>Opción</th>
                             <th>Descripción</th>
                             <th class="text-center">Características</th>
-                            <th class="text-center">Estado</th>
+                            <?php if (!empty($hasIsActive)): ?>
+                                <th class="text-center">Estado</th>
+                            <?php endif; ?>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -72,13 +67,15 @@
                                     <span class="badge bg-info me-1" title="Para Niños"><i class="bi bi-emoji-smile"></i></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center">
-                                <?php if ($option['is_active']): ?>
-                                    <span class="badge bg-success">Activo</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                <?php endif; ?>
-                            </td>
+                            <?php if (!empty($hasIsActive)): ?>
+                                <td class="text-center">
+                                    <?php if (!empty($option['is_active'])): ?>
+                                        <span class="badge bg-success">Activo</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
                             <td class="text-end">
                                 <div class="action-buttons">
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="editOption(<?= htmlspecialchars(json_encode($option)) ?>)">
@@ -136,12 +133,14 @@
                         </div>
                     </div>
                     
-                    <div id="activeField" class="mb-3" style="display: none;">
-                        <div class="form-check">
-                            <input type="checkbox" id="isActive" name="is_active" class="form-check-input" value="1" checked>
-                            <label class="form-check-label" for="isActive">Activo</label>
+                    <?php if (!empty($hasIsActive)): ?>
+                        <div id="activeField" class="mb-3" style="display: none;">
+                            <div class="form-check">
+                                <input type="checkbox" id="isActive" name="is_active" class="form-check-input" value="1" checked>
+                                <label class="form-check-label" for="isActive">Activo</label>
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -179,7 +178,7 @@ $('#optionForm').on('submit', function(e) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
                 modal.hide();
-                setTimeout(() => location.reload(), 1000);
+                refreshModuleSection('#menuList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
@@ -213,7 +212,7 @@ function deleteOption(optionId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 1000);
+                        refreshModuleSection('#menuList');
                     }
                 });
         }

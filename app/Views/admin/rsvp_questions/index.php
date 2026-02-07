@@ -24,13 +24,10 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle me-1"></i>Información</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-ui-checks me-1"></i>Preguntas RSVP</button></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>"><i class="bi bi-check2-square me-1"></i>Respuestas</a></li>
-</ul>
+<?php $activeTab = 'rsvp-questions'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
-<div class="card">
+<div id="rsvpQuestionsList" class="card">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -170,7 +167,7 @@ $('#questionForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                setTimeout(() => location.reload(), 600);
+                refreshModuleSection('#rsvpQuestionsList');
             } else {
                 Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
             }
@@ -195,7 +192,7 @@ function deleteQuestion(questionId) {
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
-                        setTimeout(() => location.reload(), 600);
+                        refreshModuleSection('#rsvpQuestionsList');
                     } else {
                         Toast.fire({ icon: 'error', title: response.message });
                     }

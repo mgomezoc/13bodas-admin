@@ -16,6 +16,8 @@ $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
 $menuOptions   = $menuOptions ?? [];
 $weddingParty  = $weddingParty ?? [];
+$faqs          = $faqs ?? ($event['faqs'] ?? []);
+$scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -56,6 +58,18 @@ function formatTimeLabel(?string $dt, string $fmt = 'H:i'): string
 {
     if (!$dt) return '';
     try { return date($fmt, strtotime($dt)); } catch (\Throwable $e) { return ''; }
+}
+function formatScheduleTime(array $item): string
+{
+    if (!empty($item['time'])) {
+        return esc((string)$item['time']);
+    }
+    $start = $item['starts_at'] ?? null;
+    $end = $item['ends_at'] ?? null;
+    if (!$start) return '';
+    $startLabel = formatTimeLabel($start);
+    $endLabel = $end ? formatTimeLabel($end) : '';
+    return trim($startLabel . ($endLabel ? ' - ' . $endLabel : ''));
 }
 
 $eventDateLabel = formatDateLabel($startRaw, 'd M Y');
@@ -117,6 +131,24 @@ if ($modStory && !empty($modStory['content_payload'])) {
     $raw = $modStory['content_payload'];
     $storyPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
+
+// --- Schedule module ---
+$modSchedule = findModule($modules, 'schedule');
+$schedulePayload = [];
+if ($modSchedule && !empty($modSchedule['content_payload'])) {
+    $raw = $modSchedule['content_payload'];
+    $schedulePayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
+}
+$scheduleItems = !empty($scheduleItems) ? $scheduleItems : ($schedulePayload['items'] ?? ($schedulePayload['events'] ?? []));
+
+// --- FAQ module ---
+$modFaq = findModule($modules, 'faq');
+$faqPayload = [];
+if ($modFaq && !empty($modFaq['content_payload'])) {
+    $raw = $modFaq['content_payload'];
+    $faqPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
+}
+$faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text with cascading fallback: copyPayload → defaults → hardcoded ---
 function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
@@ -293,6 +325,68 @@ foreach ($weddingParty as $member) {
         .badge-available { display:inline-block; padding:6px 10px; border-radius:999px; background:#f1f5f9; color:#0f172a; font-size:12px; font-weight:600; }
         .btn-registry { display:inline-flex; align-items:center; gap:8px; background:var(--t-primary); color:#fff; border:none; padding:12px 16px; border-radius:10px; text-decoration:none; }
         .btn-registry:hover { opacity:.92; color:#fff; }
+
+        /* 2025 polish */
+        body { background: #f7f7f9; color: #111827; }
+        .section-padding { padding: 110px 0; }
+        .section-title h2, .section-title-white h2 { letter-spacing: .02em; }
+        .navbar-dark .navbar-nav .nav-link { font-weight: 600; letter-spacing: .04em; }
+        .hero .wedding-announcement { backdrop-filter: blur(6px); }
+        .lovely-modern-section { background: #fff; }
+        .lovely-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, .08);
+            margin-bottom: 24px;
+            min-height: 180px;
+        }
+        .lovely-card h3 { margin-top: 12px; font-size: 22px; }
+        .lovely-card p { margin-bottom: 0; opacity: .85; }
+        .lovely-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.08);
+            color: #0f172a;
+        }
+        .lovely-faq {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 20px;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, .08);
+            margin-bottom: 20px;
+        }
+        .lovely-faq__question {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: #0f172a;
+        }
+        .lovely-faq__answer {
+            margin-top: 12px;
+            display: none;
+            color: #374151;
+        }
+        .lovely-faq.is-open .lovely-faq__answer { display: block; }
+        .lovely-faq.is-open .lovely-faq__question i { transform: rotate(180deg); }
+        @media (max-width: 991px) {
+            .section-padding { padding: 90px 0; }
+        }
+        @media (max-width: 767px) {
+            .section-padding { padding: 70px 0; }
+            .lovely-card { padding: 20px; }
+        }
     </style>
 </head>
 
@@ -364,10 +458,16 @@ foreach ($weddingParty as $member) {
                         <li class="nav-item"><a class="nav-link" href="#couple">Nosotros</a></li>
                         <li class="nav-item"><a class="nav-link" href="#story">Historia</a></li>
                         <li class="nav-item"><a class="nav-link" href="#events">Evento</a></li>
+                        <?php if (!empty($scheduleItems)): ?>
+                            <li class="nav-item"><a class="nav-link" href="#schedule">Agenda</a></li>
+                        <?php endif; ?>
                         <?php if (!empty($weddingParty)): ?>
                             <li class="nav-item"><a class="nav-link" href="#people">Cortejo</a></li>
                         <?php endif; ?>
                         <li class="nav-item"><a class="nav-link" href="#gallery">Galería</a></li>
+                        <?php if (!empty($faqs)): ?>
+                            <li class="nav-item"><a class="nav-link" href="#faqs">FAQs</a></li>
+                        <?php endif; ?>
                         <?php if (!empty($menuOptions)): ?>
                             <li class="nav-item"><a class="nav-link" href="#menu">Menú</a></li>
                         <?php endif; ?>
@@ -571,6 +671,71 @@ foreach ($weddingParty as $member) {
             </div>
         </div>
     </section>
+
+    <?php if (!empty($scheduleItems)): ?>
+    <!-- ============ SCHEDULE ============ -->
+    <section class="lovely-modern-section section-padding" id="schedule">
+        <div class="container">
+            <div class="row">
+                <div class="col col-xs-12">
+                    <div class="section-title">
+                        <div class="vertical-line"><span><i class="fi flaticon-two"></i></span></div>
+                        <h2>Agenda</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <?php foreach ($scheduleItems as $item): ?>
+                    <?php
+                    $title = safeText($item['title'] ?? 'Actividad');
+                    $desc = safeText($item['description'] ?? '');
+                    $timeLabel = formatScheduleTime($item);
+                    ?>
+                    <div class="col-lg-4 col-md-6">
+                        <article class="lovely-card">
+                            <div class="lovely-card__meta">
+                                <span class="lovely-pill"><?= $timeLabel ?: 'Horario por confirmar' ?></span>
+                            </div>
+                            <h3><?= $title ?></h3>
+                            <?php if ($desc): ?><p><?= $desc ?></p><?php endif; ?>
+                        </article>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <?php if (!empty($faqs)): ?>
+    <!-- ============ FAQS ============ -->
+    <section class="lovely-modern-section section-padding" id="faqs">
+        <div class="container">
+            <div class="row">
+                <div class="col col-xs-12">
+                    <div class="section-title">
+                        <div class="vertical-line"><span><i class="fi flaticon-two"></i></span></div>
+                        <h2>Preguntas frecuentes</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <?php foreach ($faqs as $index => $faq): ?>
+                    <div class="col-md-6">
+                        <div class="lovely-faq" data-faq>
+                            <button class="lovely-faq__question" type="button" data-faq-trigger aria-expanded="false">
+                                <span><?= esc($faq['question'] ?? 'Pregunta') ?></span>
+                                <i class="fa fa-angle-down"></i>
+                            </button>
+                            <div class="lovely-faq__answer" data-faq-content>
+                                <p><?= esc($faq['answer'] ?? '') ?></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <?php if (!empty($weddingParty)): ?>
     <!-- ============ WEDDING PARTY ============ -->
@@ -973,6 +1138,19 @@ foreach ($weddingParty as $member) {
         });
     });
 })(jQuery);
+</script>
+<script>
+(function() {
+    const items = document.querySelectorAll('[data-faq]');
+    items.forEach((item) => {
+        const trigger = item.querySelector('[data-faq-trigger]');
+        if (!trigger) return;
+        trigger.addEventListener('click', () => {
+            const open = item.classList.toggle('is-open');
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    });
+})();
 </script>
 
 </body>

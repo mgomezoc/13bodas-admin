@@ -11,6 +11,8 @@ $modules  = $modules ?? [];
 $galleryAssets = $galleryAssets ?? ($gallery ?? []);   // compat fallback
 $registryItems = $registryItems ?? ($gifts ?? []);     // compat fallback
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0.0];
+$faqs          = $faqs ?? [];
+$scheduleItems = $scheduleItems ?? [];
 
 $slug        = esc($event['slug'] ?? '');
 $eventId     = esc($event['id'] ?? '');
@@ -37,6 +39,12 @@ function fmtTime(?string $dt, string $fmt = 'H:i'): string
 {
     if (!$dt) return '';
     return date($fmt, strtotime($dt));
+}
+function fmtTimeRange(?string $start, ?string $end): string
+{
+    $startLabel = fmtTime($start);
+    $endLabel = fmtTime($end);
+    return trim($startLabel . ($endLabel ? ' - ' . $endLabel : ''));
 }
 function moneyFmt($amount, string $currency = 'MXN'): string
 {
@@ -209,8 +217,10 @@ if (!empty($registryItems) && is_array($registryItems)) {
         <nav class="w-nav" data-w-nav>
             <?php if (!empty($enabled['story'])): ?><a href="#story">Historia</a><?php endif; ?>
             <?php if (!empty($enabled['event'])): ?><a href="#event">Evento</a><?php endif; ?>
+            <?php if (!empty($scheduleItems)): ?><a href="#schedule">Agenda</a><?php endif; ?>
             <?php if (!empty($enabled['gallery'])): ?><a href="#gallery">Galería</a><?php endif; ?>
             <?php if (!empty($enabled['gifts'])): ?><a href="#gifts">Regalos</a><?php endif; ?>
+            <?php if (!empty($faqs)): ?><a href="#faq">FAQs</a><?php endif; ?>
             <?php if (!empty($enabled['rsvp'])): ?><a href="#rsvp" class="w-nav-cta">Confirmar</a><?php endif; ?>
         </nav>
     </header>
@@ -350,6 +360,37 @@ if (!empty($registryItems) && is_array($registryItems)) {
         </section>
     <?php endif; ?>
 
+    <?php if (!empty($scheduleItems)): ?>
+        <!-- SCHEDULE -->
+        <section id="schedule" class="w-section">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Agenda</h2>
+                    <p class="w-muted">Actividades y horarios del gran día.</p>
+                </div>
+
+                <div class="w-story-grid">
+                    <?php foreach ($scheduleItems as $item): ?>
+                        <?php
+                        $title = esc($item['title'] ?? 'Actividad');
+                        $timeLabel = fmtTimeRange($item['starts_at'] ?? null, $item['ends_at'] ?? null);
+                        $description = esc($item['description'] ?? '');
+                        ?>
+                        <article class="w-card" data-reveal>
+                            <h3><?= $title ?></h3>
+                            <?php if ($timeLabel): ?>
+                                <p class="w-muted"><?= esc($timeLabel) ?></p>
+                            <?php endif; ?>
+                            <?php if ($description): ?>
+                                <p><?= $description ?></p>
+                            <?php endif; ?>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <?php if (!empty($enabled['gifts'])): ?>
         <!-- GIFTS -->
         <section id="gifts" class="w-section w-section-alt">
@@ -444,6 +485,27 @@ if (!empty($registryItems) && is_array($registryItems)) {
                             <div class="w-gift-bottom"><strong class="w-price">Meta: $10,000.00</strong></div>
                         </article>
                     <?php endif; ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($faqs)): ?>
+        <!-- FAQ -->
+        <section id="faq" class="w-section w-section-alt">
+            <div class="w-container">
+                <div class="w-section-head" data-reveal>
+                    <h2>Preguntas frecuentes</h2>
+                    <p class="w-muted">Resolvemos dudas comunes para que disfrutes el evento.</p>
+                </div>
+
+                <div class="w-story-grid">
+                    <?php foreach ($faqs as $faq): ?>
+                        <article class="w-card" data-reveal>
+                            <h3><?= esc($faq['question'] ?? 'Pregunta') ?></h3>
+                            <p><?= esc($faq['answer'] ?? '') ?></p>
+                        </article>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>

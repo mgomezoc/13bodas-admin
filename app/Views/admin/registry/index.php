@@ -63,16 +63,11 @@
     </div>
 </div>
 
-<!-- Tabs -->
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle"></i> Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people"></i> Invitados</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>"><i class="bi bi-check2-square"></i> Confirmaciones</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>"><i class="bi bi-images"></i> Galería</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-gift"></i> Regalos</button></li>
-</ul>
+<?php $activeTab = 'registry'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Lista de Regalos -->
+<div id="registrySection">
 <?php if (empty($items)): ?>
 <div class="card">
     <div class="card-body">
@@ -140,6 +135,7 @@
     <?php endforeach; ?>
 </div>
 <?php endif; ?>
+</div>
 
 <!-- Modal Agregar Regalo -->
 <div class="modal fade" id="addItemModal" tabindex="-1">
@@ -206,7 +202,7 @@ $('#addItemForm').on('submit', function(e) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                location.reload();
+                refreshModuleSection('#registrySection');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
@@ -218,7 +214,7 @@ function toggleClaimed(itemId) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                location.reload();
+                refreshModuleSection('#registrySection');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }

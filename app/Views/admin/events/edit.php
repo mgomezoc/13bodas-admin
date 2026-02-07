@@ -81,85 +81,8 @@
 </div>
 
 <!-- Tabs de navegación -->
-<ul class="nav nav-tabs mb-4" id="eventTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
-            <i class="bi bi-info-circle"></i> Información
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>">
-            <i class="bi bi-people"></i> Invitados
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/groups') ?>">
-            <i class="bi bi-collection"></i> Grupos
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp') ?>">
-            <i class="bi bi-check2-square"></i> Confirmaciones
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>">
-            <i class="bi bi-images"></i> Galería
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/registry') ?>">
-            <i class="bi bi-gift"></i> Regalos
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/menu') ?>">
-            <i class="bi bi-cup-hot"></i> Menú
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/party') ?>">
-            <i class="bi bi-hearts"></i> Cortejo
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/locations') ?>">
-            <i class="bi bi-geo"></i> Ubicaciones
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/schedule') ?>">
-            <i class="bi bi-clock"></i> Agenda
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/faq') ?>">
-            <i class="bi bi-question-circle"></i> FAQ
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/recommendations') ?>">
-            <i class="bi bi-star"></i> Recomendaciones
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/rsvp-questions') ?>">
-            <i class="bi bi-ui-checks"></i> Preguntas RSVP
-        </a>
-    </li>
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/modules') ?>">
-            <i class="bi bi-grid"></i> Módulos
-        </a>
-    </li>
-    <?php if (!empty($isAdmin)): ?>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/domains') ?>">
-                <i class="bi bi-globe2"></i> Dominios
-            </a>
-        </li>
-    <?php endif; ?>
-</ul>
+<?php $activeTab = 'info'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Contenido del Tab -->
 <div class="tab-content" id="eventTabsContent">
@@ -259,10 +182,16 @@
                                 </div>
                             </div>
 
+                            <?php
+                            $contactEmail = $event['primary_contact_email'] ?? '';
+                            if (trim((string)$contactEmail) === '') {
+                                $contactEmail = $event['client_email'] ?? '';
+                            }
+                            ?>
                             <div class="mb-3">
                                 <label class="form-label" for="primary_contact_email">Email de Contacto</label>
                                 <input type="email" id="primary_contact_email" name="primary_contact_email"
-                                    class="form-control" value="<?= esc($event['primary_contact_email'] ?? '') ?>">
+                                    class="form-control" value="<?= esc($contactEmail) ?>">
                                 <div class="form-text">Recibirá notificaciones de confirmaciones</div>
                             </div>
                         </div>
@@ -298,9 +227,12 @@
                                         value="<?= esc($event['venue_geo_lng'] ?? '') ?>" placeholder="Ej: -100.3161">
                                 </div>
                             </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="geocodeVenue">
+                                <i class="bi bi-map"></i> Buscar coordenadas
+                            </button>
                             <div class="form-text">
                                 <i class="bi bi-info-circle me-1"></i>
-                                Puedes obtener las coordenadas desde <a href="https://www.google.com/maps" target="_blank">Google Maps</a>
+                                Usa la dirección o el nombre del lugar para buscar en OpenStreetMap.
                             </div>
                         </div>
                     </div>
@@ -543,6 +475,55 @@
                 }
             });
         });
+    });
+
+    $('#geocodeVenue').on('click', async function() {
+        const $btn = $(this);
+        const originalText = $btn.html();
+        const venueName = $('#venue_name').val().trim();
+        const venueAddress = $('#venue_address').val().trim();
+        const query = [venueName, venueAddress].filter(Boolean).join(', ');
+
+        if (!query) {
+            Toast.fire({
+                icon: 'warning',
+                title: 'Agrega el nombre o la dirección del lugar.'
+            });
+            return;
+        }
+
+        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Buscando...');
+
+        try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                $('#venue_geo_lat').val(parseFloat(data[0].lat).toFixed(6));
+                $('#venue_geo_lng').val(parseFloat(data[0].lon).toFixed(6));
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Coordenadas actualizadas.'
+                });
+            } else {
+                Toast.fire({
+                    icon: 'warning',
+                    title: 'No se encontraron coordenadas.'
+                });
+            }
+        } catch (error) {
+            Toast.fire({
+                icon: 'error',
+                title: 'No se pudo consultar el mapa.'
+            });
+        } finally {
+            $btn.prop('disabled', false).html(originalText);
+        }
     });
 
     function checkSlugAvailability(slug, excludeId) {

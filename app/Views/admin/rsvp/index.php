@@ -39,6 +39,7 @@
     Aquí verás en tiempo real quién confirmó, quién no asistirá y quién aún no ha respondido.</p>
 </div>
 
+<div id="rsvpSection">
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
@@ -103,14 +104,8 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
     </div>
 </div>
 
-<!-- Tabs -->
-<ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/edit/' . $event['id']) ?>"><i class="bi bi-info-circle"></i> Información</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/guests') ?>"><i class="bi bi-people"></i> Invitados</a></li>
-    <li class="nav-item"><button class="nav-link active" type="button"><i class="bi bi-check2-square"></i> Confirmaciones</button></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/gallery') ?>"><i class="bi bi-images"></i> Galería</a></li>
-    <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/events/' . $event['id'] . '/registry') ?>"><i class="bi bi-gift"></i> Regalos</a></li>
-</ul>
+<?php $activeTab = 'rsvp'; ?>
+<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Lista de respuestas -->
 <div class="card">
@@ -184,6 +179,7 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
     </div>
 </div>
 <?php endif; ?>
+</div>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -240,7 +236,7 @@ function updateStatus(guestId, status) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
                 $('#rsvpTable').bootstrapTable('refresh');
-                setTimeout(() => location.reload(), 1000);
+                refreshModuleSection('#rsvpSection');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
