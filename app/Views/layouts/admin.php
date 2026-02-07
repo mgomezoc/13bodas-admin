@@ -214,9 +214,6 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Admin JS -->
-    <script src="<?= base_url('js/admin.js') ?>"></script>
-
     <script>
         // Configuración global
         const BASE_URL = '<?= base_url() ?>';
@@ -253,6 +250,9 @@
             });
         <?php endif; ?>
     </script>
+
+    <!-- Admin JS -->
+    <script src="<?= base_url('js/admin.js') ?>"></script>
 
     <?= $this->renderSection('scripts') ?>
 </body>
