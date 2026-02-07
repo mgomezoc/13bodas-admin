@@ -11,6 +11,8 @@ $guests           = $guests ?? [];
 $rsvpResponses    = $rsvpResponses ?? [];
 $menuOptions      = $menuOptions ?? [];
 $weddingParty     = $weddingParty ?? [];
+$faqs             = $faqs ?? [];
+$scheduleItems    = $scheduleItems ?? [];
 
 $assetsBase = base_url('templates/vibranza');
 
@@ -73,8 +75,8 @@ foreach ($modules as $module) {
 
 $coupleInfo = $moduleData['couple_info'] ?? [];
 $timeline   = $moduleData['timeline']['events'] ?? [];
-$schedule   = $moduleData['schedule']['items'] ?? [];
-$faqItems   = $moduleData['faq']['items'] ?? [];
+$schedule   = $scheduleItems ?: ($moduleData['schedule']['items'] ?? []);
+$faqItems   = $faqs ?: ($moduleData['faq']['items'] ?? []);
 $customHtml = $moduleData['custom_html']['html'] ?? '';
 $musicInfo  = $moduleData['music'] ?? [];
 $accommodation = $moduleData['accommodation']['items'] ?? [];

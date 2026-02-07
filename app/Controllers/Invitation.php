@@ -275,6 +275,10 @@ class Invitation extends BaseController
             $venueConfig = json_decode($event['venue_config'], true) ?: [];
         }
 
+        // Adjuntar FAQs y agenda al evento para templates legacy
+        $event['faqs'] = $faqs;
+        $event['schedule_items'] = $scheduleItems;
+
         // Preparar datos para la vista
         $data = [
             'event'           => $event,
