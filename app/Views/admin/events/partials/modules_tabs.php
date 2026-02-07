@@ -4,6 +4,32 @@ $userRoles = $session->get('user_roles') ?? [];
 $isAdmin   = $isAdmin ?? (in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true));
 $activeTab = $activeTab ?? '';
 
+if ($activeTab === '') {
+    $path = service('uri')->getPath();
+    $path = trim((string) $path, '/');
+    $segments = explode('/', $path);
+    $activeFromPath = $segments[3] ?? '';
+    $map = [
+        'guests' => 'guests',
+        'groups' => 'groups',
+        'rsvp' => 'rsvp',
+        'gallery' => 'gallery',
+        'registry' => 'registry',
+        'menu' => 'menu',
+        'party' => 'party',
+        'locations' => 'locations',
+        'schedule' => 'schedule',
+        'faq' => 'faq',
+        'recommendations' => 'recommendations',
+        'rsvp-questions' => 'rsvp-questions',
+        'modules' => 'modules',
+        'domains' => 'domains',
+    ];
+    if (isset($map[$activeFromPath])) {
+        $activeTab = $map[$activeFromPath];
+    }
+}
+
 $tabs = [
     [
         'key'  => 'info',
