@@ -187,7 +187,7 @@ $rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asi
 $brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
 $groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
 $storyTitle = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'El evento');
+$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
 $galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
 $registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
 $partyTitle = getText($copyPayload, $defaults, 'party_title', 'Damas y Caballeros');
@@ -554,6 +554,12 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                     <?php endif; ?>
                     <?php if ($hasWeddingParty): ?>
                         <li><a href="#attendants">Cortejo</a></li>
+                    <?php endif; ?>
+                    <?php if (!empty($scheduleItems)): ?>
+                        <li><a href="#schedule">Agenda</a></li>
+                    <?php endif; ?>
+                    <?php if (!empty($faqs)): ?>
+                        <li><a href="#faqs">Preguntas</a></li>
                     <?php endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right page-scroll">
@@ -982,6 +988,66 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
         <?php endif; ?>
     </section>
     <!-- Section ends -->
+    <?php if (!empty($scheduleItems)): ?>
+        <!-- Section: Schedule -->
+        <section id="schedule" class="watercolor">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Agenda</h2>
+                    <!-- divider -->
+                    <div class="hr"></div>
+                </div>
+                <div class="row">
+                    <?php foreach ($scheduleItems as $item): ?>
+                        <?php
+                        $title = (string)($item['title'] ?? 'Actividad');
+                        $desc = (string)($item['description'] ?? '');
+                        $timeLabel = formatScheduleTime($item);
+                        $location = (string)($item['location'] ?? ($item['venue'] ?? ''));
+                        ?>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="well">
+                                <h4><?= esc($title) ?></h4>
+                                <?php if ($timeLabel !== ''): ?>
+                                    <p><strong><?= $timeLabel ?></strong></p>
+                                <?php endif; ?>
+                                <?php if ($location !== ''): ?>
+                                    <p><?= esc($location) ?></p>
+                                <?php endif; ?>
+                                <?php if ($desc !== ''): ?>
+                                    <p><?= esc($desc) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+        <!-- /Section ends -->
+    <?php endif; ?>
+    <?php if (!empty($faqs)): ?>
+        <!-- Section: FAQ -->
+        <section id="faqs">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Preguntas frecuentes</h2>
+                    <!-- divider -->
+                    <div class="hr"></div>
+                </div>
+                <div class="row">
+                    <?php foreach ($faqs as $faq): ?>
+                        <div class="col-md-6">
+                            <div class="well">
+                                <h5><?= esc($faq['question'] ?? 'Pregunta') ?></h5>
+                                <p><?= esc($faq['answer'] ?? '') ?></p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </section>
+        <!-- /Section ends -->
+    <?php endif; ?>
     <!-- Section: Quote -->
     <section id="quote" class="container-fluid">
         <div class="col-md-7 col-centered" data-center-top="opacity: 1" data-center-bottom="opacity: 0">
