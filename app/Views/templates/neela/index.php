@@ -1,38 +1,36 @@
 <?php
+
+declare(strict_types=1);
 // ================================================================
-// TEMPLATE: LOVELY — app/Views/templates/lovely/index.php
+// TEMPLATE: NEELA — app/Views/templates/neela/index.php
 // Versión: 2.0 — Con soporte completo de datos dinámicos + fallbacks
 // ================================================================
 
 // --- Base data ---
-$event         = $event ?? [];
-$template      = $template ?? [];
-$theme         = $theme ?? [];
-$modules       = $modules ?? [];
-$templateMeta  = $templateMeta ?? [];
+$event           = $event ?? [];
+$template        = $template ?? [];
+$theme           = $theme ?? [];
+$modules         = $modules ?? [];
+$templateMeta    = $templateMeta ?? [];
 $mediaByCategory = $mediaByCategory ?? [];
-$galleryAssets = $galleryAssets ?? [];
-$registryItems = $registryItems ?? [];
-$registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
-$menuOptions   = $menuOptions ?? [];
-$weddingParty  = $weddingParty ?? [];
-$faqs          = $faqs ?? ($event['faqs'] ?? []);
-$scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
-$eventLocations = $eventLocations ?? [];
+$galleryAssets   = $galleryAssets ?? [];
+$registryItems   = $registryItems ?? [];
+$registryStats   = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
+$menuOptions     = $menuOptions ?? [];
+$weddingParty    = $weddingParty ?? [];
+$faqs            = $faqs ?? ($event['faqs'] ?? []);
+$scheduleItems   = $scheduleItems ?? ($event['schedule_items'] ?? []);
+$eventLocations  = $eventLocations ?? [];
 
 // --- Defaults from template meta_json ---
-// Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
 $rawDefaults = $templateMeta['defaults'] ?? [];
 if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
-    // Nueva estructura: defaults.copy + defaults.assets
     $defaults  = $rawDefaults['copy'];
     $tplAssets = $rawDefaults['assets'] ?? [];
 } else {
-    // Estructura legacy: defaults plano + assets como hermano
     $defaults  = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
-// Section visibility (override desde theme_config del evento)
 $sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $slug        = esc($event['slug'] ?? '');
@@ -49,6 +47,15 @@ $venueName = esc($primaryLocation['name'] ?? ($event['venue_name'] ?? ''));
 $venueAddr = esc($primaryLocation['address'] ?? ($event['venue_address'] ?? ''));
 $lat       = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
 $lng       = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
+if (empty($eventLocations) && ($venueName !== '' || $venueAddr !== '' || ($lat !== '' && $lng !== ''))) {
+    $eventLocations = [[
+        'name' => $venueName,
+        'address' => $venueAddr,
+        'geo_lat' => $lat,
+        'geo_lng' => $lng,
+        'starts_at' => $startRaw,
+    ]];
+}
 
 // --- Helper functions ---
 function formatDateLabel(?string $dt, string $fmt = 'd M Y'): string
@@ -94,7 +101,6 @@ $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];
 }
-// Retrocompatibilidad: soportar tanto estructura plana como anidada (theme_defaults)
 $themeDefaults = $schema['theme_defaults'] ?? [];
 $schemaFonts  = !empty($themeDefaults['fonts'])
     ? [$themeDefaults['fonts']['heading'] ?? 'Great Vibes', $themeDefaults['fonts']['body'] ?? 'Dosis']
@@ -103,13 +109,12 @@ $schemaColors = !empty($themeDefaults['colors'])
     ? [$themeDefaults['colors']['primary'] ?? '#86B1A1', $themeDefaults['colors']['accent'] ?? '#F5F0EB']
     : ($schema['colors'] ?? ['#86B1A1', '#F5F0EB']);
 
-// Retrocompatibilidad: soportar tanto estructura plana como anidada
 $fontHeading  = $theme['fonts']['heading'] ?? ($theme['font_heading'] ?? ($schemaFonts[0] ?? 'Great Vibes'));
 $fontBody     = $theme['fonts']['body']    ?? ($theme['font_body']    ?? ($schemaFonts[1] ?? 'Dosis'));
 $colorPrimary = $theme['colors']['primary'] ?? ($theme['primary']     ?? ($schemaColors[0] ?? '#86B1A1'));
 $colorAccent  = $theme['colors']['accent']  ?? ($theme['accent']      ?? ($schemaColors[1] ?? '#F5F0EB'));
 
-// --- Module finder (busca por module_type, NO por code) ---
+// --- Module finder ---
 function findModule(array $modules, string $type): ?array
 {
     foreach ($modules as $m) {
@@ -118,7 +123,6 @@ function findModule(array $modules, string $type): ?array
     return null;
 }
 
-// --- Couple module (lovely.couple or couple_info) ---
 $modCouple = findModule($modules, 'lovely.couple') ?? findModule($modules, 'couple_info');
 $couplePayload = [];
 if ($modCouple && !empty($modCouple['content_payload'])) {
@@ -126,7 +130,6 @@ if ($modCouple && !empty($modCouple['content_payload'])) {
     $couplePayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
 
-// --- Copy module (lovely.copy) ---
 $modCopy = findModule($modules, 'lovely.copy');
 $copyPayload = [];
 if ($modCopy && !empty($modCopy['content_payload'])) {
@@ -134,7 +137,6 @@ if ($modCopy && !empty($modCopy['content_payload'])) {
     $copyPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
 
-// --- Story module ---
 $modStory = findModule($modules, 'story') ?? findModule($modules, 'timeline');
 $storyPayload = [];
 if ($modStory && !empty($modStory['content_payload'])) {
@@ -142,7 +144,6 @@ if ($modStory && !empty($modStory['content_payload'])) {
     $storyPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
 
-// --- Schedule module ---
 $modSchedule = findModule($modules, 'schedule');
 $schedulePayload = [];
 if ($modSchedule && !empty($modSchedule['content_payload'])) {
@@ -151,7 +152,6 @@ if ($modSchedule && !empty($modSchedule['content_payload'])) {
 }
 $scheduleItems = !empty($scheduleItems) ? $scheduleItems : ($schedulePayload['items'] ?? ($schedulePayload['events'] ?? []));
 
-// --- FAQ module ---
 $modFaq = findModule($modules, 'faq');
 $faqPayload = [];
 if ($modFaq && !empty($modFaq['content_payload'])) {
@@ -160,13 +160,13 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 }
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
-// --- Dynamic text with cascading fallback: copyPayload → defaults → hardcoded ---
+// --- Dynamic text with cascading fallback ---
 function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Save the Date');
 $countdownTitle    = getText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
 $countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
 $ctaHeading        = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
@@ -179,6 +179,12 @@ $eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles 
 $galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
 $registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
 $partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$aboutTitle        = getText($copyPayload, $defaults, 'about_title', 'Nos casamos');
+$aboutSubtitle     = getText($copyPayload, $defaults, 'about_subtitle', 'Estamos muy felices de compartir contigo este día tan especial.');
+$timelineFooter    = getText($copyPayload, $defaults, 'timeline_footer', 'Aquí comienza nuestro para siempre');
+$giftDescription   = getText($copyPayload, $defaults, 'gift_description', 'Gracias por ser parte de nuestra historia. Si deseas apoyarnos, aquí tienes algunas opciones.');
+$locationTitle     = getText($copyPayload, $defaults, 'location_title', 'Ubicación');
+$rsvpSubmitLabel   = getText($copyPayload, $defaults, 'rsvp_submit', 'Enviar');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));
@@ -214,8 +220,13 @@ function getAllMediaUrls(array $mediaByCategory, string $category): array
     return $urls;
 }
 
-// Hero slider images: event media → template defaults
 $heroImages = getAllMediaUrls($mediaByCategory, 'hero');
+if (empty($heroImages) && !empty($galleryAssets)) {
+    foreach ($galleryAssets as $asset) {
+        $heroImages[] = $asset['full'] ?? '';
+    }
+    $heroImages = array_values(array_filter($heroImages));
+}
 if (empty($heroImages)) {
     $sliderDefaults = $tplAssets['slider_images'] ?? ['images/slider/slide-1.jpg', 'images/slider/slide-2.jpg'];
     foreach ($sliderDefaults as $s) {
@@ -223,17 +234,16 @@ if (empty($heroImages)) {
     }
 }
 
-// Couple photos
 $groomPhoto = getMediaUrl($mediaByCategory, 'groom');
-if (!$groomPhoto) $groomPhoto = $assetsBase . '/' . ($tplAssets['couple_images'][0] ?? 'images/couple/img-1.jpg');
+if (!$groomPhoto) $groomPhoto = $assetsBase . '/' . ($tplAssets['couple_images'][0] ?? 'images/groom.jpg');
 
 $bridePhoto = getMediaUrl($mediaByCategory, 'bride');
-if (!$bridePhoto) $bridePhoto = $assetsBase . '/' . ($tplAssets['couple_images'][1] ?? 'images/couple/img-2.jpg');
+if (!$bridePhoto) $bridePhoto = $assetsBase . '/' . ($tplAssets['couple_images'][1] ?? 'images/bride.jpg');
 
-// Background images
 $countdownBg = getMediaUrl($mediaByCategory, 'countdown_bg') ?: ($assetsBase . '/' . ($tplAssets['countdown_bg'] ?? 'images/countdown-bg.jpg'));
 $ctaBg       = getMediaUrl($mediaByCategory, 'cta_bg') ?: ($assetsBase . '/' . ($tplAssets['cta_bg'] ?? 'images/cta-bg.jpg'));
 $rsvpBg      = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/' . ($tplAssets['rsvp_bg'] ?? 'images/rsvp-bg.jpg'));
+
 $eventImg = $primaryLocation['image_url'] ?? '';
 if ($eventImg !== '' && !preg_match('#^https?://#i', $eventImg)) {
     $eventImg = base_url($eventImg);
@@ -271,40 +281,113 @@ foreach ($weddingParty as $member) {
     $cat = $member['category'] ?? 'other';
     $partyByCategory[$cat][] = $member;
 }
+
+$brideSocialLinks = parseSocialLinks($couplePayload['bride']['social_links'] ?? ($couplePayload['bride']['social'] ?? []));
+$groomSocialLinks = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($couplePayload['groom']['social'] ?? []));
+
+$timelineEntries = !empty($timelineItems)
+    ? $timelineItems
+    : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
+
+$galleryItems = $galleryAssets;
+if (empty($galleryItems)) {
+    $galleryUrls = getAllMediaUrls($mediaByCategory, 'gallery');
+    if (!empty($galleryUrls)) {
+        foreach ($galleryUrls as $url) {
+            $galleryItems[] = ['full' => $url, 'thumb' => $url, 'alt' => $coupleTitle, 'caption' => ''];
+        }
+    } else {
+        $galleryDefaults = $tplAssets['gallery_images'] ?? [];
+        foreach ($galleryDefaults as $img) {
+            $url = $assetsBase . '/' . $img;
+            $galleryItems[] = ['full' => $url, 'thumb' => $url, 'alt' => $coupleTitle, 'caption' => ''];
+        }
+    }
+}
+
+$hasTimeline = !empty($timelineEntries);
+$hasGallery = !empty($galleryItems);
+$hasRegistry = !empty($registryItems);
+$hasBrideSide = !empty($partyByCategory['bride_side']);
+$hasGroomSide = !empty($partyByCategory['groom_side']);
+$hasLocations = !empty($eventLocations) || ($lat !== '' && $lng !== '');
+
+$heroTimestamp = $startRaw ? strtotime($startRaw) : null;
+$heroMonth = $heroTimestamp ? strtoupper(date('M', $heroTimestamp)) : '';
+$heroDay = $heroTimestamp ? date('d', $heroTimestamp) : '';
+$heroYear = $heroTimestamp ? date('Y', $heroTimestamp) : '';
+
+$now = new DateTimeImmutable('now');
+$eventDate = $startRaw ? new DateTimeImmutable($startRaw) : null;
+$diffSeconds = $eventDate ? max(0, $eventDate->getTimestamp() - $now->getTimestamp()) : 0;
+$countdownDays = (int)floor($diffSeconds / 86400);
+$countdownHours = (int)floor(($diffSeconds % 86400) / 3600);
+$countdownMinutes = (int)floor(($diffSeconds % 3600) / 60);
+$countdownSeconds = (int)($diffSeconds % 60);
+
+$mapMarkers = [];
+foreach ($eventLocations as $loc) {
+    $locLat = $loc['geo_lat'] ?? null;
+    $locLng = $loc['geo_lng'] ?? null;
+    if ($locLat === null || $locLng === null || $locLat === '' || $locLng === '') {
+        continue;
+    }
+    $locName = (string)($loc['name'] ?? $venueName);
+    $mapMarkers[] = [
+        'title' => $locName,
+        'latitude' => (float)$locLat,
+        'longitude' => (float)$locLng,
+        'icon' => 'fas fa-bell',
+        'infoWindow' => $locName,
+    ];
+}
+if (empty($mapMarkers) && $lat !== '' && $lng !== '') {
+    $mapMarkers[] = [
+        'title' => $venueName,
+        'latitude' => (float)$lat,
+        'longitude' => (float)$lng,
+        'icon' => 'fas fa-bell',
+        'infoWindow' => $venueName,
+    ];
+}
+
+$mapInitialLat = $lat !== '' ? (float)$lat : ($mapMarkers[0]['latitude'] ?? null);
+$mapInitialLng = $lng !== '' ? (float)$lng : ($mapMarkers[0]['longitude'] ?? null);
+
+$pageTitle = $templateMeta['title'] ?? ($coupleTitle !== '' ? $coupleTitle : 'Invitación');
+$pageDescription = $templateMeta['description'] ?? $coupleTitle;
 ?>
 
 <!DOCTYPE html>
-<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
-<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
-<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if lt IE 7 ]><html class="ie ie6" lang="es"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="es"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="es"> <![endif]-->
 <!--[if (gte IE 9)|!(IE)]><!-->
-<html lang="en"> <!--<![endif]-->
-
-<!-- Mirrored from www.wiselythemes.com/html/neela/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 08 Feb 2026 08:10:14 GMT -->
+<html lang="es"> <!--<![endif]-->
 
 <head>
     <meta charset="utf-8">
 
     <!-- Page Title -->
-    <title>Neela - Responsive One/Multi-Page Wedding HTML5 Template</title>
+    <title><?= esc($pageTitle) ?></title>
 
-    <meta name="keywords" content="one-page, single page, multi-page, wedding template, retina ready, responsive, modern html5 template, bootstrap, css3, wedding, venue">
-    <meta name="description" content="Neela - Responsive One/Multi-Page Wedding HTML5 Template">
-    <meta name="author" content="Wisely Themes">
+    <meta name="keywords" content="<?= esc($templateMeta['keywords'] ?? 'wedding, invitation, event') ?>">
+    <meta name="description" content="<?= esc($pageDescription) ?>">
+    <meta name="author" content="<?= esc($templateMeta['author'] ?? '13Bodas') ?>">
 
     <!-- Mobile Meta Tag -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <!-- Fav and touch icons -->
-    <link rel="icon" href="images/fav_touch_icons/favicon.ico" sizes="any">
-    <link rel="icon" href="images/fav_touch_icons/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="images/fav_touch_icons/apple-touch-icon-180x180.png">
-    <link rel="manifest" href="images/fav_touch_icons/manifest.json">
+    <link rel="icon" href="<?= $assetsBase ?>/images/fav_touch_icons/favicon.ico" sizes="any">
+    <link rel="icon" href="<?= $assetsBase ?>/images/fav_touch_icons/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<?= $assetsBase ?>/images/fav_touch_icons/apple-touch-icon-180x180.png">
+    <link rel="manifest" href="<?= $assetsBase ?>/images/fav_touch_icons/manifest.json">
 
     <!-- IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-	  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
     <!-- Google Web Fonts -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&amp;display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
@@ -340,9 +423,9 @@ foreach ($weddingParty as $member) {
                 <path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z" />
             </svg>
             <div class="preloader-title">
-                Isabella<br>
+                <?= esc($brideName) ?><br>
                 <small>&</small><br>
-                Andrew
+                <?= esc($groomName) ?>
             </div>
         </div>
     </div>
@@ -358,43 +441,45 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-12">
-                            <a href="#hero" class="nav-logo"><img src="images/logo.png" alt="Neela" /></a>
+                            <a href="#hero" class="nav-logo"><?= esc($coupleTitle) ?></a>
 
                             <!-- BEGIN MAIN MENU -->
                             <nav class="navbar">
 
                                 <ul class="nav navbar-nav">
-                                    <li><a href="#hero">Home</a></li>
+                                    <li><a href="#hero">Inicio</a></li>
 
                                     <li class="dropdown">
-                                        <a href="#about-us" data-toggle="dropdown" data-hover="dropdown">About Us<b class="caret"></b></a>
+                                        <a href="#about-us" data-toggle="dropdown" data-hover="dropdown">Nosotros<b class="caret"></b></a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="#loveline">Loveline</a></li>
+                                            <?php if ($hasTimeline): ?>
+                                                <li><a href="#loveline">Loveline</a></li>
+                                            <?php endif; ?>
                                         </ul>
                                     </li>
 
                                     <li class="dropdown">
-                                        <a href="#the-wedding" data-toggle="dropdown" data-hover="dropdown">The Wedding<b class="caret"></b></a>
+                                        <a href="#the-wedding" data-toggle="dropdown" data-hover="dropdown">La boda<b class="caret"></b></a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="#the-wedding">Invite</a></li>
-                                            <li><a href="#location">Location</a></li>
-                                            <li><a href="#bridesmaids">Bridesmaids</a></li>
-                                            <li><a href="#testimonials">Testimonials</a></li>
-                                            <li><a href="#groomsmen">Groomsmen</a></li>
-                                            <li><a href="#giftregistry">Gift Registry</a></li>
-                                            <li class="dropdown-submenu">
-                                                <a href="#">Another Menu</a>
-                                                <ul class="dropdown-menu">
-                                                    <li><a href="#">Another Menu</a></li>
-                                                    <li><a href="#">Another Menu</a></li>
-                                                </ul>
-                                            </li>
+                                            <li><a href="#the-wedding">Invitación</a></li>
+                                            <?php if ($hasLocations): ?>
+                                                <li><a href="#location">Ubicación</a></li>
+                                            <?php endif; ?>
+                                            <?php if ($hasBrideSide): ?>
+                                                <li><a href="#bridesmaids">Bridesmaids</a></li>
+                                            <?php endif; ?>
+                                            <?php if ($hasGroomSide): ?>
+                                                <li><a href="#groomsmen">Groomsmen</a></li>
+                                            <?php endif; ?>
+                                            <?php if ($hasRegistry): ?>
+                                                <li><a href="#giftregistry">Gift Registry</a></li>
+                                            <?php endif; ?>
                                         </ul>
                                     </li>
 
-                                    <li><a href="#gallery">Gallery</a></li>
-
-                                    <li><a href="#blog">Blog</a></li>
+                                    <?php if ($hasGallery): ?>
+                                        <li><a href="#gallery">Galería</a></li>
+                                    <?php endif; ?>
 
                                     <li><a href="#rsvp">RSVP</a></li>
                                 </ul>
@@ -418,15 +503,19 @@ foreach ($weddingParty as $member) {
                     <div class="col-sm-12">
 
                         <div class="hero-wrapper v-center">
-                            <h2 data-animation-direction="fade" data-animation-delay="600">Save the Date</h2>
+                            <h2 data-animation-direction="fade" data-animation-delay="600"><?= $heroTagline ?></h2>
 
                             <h1 class="hero-title light ">
-                                <span data-animation-direction="from-right" data-animation-delay="300">Isabella</span>
+                                <span data-animation-direction="from-right" data-animation-delay="300"><?= esc($brideName) ?></span>
                                 <small data-animation-direction="from-top" data-animation-delay="300">&</small>
-                                <span data-animation-direction="from-left" data-animation-delay="300">Andrew</span>
+                                <span data-animation-direction="from-left" data-animation-delay="300"><?= esc($groomName) ?></span>
                             </h1>
 
-                            <div class="hero-subtitle light" data-animation-direction="fade" data-animation-delay="1000">SEPT <span>24</span> 2025</div>
+                            <?php if ($heroMonth !== '' && $heroDay !== '' && $heroYear !== ''): ?>
+                                <div class="hero-subtitle light" data-animation-direction="fade" data-animation-delay="1000">
+                                    <?= esc($heroMonth) ?> <span><?= esc($heroDay) ?></span> <?= esc($heroYear) ?>
+                                </div>
+                            <?php endif; ?>
 
                             <div data-animation-direction="fade" data-animation-delay="1000">
                                 <a href="#rsvp" class="btn btn-light scrollto">RSVP</a>
@@ -446,16 +535,24 @@ foreach ($weddingParty as $member) {
                 <div class="row about-elems-wrapper">
                     <div class="element col-md-6 col-xl-4 offset-xl-2" data-animation-direction="from-left" data-animation-delay="300">
                         <div class="image">
-                            <img src="images/groom.jpg" alt="" width="600" height="714" />
+                            <img src="<?= esc($groomPhoto) ?>" alt="<?= esc($groomName) ?>" width="600" height="714" />
                             <div class="hover-info neela-style">
                                 <div class="content">
-                                    <h3>Andrew Miller<small>The Groom</small></h3>
-                                    <p>I am so incredibly blessed and excited to spend everyday for the rest of my life with my best friend!</p>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
+                                    <h3><?= esc($groomName) ?><small><?= $groomSectionTitle ?></small></h3>
+                                    <p><?= $groomBio ?></p>
+                                    <?php if (!empty($groomSocialLinks)): ?>
+                                        <ul class="sn-icons">
+                                            <?php foreach ($groomSocialLinks as $link): ?>
+                                                <?php
+                                                $url = $link['url'] ?? ($link['link'] ?? '');
+                                                $icon = $link['icon'] ?? 'fab fa-instagram-square';
+                                                ?>
+                                                <?php if ($url): ?>
+                                                    <li><a href="<?= esc($url) ?>" target="_blank" rel="noopener"><i class="<?= esc($icon) ?>"></i></a></li>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -467,16 +564,24 @@ foreach ($weddingParty as $member) {
 
                     <div class="element col-md-6 col-xl-4" data-animation-direction="from-right" data-animation-delay="400">
                         <div class="image">
-                            <img src="images/bride.jpg" alt="" width="600" height="714" />
+                            <img src="<?= esc($bridePhoto) ?>" alt="<?= esc($brideName) ?>" width="600" height="714" />
                             <div class="hover-info neela-style">
                                 <div class="content">
-                                    <h3>Isabella Walker<small>The Bride</small></h3>
-                                    <p>She's everything I've always dreamed of and I'm so excited to spend the rest of my life with her!</p>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
+                                    <h3><?= esc($brideName) ?><small><?= $brideSectionTitle ?></small></h3>
+                                    <p><?= $brideBio ?></p>
+                                    <?php if (!empty($brideSocialLinks)): ?>
+                                        <ul class="sn-icons">
+                                            <?php foreach ($brideSocialLinks as $link): ?>
+                                                <?php
+                                                $url = $link['url'] ?? ($link['link'] ?? '');
+                                                $icon = $link['icon'] ?? 'fab fa-instagram-square';
+                                                ?>
+                                                <?php if ($url): ?>
+                                                    <li><a href="<?= esc($url) ?>" target="_blank" rel="noopener"><i class="<?= esc($icon) ?>"></i></a></li>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -485,166 +590,94 @@ foreach ($weddingParty as $member) {
 
                 <div class="row">
                     <div class="about-us-desc col-lg-8 offset-lg-2" data-animation-direction="from-bottom" data-animation-delay="300">
-                        <h3><small>We are</small>Getting Married</h3>
-                        <p>Today and always, beyond tomorrow, I need you beside me, always as my best friend, lover and forever soul mate. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt porttitor venenatis. Vestibulum sit amet est nisl. Vestibulum iaculis finibus sem nec condimentum. Quisque nulla orci, aliquet sit amet sem eget, pellentesque euismod enim. Aenean quis nisl at est consequat elementum sed vel turpis. Phasellus dignissim sit amet orci vitae mattis. Phasellus a imperdiet ligula, efficitur dignissim ex. Mauris placerat aliquet sem commodo molestie.</p>
-                        <img src="images/signature-2.png" alt="Andrew and Isabella">
+                        <h3><small><?= $ctaHeading ?></small><?= $ctaSubheading ?></h3>
+                        <p><?= $aboutSubtitle ?></p>
                     </div>
                 </div>
             </div>
         </section>
         <!-- END ABOUT US SECTION -->
 
-        <!-- BEGIN OUR STORY TITLE SECTION -->
-        <section id="our-story-title" class="parallax-background bg-color-overlay section-divider-bottom-2 padding-divider-top">
-            <div class="section-divider-top-1 off-section"></div><!-- The class "section-divider-top-1" can also be applied to the tag <section>. In this case, it was added on a new <div> because the tag <section> have all pseudo elements (::after and ::before) in use. -->
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <h1 class="section-title light">Our love story</h1>
+        <?php if ($hasTimeline): ?>
+            <!-- BEGIN OUR STORY TITLE SECTION -->
+            <section id="our-story-title" class="parallax-background bg-color-overlay section-divider-bottom-2 padding-divider-top">
+                <div class="section-divider-top-1 off-section"></div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h1 class="section-title light"><?= $storyTitle ?></h1>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-        <!-- END OUR STORY TITLE SECTION -->
+            </section>
+            <!-- END OUR STORY TITLE SECTION -->
 
-        <!-- BEGIN TIMELINE SECTION -->
-        <section id="loveline">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
-                        <div class="timeline">
-                            <div class="year" data-animation-direction="from-top" data-animation-delay="250">
-                                <span class="neela-style">2018</span>
-                            </div>
+            <!-- BEGIN TIMELINE SECTION -->
+            <section id="loveline">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
+                            <div class="timeline">
+                                <?php foreach ($timelineEntries as $idx => $item): ?>
+                                    <?php
+                                    $itemDate = (string)($item['date'] ?? $item['year'] ?? '');
+                                    $itemYear = $item['year'] ?? ($itemDate ? date('Y', strtotime($itemDate)) : '');
+                                    $itemTitle = esc($item['title'] ?? 'Momento especial');
+                                    $itemText = esc($item['description'] ?? ($item['text'] ?? ''));
+                                    $fallbackImg = getMediaUrl($mediaByCategory, 'timeline', $idx) ?: getMediaUrl($mediaByCategory, 'story', $idx) ?: ($assetsBase . '/images/timeline-first-date.jpg');
+                                    $itemImg = trim((string)($item['image_url'] ?? ($item['image'] ?? '')));
+                                    $imgPrimary = $itemImg !== '' ? $itemImg : $fallbackImg;
+                                    if ($imgPrimary !== '' && !preg_match('#^https?://#i', $imgPrimary)) {
+                                        $imgPrimary = base_url($imgPrimary);
+                                    }
+                                    $isEven = ($idx % 2 === 0);
+                                    ?>
+                                    <?php if ($itemYear): ?>
+                                        <div class="year" data-animation-direction="from-top" data-animation-delay="250">
+                                            <span class="neela-style"><?= esc((string)$itemYear) ?></span>
+                                        </div>
+                                    <?php endif; ?>
 
-                            <div class="template-1">
-                                <div class="date" data-parallax="3" data-animation-direction="fade" data-animation-delay="350">
-                                    <span class="neela-style">22 September</span>
-                                </div>
+                                    <div class="<?= $isEven ? 'template-1' : 'template-2' ?>">
+                                        <div class="date" data-parallax="3" data-animation-direction="fade" data-animation-delay="350">
+                                            <span class="neela-style"><?= esc($itemDate) ?></span>
+                                        </div>
 
-                                <div class="image-1" data-parallax="-4" data-animation-direction="from-left" data-animation-delay="250">
-                                    <img src="images/timeline-first-date.jpg" alt="" width="600" height="600">
-                                </div>
+                                        <div class="image-1" data-parallax="-4" data-animation-direction="from-left" data-animation-delay="250">
+                                            <img src="<?= esc($imgPrimary) ?>" alt="<?= $itemTitle ?>" width="600" height="600">
+                                        </div>
 
-                                <div class="image-2" data-parallax="6" data-animation-direction="from-right" data-animation-delay="250">
-                                    <img src="images/timeline-first-kiss.jpg" alt="" width="600" height="818">
-                                </div>
-
-                                <div class="description-wrapper" data-parallax="-6" data-animation-direction="from-bottom" data-animation-delay="250">
-                                    <div class="description" data-parallax="-6" data-animation-direction="from-bottom" data-animation-delay="250">
-                                        <div class="neela-style">
-                                            <h4>Our first date & kiss</h4>
-                                            <p>Andrew was extremely nervous. He was afraid to expose his feelings to Isabella, but didn’t want to risk staying in the friend zone. So it was now or never! After all, Isabella was the one. "It was about time!" she said. It was...PERFECT!</p>
+                                        <div class="description-wrapper" data-parallax="-6" data-animation-direction="from-bottom" data-animation-delay="250">
+                                            <div class="description" data-parallax="-6" data-animation-direction="from-bottom" data-animation-delay="250">
+                                                <div class="neela-style">
+                                                    <h4><?= $itemTitle ?></h4>
+                                                    <p><?= $itemText ?></p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
 
-                            <div class="year" data-animation-direction="from-top" data-animation-delay="250">
-                                <span class="neela-style">2019</span>
+                            <div class="timeline_footer">
+                                <div data-animation-direction="from-top" data-animation-delay="250"><i class="icon-diamond-ring"></i></div>
+                                <div class="punchline" data-animation-direction="from-bottom" data-animation-delay="250"><small><?= $ctaHeading ?></small><?= $timelineFooter ?></div>
                             </div>
 
-                            <div class="gallery-container">
-                                <div class="timeline-gallery-wrapper" data-animation-direction="from-left" data-animation-delay="250">
-                                    <div class="timeline-gallery owl-carousel">
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img1.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img1.jpg" alt="" width="620" height="431" />
-                                        </div>
-
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img2.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img2.jpg" alt="" width="620" height="431" />
-                                        </div>
-
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img3.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img3.jpg" alt="" width="620" height="431" />
-                                        </div>
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img4.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img4.jpg" alt="" width="620" height="431" />
-                                        </div>
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img5.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img5.jpg" alt="" width="620" height="431" />
-                                        </div>
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img6.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img6.jpg" alt="" width="620" height="431" />
-                                        </div>
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img7.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img7.jpg" alt="" width="620" height="431" />
-                                        </div>
-                                        <div class="item">
-                                            <a class="hover-img" href="images/timeline-slider-img8.jpg" data-lightbox="gallery-timeline" title="Our Vacations"><span class="btn btn-light btn-sm">+</span></a>
-                                            <img src="images/timeline-slider-img8.jpg" alt="" width="620" height="431" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="description-wrapper" data-animation-direction="from-bottom" data-animation-delay="250">
-                                    <div class="description">
-                                        <div class="neela-style">
-                                            <h4>Some of our most memorable moments</h4>
-                                            <p>They had taken overnight trips before, but this was their first huge vacations outside the USA. Isabella and Andrew travelled to the Baltic region and visited a number of countries including Iceland, Finland, Denmark, Russia, Poland and Germany.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="year" data-animation-direction="from-top" data-animation-delay="250">
-                                <span class="neela-style">2021</span>
-                            </div>
-
-                            <div class="template-2">
-                                <div class="date" data-parallax="3" data-animation-direction="fade" data-animation-delay="250">
-                                    <span class="neela-style">15 July</span>
-                                </div>
-
-                                <div class="videoEmbed" data-parallax="6" data-animation-direction="from-top" data-animation-delay="250">
-                                    <iframe src="https://player.vimeo.com/video/136240001" width="590" height="330" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-                                </div>
-
-                                <div class="image-1" data-parallax="-2" data-animation-direction="from-left" data-animation-delay="250">
-                                    <img src="images/timeline-proposal-img1.jpg" alt="" width="600" height="818">
-                                </div>
-
-                                <div class="image-2" data-parallax="4" data-animation-direction="from-right" data-animation-delay="250">
-                                    <img src="images/timeline-proposal-img2.jpg" alt="" width="600" height="800">
-                                </div>
-
-                                <div class="description-wrapper" data-parallax="-5" data-animation-direction="from-bottom" data-animation-delay="250">
-                                    <div class="description" data-parallax="-6" data-animation-direction="from-bottom" data-animation-delay="250">
-                                        <div class="neela-style">
-                                            <h4>She said Yes!</h4>
-                                            <p>So how did Mark pop the question? On a Cruise ... off the shore ... of the Cayman Islands! (YES!) On their way down to dinner with the Ship's Captain, Mark's nerves got the best of him and he pulled Sarah back to the room and straight onto the balcony for the best proposal a girl could ask for!</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-
-                        <div class="timeline_footer">
-                            <div data-animation-direction="from-top" data-animation-delay="250"><i class="icon-diamond-ring"></i></div>
-                            <div class="punchline" data-animation-direction="from-bottom" data-animation-delay="250"><small>This is where our</small>forever<br>begins!</div>
-                        </div>
-
                     </div>
                 </div>
-            </div>
-        </section>
-        <!-- END TIMELINE SECTION -->
-
+            </section>
+            <!-- END TIMELINE SECTION -->
+        <?php endif; ?>
 
         <!-- BEGIN THE WEDDING SECTION -->
         <section id="the-wedding" class="parallax-background bg-color-overlay padding-divider-top section-divider-bottom-1">
-            <div class="section-divider-top-1 off-section"></div><!-- The class "section-divider-top-1" can also be applied to the tag <section>. In this case, it was added on a new <div> because the tag <section> have all pseudo elements (::after and ::before) in use. -->
+            <div class="section-divider-top-1 off-section"></div>
             <div class="container">
                 <div class="row">
                     <div class="col-sm-12">
-                        <h1 class="section-title light">Invitation</h1>
+                        <h1 class="section-title light"><?= $eventsTitle ?></h1>
                     </div>
                 </div>
 
@@ -658,13 +691,15 @@ foreach ($weddingParty as $member) {
                             </div>
 
                             <div class="invite_info">
-                                <h2>Isabella <small>&</small> Andrew</h2>
+                                <h2><?= esc($brideName) ?> <small>&</small> <?= esc($groomName) ?></h2>
 
-                                <div class="uppercase">Request the honor of your presence on their wedding day</div>
-                                <div class="date">September 24, 2025<small>at 03:00 pm</small></div>
-                                <div class="uppercase">At Birchwood Church<br>4181 Birchwood Ave Seal Beach, CA</div>
+                                <div class="uppercase"><?= esc($defaults['invite_intro'] ?? 'Nos encantaría contar con tu presencia en nuestra boda') ?></div>
+                                <div class="date"><?= esc($eventDateLabel) ?><small><?= esc($eventTimeRange) ?></small></div>
+                                <div class="uppercase"><?= esc($venueName) ?><br><?= esc($venueAddr) ?></div>
 
-                                <h5>Reception to follow</h5>
+                                <?php if (!empty($defaults['invite_note'])): ?>
+                                    <h5><?= esc($defaults['invite_note']) ?></h5>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -673,589 +708,244 @@ foreach ($weddingParty as $member) {
         </section>
         <!-- END THE WEDDING SECTION -->
 
-
-        <!-- BEGIN WEDDING LOCATION SECTION -->
-        <section id="location">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <h2 class="section-title">Location</h2>
+        <?php if ($hasLocations): ?>
+            <!-- BEGIN WEDDING LOCATION SECTION -->
+            <section id="location">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="section-title"><?= $locationTitle ?></h2>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12 col-xl-10 offset-xl-1">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 col-xl-10 offset-xl-1">
 
-                        <div class="map-info-container">
-                            <div class="info-wrapper" data-animation-direction="from-bottom" data-animation-delay="100">
-                                <div class="location-info">
-                                    <div class="neela-style">
-                                        <h4 class="has-icon"><i class="icon-big-church"></i>Ceremony<small>03:00pm</small></h4>
-                                        <h5>Birchwood Church</h5>
-                                        <p>4181 Birchwood Ave Seal Beach, CA<br>33.776825, -118.059113</p>
+                            <div class="map-info-container">
+                                <div class="info-wrapper" data-animation-direction="from-bottom" data-animation-delay="100">
+                                    <?php foreach ($eventLocations as $loc): ?>
+                                        <?php
+                                        $locName = esc($loc['name'] ?? $venueName);
+                                        $locAddr = esc($loc['address'] ?? $venueAddr);
+                                        $locLat = $loc['geo_lat'] ?? '';
+                                        $locLng = $loc['geo_lng'] ?? '';
+                                        $locTime = esc($loc['starts_at'] ?? $loc['time'] ?? $eventTimeRange);
+                                        ?>
+                                        <div class="location-info">
+                                            <div class="neela-style">
+                                                <h4 class="has-icon"><i class="icon-big-church"></i><?= $locName ?><small><?= $locTime ?></small></h4>
+                                                <h5><?= $locName ?></h5>
+                                                <p><?= $locAddr ?><br><?= esc($locLat) ?>, <?= esc($locLng) ?></p>
 
-                                        <div class="info-map-divider"></div>
+                                                <div class="info-map-divider"></div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
 
-                                        <h4 class="has-icon"><i class="icon-champagne-glasses"></i>Reception<small>05:30pm</small></h4>
-                                        <h5>Old Ranch Country Club</h5>
-                                        <p>29033 West Lake Drive, Agoura Hills, CA<br>33.776025, -118.065314</p>
+                                <div class="map-wrapper" data-animation-direction="fade" data-animation-delay="100">
+                                    <div id="map_canvas" class="gmap"></div>
+
+                                    <div class="map_pins">
+                                        <div class="map_pin neela-style"></div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="map-wrapper" data-animation-direction="fade" data-animation-delay="100">
-                                <div id="map_canvas" class="gmap"></div>
-
-                                <div class="map_pins">
-                                    <ul class="pins">
-                                        <li><i class="fas fa-bell"></i>Ceremony</li>
-                                        <li><i class="fas fa-glass-cheers"></i>Reception</li>
-                                        <li><i class="fas fa-bed"></i>Accomodations</li>
-                                        <li><i class="fas fa-plane"></i>Transportation</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="center">
-                            <a href="#rsvp" class="btn btn-primary scrollto">RSVP</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- END WEDDING LOCATION SECTION -->
-
-
-        <!-- BEGIN BRIDESMAIDS SECTION -->
-        <section id="bridesmaids" class="parallax-background bg-color-overlay">
-            <div class="container">
-
-                <div class="row">
-                    <div class="col-sm-12">
-                        <h2 class="section-title light">Bridesmaids</h2>
-                    </div>
-                </div>
-
-                <div class="row center">
-                    <div class="element bmaid-gmen col-sm-6 col-lg-4" data-animation-direction="from-top" data-animation-delay="300">
-                        <div class="image">
-                            <img src="images/bridesmaids-img1.jpg" alt="" width="434" height="434" />
-                            <div class="hover-info neela-style">
-                                <div class="content center">
-                                    <h3>Emily Garcia<small>Maid of honour</small></h3>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="element bmaid-gmen col-sm-6 col-lg-4" data-animation-direction="from-top" data-animation-delay="400">
-                        <div class="image">
-                            <img src="images/bridesmaids-img2.jpg" alt="" width="434" height="434" />
-                            <div class="hover-info neela-style">
-                                <div class="content center">
-                                    <h3>Rachel Harris<small>Bridesmaid</small></h3>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="element bmaid-gmen col-sm-6 col-lg-4" data-animation-direction="from-top" data-animation-delay="500">
-                        <div class="image">
-                            <img src="images/bridesmaids-img3.jpg" alt="" width="434" height="434" />
-                            <div class="hover-info neela-style">
-                                <div class="content center">
-                                    <h3>Sarah Williams<small>Bridesmaid</small></h3>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
-                                </div>
+                            <div class="center">
+                                <a href="#rsvp" class="btn btn-primary scrollto">RSVP</a>
                             </div>
                         </div>
                     </div>
                 </div>
+            </section>
+            <!-- END WEDDING LOCATION SECTION -->
+        <?php endif; ?>
 
-            </div>
-        </section>
-        <!-- END BRIDESMAIDS SECTION -->
-
-
-        <!-- BEGIN TESTIMONIALS SECTION -->
-        <section id="testimonials" class="bg-color side-flowers-light">
-            <div class="container">
-
-                <div class="row">
-                    <div class="col-lg-12 col-xl-10 offset-xl-1">
-                        <div id="testimonials-slider" class="owl-carousel testimonials light" data-animation-direction="from-bottom" data-animation-delay="300">
-                            <div class="item">
-                                <blockquote>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius ante libero, a sollicitudin elit malesuada et. Nulla facilisi. Pellentesque magna diam, mattis a gravida eget, lobortis ut velit. Nam interdum hendrerit nisl et malesuada. Nulla facilisis velit neque, sed ultrices nibh facilisis non.</blockquote>
-
-                                <div class="author">
-                                    <h3>John Doe<small>Best Man</small></h3>
-                                </div>
-                            </div>
-
-                            <div class="item">
-                                <blockquote>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius ante libero, a sollicitudin elit malesuada et. Nulla facilisi. Pellentesque magna diam, mattis a gravida eget, lobortis ut velit. Nam interdum hendrerit nisl et malesuada. Nulla facilisis velit neque, sed ultrices nibh facilisis non.</blockquote>
-
-                                <div class="author">
-                                    <h3>John Doe<small>Best Man</small></h3>
-                                </div>
-                            </div>
-
-                            <div class="item">
-                                <blockquote>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius ante libero, a sollicitudin elit malesuada et. Nulla facilisi. Pellentesque magna diam, mattis a gravida eget, lobortis ut velit. Nam interdum hendrerit nisl et malesuada. Nulla facilisis velit neque, sed ultrices nibh facilisis non.</blockquote>
-
-                                <div class="author">
-                                    <h3>John Doe<small>Best Man</small></h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- END TESTIMONIALS SECTION -->
-
-        <!-- BEGIN GROOMSMEN SECTION -->
-        <section id="groomsmen" class="parallax-background bg-color-overlay">
-            <div class="container">
-
-                <div class="row">
-                    <div class="col-sm-12">
-                        <h2 class="section-title light">Groomsmen</h2>
-                    </div>
-                </div>
-
-                <div class="row center">
-                    <div class="element bmaid-gmen col-sm-6 col-lg-4" data-animation-direction="from-top" data-animation-delay="300">
-                        <div class="image">
-                            <img src="images/groomsmen-img1.jpg" alt="" width="434" height="434" />
-                            <div class="hover-info neela-style">
-                                <div class="content center">
-                                    <h3>Michael Scott<small>Best Man</small></h3>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
+        <?php if ($hasBrideSide): ?>
+            <!-- BEGIN BRIDESMAIDS SECTION -->
+            <section id="bridesmaids" class="parallax-background bg-color-overlay">
+                <div class="section-divider-top-1 off-section"></div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="section-title light"><?= esc($partyLabels['bride_side']) ?></h2>
                         </div>
                     </div>
 
-                    <div class="element bmaid-gmen col-sm-6 col-lg-4" data-animation-direction="from-top" data-animation-delay="400">
-                        <div class="image">
-                            <img src="images/groomsmen-img2.jpg" alt="" width="434" height="434" />
-                            <div class="hover-info neela-style">
-                                <div class="content center">
-                                    <h3>Daniel Wright<small>Groomsman</small></h3>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="element bmaid-gmen col-sm-6 col-lg-4" data-animation-direction="from-top" data-animation-delay="500">
-                        <div class="image">
-                            <img src="images/groomsmen-img3.jpg" alt="" width="434" height="434" />
-                            <div class="hover-info neela-style">
-                                <div class="content center">
-                                    <h3>Ryan Anderson<small>Groomsman</small></h3>
-                                    <ul class="sn-icons">
-                                        <li><a href="#"><i class="fab fa-instagram-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-twitter-square"></i></a></li>
-                                        <li><a href="#"><i class="fab fa-facebook-square"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-        <!-- END GROOMSMEN SECTION -->
-
-
-        <!-- BEGIN WEDDING GIFTS SECTION -->
-        <section id="giftregistry" class="section-bg-color parallax-background">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-8 col-xl-6">
-                        <h2 class="section-title-lg uppercase desc"><small>Gift</small><strong>Registry</strong></h2>
-                        <div class="section-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius ante libero, amet as sollicitudin elit malesuada et. Nulla facilisi. Pellentesque magna diam, mattis gravida eget, lobortis ut velit. Nam interdum hendrerit nisl et malesuada.</div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-8 col-xl-6">
-                        <ul class="wedding-gifts">
-
-                            <li id="gift-list" data-animation-direction="from-bottom" data-animation-delay="300">
-                                <div class="neela-style">
-                                    <i class="icon-wedding"></i>
-                                    <h3>Check our<br>wedding gift list</h3>
-
-                                    <div class="info">
-                                        <a href="#" class="img"><img src="images/macys-logo.png" alt="Macy's" /></a>
-                                        <a href="#" class="img"><img src="images/bed-bath-beyond-logo.png" alt="Target" /></a>
+                    <div class="row">
+                        <?php foreach ($partyByCategory['bride_side'] as $member): ?>
+                            <?php
+                            $memberName = esc($member['name'] ?? '');
+                            $memberRole = esc($member['role'] ?? $member['title'] ?? $partyLabels['bride_side']);
+                            $memberImg = $member['photo_url'] ?? $member['image_url'] ?? '';
+                            if ($memberImg !== '' && !preg_match('#^https?://#i', $memberImg)) {
+                                $memberImg = base_url($memberImg);
+                            }
+                            $memberImg = $memberImg ?: ($assetsBase . '/images/bridesmaids-img1.jpg');
+                            ?>
+                            <div class="col-md-6 col-xl-4" data-animation-direction="from-bottom" data-animation-delay="200">
+                                <div class="element">
+                                    <div class="image">
+                                        <img src="<?= esc($memberImg) ?>" alt="<?= $memberName ?>" width="434" height="434" />
+                                        <div class="hover-info neela-style">
+                                            <div class="content center">
+                                                <h3><?= $memberName ?><small><?= $memberRole ?></small></h3>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </li>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+            <!-- END BRIDESMAIDS SECTION -->
+        <?php endif; ?>
 
-                            <li id="help-wedding" data-animation-direction="from-bottom" data-animation-delay="300">
-                                <div class="neela-style">
-                                    <i class="icon-wedding-day"></i>
-                                    <h3>Help with the<br>wedding planning</h3>
+        <?php if ($hasGroomSide): ?>
+            <!-- BEGIN GROOMSMEN SECTION -->
+            <section id="groomsmen" class="parallax-background bg-color-overlay">
+                <div class="section-divider-top-1 off-section"></div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h2 class="section-title light"><?= esc($partyLabels['groom_side']) ?></h2>
+                        </div>
+                    </div>
 
-                                    <div class="info">
-                                        <a href="#rsvp" class="btn btn-primary reverse scrollto"><i class="fa fa-envelope"></i>Contact us</a>
+                    <div class="row">
+                        <?php foreach ($partyByCategory['groom_side'] as $member): ?>
+                            <?php
+                            $memberName = esc($member['name'] ?? '');
+                            $memberRole = esc($member['role'] ?? $member['title'] ?? $partyLabels['groom_side']);
+                            $memberImg = $member['photo_url'] ?? $member['image_url'] ?? '';
+                            if ($memberImg !== '' && !preg_match('#^https?://#i', $memberImg)) {
+                                $memberImg = base_url($memberImg);
+                            }
+                            $memberImg = $memberImg ?: ($assetsBase . '/images/groomsmen-img1.jpg');
+                            ?>
+                            <div class="col-md-6 col-xl-4" data-animation-direction="from-bottom" data-animation-delay="200">
+                                <div class="element">
+                                    <div class="image">
+                                        <img src="<?= esc($memberImg) ?>" alt="<?= $memberName ?>" width="434" height="434" />
+                                        <div class="hover-info neela-style">
+                                            <div class="content center">
+                                                <h3><?= $memberName ?><small><?= $memberRole ?></small></h3>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </li>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+            <!-- END GROOMSMEN SECTION -->
+        <?php endif; ?>
 
-                            <li id="help-honeymoon" data-animation-direction="from-bottom" data-animation-delay="300">
-                                <div class="neela-style">
-                                    <i class="icon-honeymoon"></i>
-                                    <h3>Contribute to our<br>dream honeymoon</h3>
+        <?php if ($hasRegistry): ?>
+            <!-- BEGIN WEDDING GIFTS SECTION -->
+            <section id="giftregistry" class="section-bg-color parallax-background">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8 col-xl-6">
+                            <h2 class="section-title-lg uppercase desc"><small><?= esc($registryTitle) ?></small><strong>Registry</strong></h2>
+                            <div class="section-desc"><?= $giftDescription ?></div>
+                        </div>
+                    </div>
 
-                                    <div class="info">
-                                        <a href="#" class="btn btn-primary reverse">$50</a>
-                                        <a href="#" class="btn btn-primary reverse">$100</a>
-                                        <a href="#" class="btn btn-primary reverse">$200</a>
-                                        <br>
-                                        <a href="#" id="otheramount" class="btn btn-primary reverse">Other Amount</a>
-                                    </div>
-                                </div>
-                            </li>
+                    <div class="row">
+                        <div class="col-md-8 col-xl-6">
+                            <ul class="wedding-gifts">
+                                <?php foreach ($registryItems as $item): ?>
+                                    <?php
+                                    $itemTitle = esc($item['title'] ?? $item['name'] ?? 'Regalo');
+                                    $itemDesc = esc($item['description'] ?? '');
+                                    $itemUrl = $item['product_url'] ?? $item['external_url'] ?? '';
+                                    $itemImg = $item['image_url'] ?? '';
+                                    if ($itemImg !== '' && !preg_match('#^https?://#i', $itemImg)) {
+                                        $itemImg = base_url($itemImg);
+                                    }
+                                    $itemPrice = moneyFmt($item['price'] ?? 0, $item['currency_code'] ?? 'MXN');
+                                    ?>
+                                    <li data-animation-direction="from-bottom" data-animation-delay="300">
+                                        <div class="neela-style">
+                                            <i class="icon-wedding"></i>
+                                            <h3><?= $itemTitle ?></h3>
 
+                                            <div class="info">
+                                                <?php if ($itemImg): ?>
+                                                    <span class="img"><img src="<?= esc($itemImg) ?>" alt="<?= $itemTitle ?>" /></span>
+                                                <?php endif; ?>
+                                                <?php if ($itemDesc): ?>
+                                                    <p><?= $itemDesc ?></p>
+                                                <?php endif; ?>
+                                                <?php if ($itemUrl): ?>
+                                                    <a href="<?= esc($itemUrl) ?>" class="btn btn-primary reverse" target="_blank" rel="noopener">Ver regalo</a>
+                                                <?php endif; ?>
+                                                <span class="btn btn-primary reverse"><?= esc($itemPrice) ?></span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- END WEDDING GIFTS SECTION -->
+        <?php endif; ?>
+
+        <?php if ($hasGallery): ?>
+            <!-- BEGIN GALLERY SECTION -->
+            <section id="gallery" class="section-bg-color">
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h1 class="section-title"><?= $galleryTitle ?></h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-wrapper">
+                    <div class="gallery-left"><i class="fas fa-chevron-left"></i></div>
+                    <div class="gallery-right"><i class="fas fa-chevron-right"></i></div>
+
+                    <div class="gallery-scroller">
+                        <ul>
+                            <?php foreach ($galleryItems as $asset): ?>
+                                <?php
+                                $full = $asset['full'] ?? '';
+                                $thumb = $asset['thumb'] ?? $full;
+                                $alt = $asset['alt'] ?? $coupleTitle;
+                                if ($full !== '' && !preg_match('#^https?://#i', $full)) {
+                                    $full = base_url($full);
+                                }
+                                if ($thumb !== '' && !preg_match('#^https?://#i', $thumb)) {
+                                    $thumb = base_url($thumb);
+                                }
+                                ?>
+                                <?php if ($full): ?>
+                                    <li>
+                                        <div class="hover-info">
+                                            <a class="btn btn-light btn-sm only-icon" href="<?= esc($full) ?>" data-lightbox="WeddingPhotos" title="<?= esc($alt) ?>">
+                                                <i class="fa fa-link"></i>
+                                            </a>
+                                        </div>
+                                        <img src="<?= esc($thumb) ?>" alt="<?= esc($alt) ?>" width="380" height="380" />
+                                    </li>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
                         </ul>
                     </div>
                 </div>
-            </div>
-        </section>
-        <!-- END WEDDING GIFTS SECTION -->
-
-
-        <!-- BEGIN GALLERY SECTION -->
-        <section id="gallery" class="section-bg-color">
-
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <h1 class="section-title">Wedding Gallery</h1>
-                    </div>
-                </div>
-            </div>
-
-            <div class="gallery-wrapper">
-                <div class="gallery-left"><i class="fas fa-chevron-left"></i></div>
-                <div class="gallery-right"><i class="fas fa-chevron-right"></i></div>
-
-                <div class="gallery-scroller">
-                    <ul>
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img1.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb1.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img2.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb2.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img3.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb3.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img4.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb4.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img5.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb5.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img6.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb6.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img7.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb7.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img8.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb8.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img9.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb9.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img10.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb10.jpg" alt="" width="380" height="380" />
-                        </li>
-                    </ul>
-                    <ul>
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img11.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb11.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img12.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb12.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img13.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb13.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img14.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb14.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img15.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb15.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img16.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb16.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img17.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb17.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img18.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb18.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img19.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb19.jpg" alt="" width="380" height="380" />
-                        </li>
-
-                        <li>
-                            <div class="hover-info">
-                                <a class="btn btn-light btn-sm only-icon" href="images/gallery-img20.jpg" data-lightbox="WeddingPhotos" title="Wedding Photos">
-                                    <i class="fa fa-link"></i>
-                                </a>
-                            </div>
-                            <img src="images/gallery-thumb20.jpg" alt="" width="380" height="380" />
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-        <!-- END GALLERY SECTION -->
-
-
-        <!-- BEGIN BLOG SECTION -->
-        <section id="blog" class="section-bg-color divider-bottom-2 divider-pattern divider-bg-color">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <h1 class="section-title">Wedding Blog</h1>
-                    </div>
-                </div>
-
-                <div class="row">
-
-                    <!-- BEGIN BLOG MAIN CONTENT -->
-                    <div class="col-sm-12">
-
-                        <!-- BEGIN BLOG LISTING -->
-                        <div class="blog-listing clearfix">
-                            <div class="row gx-5">
-
-                                <!-- BEGIN BLOG ITEM -->
-                                <article class="item col-md-6">
-                                    <div class="image">
-                                        <a href="blog-single-post.html">
-                                            <span class="btn btn-light"><i class="fa fa-file-o"></i> Read More</span>
-                                        </a>
-                                        <img src="images/post1.jpg" alt="" width="793" height="494" />
-                                    </div>
-
-                                    <div class="date">July 20, 2021</div>
-
-                                    <div class="info-blog">
-                                        <h3 class="post-title"><a href="blog-single-post.html">Wedding trends to obsess over this year</a></h3>
-
-                                        <p>If you've always dreamt of carrying a bouquet of old fashioned garden roses down the aisle, but your budget doesn't quite match up to the dream, try this!</p>
-
-                                        <div class="bottom-info">
-                                            <ul class="blog-meta">
-                                                <li><a href="#">Wedding</a>, <a href="#">Ideas</a>, <a href="#">Tips</a></li>
-                                                <li>/ By <a href="#">WiselyThemes</a></li>
-                                            </ul>
-
-                                            <div class="blog-share">
-                                                <a target="_blank" href="http://www.facebook.com/sharer.php?u=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fblog-single-post.html"><i class="fab fa-facebook-f"></i></a>
-                                                <a target="_blank" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fblog-single-post.html%2F&amp;text=5%20ways%20to%20have%20a%20beautiful%20wedding"><i class="fab fa-twitter"></i></a>
-                                                <a target="_blank" href="../../../pinterest.com/pin/create/button/indexeb31.html?url=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fblog-single-post.html%2F&amp;description=Wedding%20trends%20to%20obsess%20over%20this%20year&amp;media=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fimages%2Fblog-img-detail.jpg"><i class="fab fa-pinterest-p"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </article>
-                                <!-- END BLOG ITEM -->
-
-                                <!-- BEGIN BLOG ITEM -->
-                                <article class="item col-md-6">
-                                    <div class="image">
-                                        <a href="blog-single-post.html">
-                                            <span class="btn btn-light"><i class="fa fa-file-o"></i> Read More</span>
-                                        </a>
-                                        <img src="images/post2.jpg" alt="" width="793" height="494" />
-                                    </div>
-
-                                    <div class="date">August 2, 2021</div>
-
-                                    <div class="info-blog">
-                                        <h3 class="post-title"><a href="blog-single-post.html">The ultimate guide to plan your wedding</a></h3>
-
-                                        <p>When you consider that the average wedding costs over $20,000, you may be thinking that there’s no way you can afford the day of your dreams.</p>
-
-                                        <div class="bottom-info">
-                                            <ul class="blog-meta">
-                                                <li><a href="#">Wedding</a>, <a href="#">Ideas</a>, <a href="#">Tips</a></li>
-                                                <li>/ By <a href="#">WiselyThemes</a></li>
-                                            </ul>
-
-                                            <div class="blog-share">
-                                                <a target="_blank" href="http://www.facebook.com/sharer.php?u=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fblog-single-post.html"><i class="fab fa-facebook-f"></i></a>
-                                                <a target="_blank" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fblog-single-post.html%2F&amp;text=DIY%3A%20A%20Garden%20Rose%20Bouquet"><i class="fab fa-twitter"></i></a>
-                                                <a target="_blank" href="http://pinterest.com/pin/create/button/?url=https%3A%2F%2Fwww.wiselythemes.com%2Fhtml%2Fneela%2Fblog-single-post.html%2F&amp;description=DIY%3A%20A%20Garden%20Rose%20Bouquet&amp;media=http%3A%2F%2Fplacehold.it%2F750x580"><i class="fab fa-pinterest-p"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </article>
-                                <!-- END BLOG ITEM -->
-
-                            </div>
-                        </div>
-                        <!-- END BLOG LISTING -->
-
-                        <div class="center">
-                            <a class="btn btn-primary" href="blog-listing-sidebar-right.html">View all blog posts</a>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- END BLOG SECTION -->
-
+            </section>
+            <!-- END GALLERY SECTION -->
+        <?php endif; ?>
 
         <!-- BEGIN CONTACTS SECTION -->
         <section id="rsvp" class="section-bg-color extra-padding-section">
@@ -1265,34 +955,40 @@ foreach ($weddingParty as $member) {
                     <div class="col-lg-10 offset-lg-1 col-xl-8 offset-xl-2  col-xxl-6 offset-xxl-3">
 
                         <div class="form-wrapper flowers neela-style">
-                            <h1 class="section-title">Will you Attend?</h1>
+                            <h1 class="section-title"><?= $rsvpHeading ?></h1>
 
-                            <form id="form-rsvp" method="post" action="#">
+                            <form id="form-rsvp" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                                <?= csrf_field() ?>
 
                                 <div class="form-floating">
-                                    <input type="text" name="Name" id="name" placeholder="Your Name*" class="form-control required fromName">
-                                    <label for="name">Your Name*</label>
+                                    <input type="text" name="name" id="name" placeholder="Nombre" class="form-control required fromName">
+                                    <label for="name">Nombre*</label>
                                 </div>
 
                                 <div class="form-floating">
-                                    <input type="email" name="E-mail" id="email" placeholder="E-mail*" class="form-control required fromEmail">
+                                    <input type="email" name="email" id="email" placeholder="E-mail" class="form-control required fromEmail">
                                     <label for="email">E-mail*</label>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="tel" name="phone" id="phone" placeholder="Teléfono" class="form-control">
+                                    <label for="phone">Teléfono</label>
                                 </div>
 
                                 <div class="form-check-wrapper">
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input required" type="radio" name="Attend wedding" id="attend_wedding_yes">
-                                        <label for="attend_wedding_yes">Yes, I will attend.</label>
+                                        <input class="form-check-input required" type="radio" name="attending" id="attend_wedding_yes" value="yes">
+                                        <label for="attend_wedding_yes">Sí, asistiré.</label>
                                     </div>
 
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input required" type="radio" name="Attend wedding" id="attend_wedding_no">
-                                        <label for="attend_wedding_no">Sorry, I can't come.</label>
+                                        <input class="form-check-input required" type="radio" name="attending" id="attend_wedding_no" value="no">
+                                        <label for="attend_wedding_no">No podré asistir.</label>
                                     </div>
                                 </div>
 
                                 <div class="form-floating">
-                                    <select class="form-select" aria-label="Number of guests" name="Number of Guests" id="num_guests">
+                                    <select class="form-select" aria-label="Número de invitados" name="guests" id="num_guests">
                                         <option value="0">0</option>
                                         <option value="1">1</option>
                                         <option value="2">2</option>
@@ -1303,54 +999,23 @@ foreach ($weddingParty as $member) {
                                         <option value="7">7</option>
                                     </select>
 
-                                    <label for="num_guests">Number of guests</label>
+                                    <label for="num_guests">Número de invitados</label>
                                 </div>
-
-                                <fieldset class="form-check-wrapper required" name="Meal Preferences" id="meal_pref">
-                                    <label>Meal Preferences:</label>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="meal_meat">
-                                        <label for="meal_meat">
-                                            Meat
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="meal_fish">
-                                        <label for="meal_fish">
-                                            Fish
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="meal_vegetarian">
-                                        <label for="meal_vegetarian">
-                                            Vegetarian
-                                        </label>
-                                    </div>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="meal_gluten_free">
-                                        <label for="meal_gluten_free">
-                                            Gluten free
-                                        </label>
-                                    </div>
-                                </fieldset>
 
                                 <div class="form-floating">
-                                    <textarea id="message" name="Message" placeholder="Message" class="form-control" rows="4"></textarea>
-                                    <label for="message">Message</label>
+                                    <input type="text" name="song_request" id="song_request" placeholder="Canción" class="form-control">
+                                    <label for="song_request">Canción solicitada</label>
                                 </div>
 
-                                <div class="center">
-                                    <div class="g-recaptcha" data-sitekey="6LcTJDEUAAAAACOL__6CedRrCb6m2M94OSmqF4MV"></div>
+                                <div class="form-floating">
+                                    <textarea id="message" name="message" placeholder="Mensaje" class="form-control" rows="4"></textarea>
+                                    <label for="message">Mensaje</label>
                                 </div>
 
                                 <div class="form_status_message"></div>
 
                                 <div class="center">
-                                    <button type="submit" class="btn btn-primary submit_form">Send</button>
+                                    <button type="submit" class="btn btn-primary"><?= $rsvpSubmitLabel ?></button>
                                 </div>
                             </form>
                         </div>
@@ -1368,23 +1033,27 @@ foreach ($weddingParty as $member) {
                     <div class="row">
                         <div class="col-md-4">
                             <div class="footer-info left">
-                                Saturday, 24 September 2025 at 03:00 pm<br>
-                                4181 Birchwood Ave Seal Beach, CA
+                                <?= esc($eventDateLabel) ?><?= $eventTimeRange ? ' ' . esc($eventTimeRange) : '' ?><br>
+                                <?= esc($venueAddr) ?>
                             </div>
                         </div>
 
                         <div class="col-md-4">
                             <div class="footer-logo">
-                                Isabella<br>
+                                <?= esc($brideName) ?><br>
                                 <small>&</small><br>
-                                Andrew
+                                <?= esc($groomName) ?>
                             </div>
                         </div>
 
                         <div class="col-md-4">
                             <div class="footer-info right">
-                                Tel.: +0012 345 678 910<br>
-                                E-mail: isabella.andrew@example.com
+                                <?php if (!empty($event['contact_phone'] ?? '')): ?>
+                                    Tel.: <?= esc($event['contact_phone']) ?><br>
+                                <?php endif; ?>
+                                <?php if (!empty($event['contact_email'] ?? '')): ?>
+                                    E-mail: <?= esc($event['contact_email']) ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -1395,7 +1064,7 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-12">
-                            &copy; 2021 <a href="https://www.wiselythemes.com/">WiselyThemes</a>, All Rights Reserved.
+                            &copy; <?= esc((string)date('Y')) ?> <?= esc($templateMeta['footer_owner'] ?? '13Bodas') ?>
                         </div>
                     </div>
                 </div>
@@ -1432,10 +1101,54 @@ foreach ($weddingParty as $member) {
 
     <!-- Template Scripts -->
     <script src="<?= $assetsBase ?>/js/variables.js"></script>
+    <script>
+        var c_days = <?= (int)$countdownDays ?>;
+        var c_hours = <?= (int)$countdownHours ?>;
+        var c_minutes = <?= (int)$countdownMinutes ?>;
+        var c_seconds = <?= (int)$countdownSeconds ?>;
+        var countdown_end_msg = <?= json_encode($defaults['countdown_end_msg'] ?? '¡El evento ya comenzó!', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var map_initial_latitude = <?= $mapInitialLat !== null ? (float)$mapInitialLat : 'null' ?>;
+        var map_initial_longitude = <?= $mapInitialLng !== null ? (float)$mapInitialLng : 'null' ?>;
+        var map_initial_zoom = <?= (int)($defaults['map_initial_zoom'] ?? 15) ?>;
+        var map_markers = <?= json_encode($mapMarkers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var slidehow_images = <?= json_encode($heroImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
     <script src="<?= $assetsBase ?>/js/scripts.js"></script>
+    <script>
+        (function($) {
+            'use strict';
 
-    <!-- Google reCaptcha API -->
-    <script src="../../../www.google.com/recaptcha/api.js" async defer></script>
+            const $form = $('#form-rsvp');
+            const $status = $form.find('.form_status_message');
+
+            if (!$form.length) {
+                return;
+            }
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                $status.html('');
+
+                $.ajax({
+                        url: $form.attr('action'),
+                        method: 'POST',
+                        data: $form.serialize(),
+                        dataType: 'json'
+                    })
+                    .done(function(resp) {
+                        if (resp && resp.success) {
+                            $status.html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + (resp.message || 'Confirmación registrada. ¡Gracias!') + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                            $form.trigger('reset');
+                        } else {
+                            $status.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + ((resp && resp.message) ? resp.message : 'No fue posible registrar tu confirmación.') + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                        }
+                    })
+                    .fail(function() {
+                        $status.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">No fue posible registrar tu confirmación.<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                    });
+            });
+        })(jQuery);
+    </script>
 </body>
 
 </html>
