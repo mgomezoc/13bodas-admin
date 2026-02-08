@@ -143,6 +143,14 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/schedule/update/(:segment)', 'Admin\EventSchedule::update/$1/$2');
         $routes->post('(:segment)/schedule/delete/(:segment)', 'Admin\EventSchedule::delete/$1/$2');
 
+        // Historia / timeline
+        $routes->get('(:segment)/timeline', 'Admin\Timeline::index/$1', ['as' => 'admin.timeline.index']);
+        $routes->get('(:segment)/timeline/new', 'Admin\Timeline::new/$1', ['as' => 'admin.timeline.new']);
+        $routes->post('(:segment)/timeline', 'Admin\Timeline::create/$1', ['as' => 'admin.timeline.create']);
+        $routes->get('(:segment)/timeline/edit/(:segment)', 'Admin\Timeline::edit/$1/$2', ['as' => 'admin.timeline.edit']);
+        $routes->post('(:segment)/timeline/update/(:segment)', 'Admin\Timeline::update/$1/$2', ['as' => 'admin.timeline.update']);
+        $routes->post('(:segment)/timeline/delete/(:segment)', 'Admin\Timeline::delete/$1/$2', ['as' => 'admin.timeline.delete']);
+
         // FAQ
         $routes->get('(:segment)/faq', 'Admin\EventFaq::index/$1');
         $routes->post('(:segment)/faq/store', 'Admin\EventFaq::store/$1');

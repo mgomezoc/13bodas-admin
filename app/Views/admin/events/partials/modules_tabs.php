@@ -19,6 +19,7 @@ if ($activeTab === '') {
         'party' => 'party',
         'locations' => 'locations',
         'schedule' => 'schedule',
+        'timeline' => 'timeline',
         'faq' => 'faq',
         'recommendations' => 'recommendations',
         'rsvp-questions' => 'rsvp-questions',
@@ -90,6 +91,12 @@ $tabs = [
         'label'=> 'Agenda',
         'icon' => 'bi-clock',
         'url'  => base_url('admin/events/' . $event['id'] . '/schedule'),
+    ],
+    [
+        'key'  => 'timeline',
+        'label'=> 'Historia',
+        'icon' => 'bi-clock-history',
+        'url'  => base_url('admin/events/' . $event['id'] . '/timeline'),
     ],
     [
         'key'  => 'faq',

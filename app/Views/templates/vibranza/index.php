@@ -96,7 +96,7 @@ foreach ($modules as $module) {
 }
 
 $coupleInfo = $moduleData['couple_info'] ?? [];
-$timeline   = $moduleData['timeline']['events'] ?? [];
+$timeline   = !empty($timelineItems) ? $timelineItems : ($moduleData['timeline']['events'] ?? []);
 $schedule   = $scheduleItems ?: ($moduleData['schedule']['items'] ?? []);
 $faqItems   = $faqs ?: ($moduleData['faq']['items'] ?? []);
 $customHtml = $moduleData['custom_html']['html'] ?? '';
@@ -244,14 +244,17 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                     <div class="timeline">
                         <?php foreach ($timeline as $index => $item): ?>
                             <?php
-                                $storyImage = $item['image'] ?? $item['image_url'] ?? getMediaUrl($mediaByCategory, 'story', $index);
-                                $storyText = $item['text'] ?? ($item['description'] ?? '');
+                                $storyImage = $item['image_url'] ?? ($item['image'] ?? getMediaUrl($mediaByCategory, 'story', $index));
+                                if (!empty($storyImage) && !preg_match('#^https?://#i', $storyImage)) {
+                                    $storyImage = base_url($storyImage);
+                                }
+                                $storyText = $item['description'] ?? ($item['text'] ?? '');
                             ?>
                             <article>
                                 <?php if (!empty($storyImage)): ?>
                                     <img src="<?= esc($storyImage) ?>" alt="<?= esc($item['title'] ?? 'Momento especial') ?>">
                                 <?php endif; ?>
-                                <span class="timeline__date"><?= esc($item['date'] ?? '') ?></span>
+                                <span class="timeline__date"><?= esc($item['year'] ?? ($item['date'] ?? '')) ?></span>
                                 <h3><?= esc($item['title'] ?? 'Momento especial') ?></h3>
                                 <p><?= esc($storyText) ?></p>
                             </article>

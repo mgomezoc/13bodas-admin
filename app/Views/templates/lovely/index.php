@@ -714,15 +714,20 @@ foreach ($weddingParty as $member) {
                     <div class="col col-xs-12">
                         <div class="story-timeline">
                             <?php
-                            $storyItems = $storyPayload['items'] ?? ($storyPayload['events'] ?? []);
+                            $storyItems = !empty($timelineItems)
+                                ? $timelineItems
+                                : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
                             ?>
                             <?php if (!empty($storyItems)): ?>
                                 <?php foreach ($storyItems as $idx => $item): ?>
                                     <?php
                                     $isEven = ($idx % 2 === 0);
                                     $fallbackImg = getMediaUrl($mediaByCategory, 'story', $idx) ?: ($assetsBase . '/images/story/img-' . (($idx % 8) + 1) . '.jpg');
-                                    $itemImg = trim((string)($item['image'] ?? ''));
+                                    $itemImg = trim((string)($item['image_url'] ?? ($item['image'] ?? '')));
                                     $storyImg = $itemImg !== '' ? $itemImg : $fallbackImg;
+                                    if ($storyImg !== '' && !preg_match('#^https?://#i', $storyImg)) {
+                                        $storyImg = base_url($storyImg);
+                                    }
                                     ?>
                                     <div class="row <?= $isEven ? '' : 'row-reverse' ?>">
                                         <?php if ($isEven): ?>
@@ -730,7 +735,7 @@ foreach ($weddingParty as $member) {
                                                 <div class="story-text right-align-text">
                                                     <h3><?= esc($item['title'] ?? 'Momento especial') ?></h3>
                                                     <span class="date"><?= esc($item['year'] ?? ($item['date'] ?? '')) ?></span>
-                                                    <p><?= esc($item['text'] ?? ($item['description'] ?? '')) ?></p>
+                                                    <p><?= esc($item['description'] ?? ($item['text'] ?? '')) ?></p>
                                                 </div>
                                             </div>
                                             <div class="col col-lg-6">
@@ -748,7 +753,7 @@ foreach ($weddingParty as $member) {
                                                 <div class="story-text">
                                                     <h3><?= esc($item['title'] ?? 'Momento especial') ?></h3>
                                                     <span class="date"><?= esc($item['year'] ?? ($item['date'] ?? '')) ?></span>
-                                                    <p><?= esc($item['text'] ?? ($item['description'] ?? '')) ?></p>
+                                                    <p><?= esc($item['description'] ?? ($item['text'] ?? '')) ?></p>
                                                 </div>
                                             </div>
                                         <?php endif; ?>
