@@ -150,19 +150,9 @@ if ($modStory && !empty($modStory['content_payload'])) {
     $raw = $modStory['content_payload'];
     $storyPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
-$storyItems = $storyPayload['items'] ?? $storyPayload['events'] ?? [];
-
-// Timeline fallback desde event_timeline_items
-if (empty($storyItems) && !empty($timelineItems)) {
-    $storyItems = array_map(static function (array $row): array {
-        return [
-            'title' => $row['title'] ?? '',
-            'date' => $row['year'] ?? '',
-            'description' => $row['description'] ?? '',
-            'image_url' => $row['image_url'] ?? '',
-        ];
-    }, $timelineItems);
-}
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
 
 // --- Schedule module ---
 $modSchedule = findModule($modules, 'schedule');
@@ -224,8 +214,8 @@ function getMediaUrl(array $mediaByCategory, string $category, int $index = 0, s
 }
 
 $heroImage = getMediaUrl($mediaByCategory, 'hero', 0, 'large') ?: getMediaUrl($mediaByCategory, 'hero', 0, 'original');
-$coupleImage = getMediaUrl($mediaByCategory, 'couple', 0, 'large') ?: getMediaUrl($mediaByCategory, 'couple', 0, 'original');
 $brideImage = getMediaUrl($mediaByCategory, 'bride', 0, 'original');
+$coupleImage = $brideImage ?: (getMediaUrl($mediaByCategory, 'couple', 0, 'large') ?: getMediaUrl($mediaByCategory, 'couple', 0, 'original'));
 $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
 
 $partyLabels = [
@@ -272,7 +262,11 @@ function normalizeAssetUrl(string $url): string
 $storyItems = array_map(static function (array $item): array {
     if (!empty($item['image_url'])) {
         $item['image_url'] = normalizeAssetUrl((string) $item['image_url']);
+    } elseif (!empty($item['image'])) {
+        $item['image_url'] = normalizeAssetUrl((string) $item['image']);
     }
+    $item['date'] = $item['date'] ?? ($item['year'] ?? '');
+    $item['description'] = $item['description'] ?? ($item['text'] ?? '');
     return $item;
 }, $storyItems);
 
@@ -514,11 +508,20 @@ $storyItems = array_map(static function (array $item): array {
 
                                 <div class="tab-content">
                                     <?php foreach ($storyItems as $idx => $item): ?>
+                                        <?php
+                                        $fallbackImg = getMediaUrl($mediaByCategory, 'story', $idx, 'large')
+                                            ?: $assetsBase . '/images/story/img-' . (($idx % 8) + 1) . '.jpg';
+                                        $itemImg = trim((string)($item['image_url'] ?? ''));
+                                        $storyImg = $itemImg !== '' ? $itemImg : $fallbackImg;
+                                        if ($storyImg !== '') {
+                                            $storyImg = normalizeAssetUrl($storyImg);
+                                        }
+                                        ?>
                                         <div class="tab-pane <?= $idx === 0 ? 'active' : 'fade' ?>" id="story-<?= $idx ?>">
                                             <div class="wpo-story-item">
                                                 <div class="wpo-story-img">
-                                                    <?php if (!empty($item['image_url'])): ?>
-                                                        <img src="<?= esc($item['image_url']) ?>" alt="<?= esc($item['title']) ?>">
+                                                    <?php if ($storyImg): ?>
+                                                        <img src="<?= esc($storyImg) ?>" alt="<?= esc($item['title']) ?>">
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="wpo-story-content">
