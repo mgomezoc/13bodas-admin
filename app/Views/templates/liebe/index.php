@@ -1,74 +1,82 @@
 <?php
+
+declare(strict_types=1);
+
 // ================================================================
 // TEMPLATE: LIEBE — app/Views/templates/liebe/index.php
 // Versión: 2.0 — Con soporte completo de datos dinámicos + fallbacks
 // ================================================================
 
 // --- Base data ---
-$event         = $event ?? [];
-$template      = $template ?? [];
-$theme         = $theme ?? [];
-$modules       = $modules ?? [];
-$templateMeta  = $templateMeta ?? [];
+$event = $event ?? [];
+$template = $template ?? [];
+$theme = $theme ?? [];
+$modules = $modules ?? [];
+$templateMeta = $templateMeta ?? [];
 $mediaByCategory = $mediaByCategory ?? [];
 $galleryAssets = $galleryAssets ?? [];
 $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
-$menuOptions   = $menuOptions ?? [];
-$weddingParty  = $weddingParty ?? [];
-$faqs          = $faqs ?? ($event['faqs'] ?? []);
+$menuOptions = $menuOptions ?? [];
+$weddingParty = $weddingParty ?? [];
+$faqs = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
+$blogPosts = $blogPosts ?? [];
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
 $rawDefaults = $templateMeta['defaults'] ?? [];
 if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
     // Nueva estructura: defaults.copy + defaults.assets
-    $defaults  = $rawDefaults['copy'];
+    $defaults = $rawDefaults['copy'];
     $tplAssets = $rawDefaults['assets'] ?? [];
 } else {
     // Estructura legacy: defaults plano + assets como hermano
-    $defaults  = $rawDefaults;
+    $defaults = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
 // Section visibility (override desde theme_config del evento)
 $sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
-$slug        = esc($event['slug'] ?? '');
+$slug = esc($event['slug'] ?? '');
 $coupleTitle = esc($event['couple_title'] ?? 'Nuestra Boda');
-$brideName   = esc($event['bride_name'] ?? '');
-$groomName   = esc($event['groom_name'] ?? '');
 
-$startRaw     = $event['event_date_start'] ?? null;
-$endRaw       = $event['event_date_end'] ?? null;
+$startRaw = $event['event_date_start'] ?? null;
+$endRaw = $event['event_date_end'] ?? null;
 $rsvpDeadline = $event['rsvp_deadline'] ?? null;
 
 $primaryLocation = $eventLocations[0] ?? [];
 $venueName = esc($primaryLocation['name'] ?? ($event['venue_name'] ?? ''));
 $venueAddr = esc($primaryLocation['address'] ?? ($event['venue_address'] ?? ''));
-$lat       = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
-$lng       = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
+$lat = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
+$lng = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
 
 // --- Helper functions ---
 function formatDateLabel(?string $dt, string $fmt = 'd M Y'): string
 {
-    if (!$dt) return '';
+    if (!$dt) {
+        return '';
+    }
     try {
         return date($fmt, strtotime($dt));
     } catch (\Throwable $e) {
         return '';
     }
 }
+
 function formatTimeLabel(?string $dt, string $fmt = 'H:i'): string
 {
-    if (!$dt) return '';
+    if (!$dt) {
+        return '';
+    }
     try {
         return date($fmt, strtotime($dt));
     } catch (\Throwable $e) {
         return '';
     }
 }
+
 function formatScheduleTime(array $item): string
 {
     if (!empty($item['time'])) {
@@ -76,14 +84,16 @@ function formatScheduleTime(array $item): string
     }
     $start = $item['starts_at'] ?? null;
     $end = $item['ends_at'] ?? null;
-    if (!$start) return '';
+    if (!$start) {
+        return '';
+    }
     $startLabel = formatTimeLabel($start);
     $endLabel = $end ? formatTimeLabel($end) : '';
     return trim($startLabel . ($endLabel ? ' - ' . $endLabel : ''));
 }
 
 $eventDateLabel = formatDateLabel($startRaw, 'd M Y');
-$eventDateISO   = $startRaw ? date('c', strtotime($startRaw)) : '';
+$eventDateISO = $startRaw ? date('c', strtotime($startRaw)) : '';
 $eventTimeRange = trim(formatTimeLabel($startRaw) . ($endRaw ? ' - ' . formatTimeLabel($endRaw) : ''));
 $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
@@ -96,7 +106,7 @@ if (!empty($template['schema_json'])) {
 }
 // Retrocompatibilidad: soportar tanto estructura plana como anidada (theme_defaults)
 $themeDefaults = $schema['theme_defaults'] ?? [];
-$schemaFonts  = !empty($themeDefaults['fonts'])
+$schemaFonts = !empty($themeDefaults['fonts'])
     ? [$themeDefaults['fonts']['heading'] ?? 'Great Vibes', $themeDefaults['fonts']['body'] ?? 'Dosis']
     : ($schema['fonts'] ?? ['Great Vibes', 'Dosis']);
 $schemaColors = !empty($themeDefaults['colors'])
@@ -104,16 +114,18 @@ $schemaColors = !empty($themeDefaults['colors'])
     : ($schema['colors'] ?? ['#86B1A1', '#F5F0EB']);
 
 // Retrocompatibilidad: soportar tanto estructura plana como anidada
-$fontHeading  = $theme['fonts']['heading'] ?? ($theme['font_heading'] ?? ($schemaFonts[0] ?? 'Great Vibes'));
-$fontBody     = $theme['fonts']['body']    ?? ($theme['font_body']    ?? ($schemaFonts[1] ?? 'Dosis'));
-$colorPrimary = $theme['colors']['primary'] ?? ($theme['primary']     ?? ($schemaColors[0] ?? '#86B1A1'));
-$colorAccent  = $theme['colors']['accent']  ?? ($theme['accent']      ?? ($schemaColors[1] ?? '#F5F0EB'));
+$fontHeading = $theme['fonts']['heading'] ?? ($theme['font_heading'] ?? ($schemaFonts[0] ?? 'Great Vibes'));
+$fontBody = $theme['fonts']['body'] ?? ($theme['font_body'] ?? ($schemaFonts[1] ?? 'Dosis'));
+$colorPrimary = $theme['colors']['primary'] ?? ($theme['primary'] ?? ($schemaColors[0] ?? '#86B1A1'));
+$colorAccent = $theme['colors']['accent'] ?? ($theme['accent'] ?? ($schemaColors[1] ?? '#F5F0EB'));
 
 // --- Module finder (busca por module_type, NO por code) ---
 function findModule(array $modules, string $type): ?array
 {
     foreach ($modules as $m) {
-        if (($m['module_type'] ?? '') === $type) return $m;
+        if (($m['module_type'] ?? '') === $type) {
+            return $m;
+        }
     }
     return null;
 }
@@ -166,30 +178,70 @@ function getText(array $copyPayload, array $defaults, string $key, string $hardc
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle    = getText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
+$heroTagline = getText($copyPayload, $defaults, 'hero_tagline', 'Are getting married');
+$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Save the date');
 $countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
-$ctaHeading        = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
-$ctaSubheading     = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading       = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
+$ctaHeading = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
+$ctaSubheading = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
+$rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'RSVP');
 $brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
 $groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle        = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
-$partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$storyTitle = getText($copyPayload, $defaults, 'story_title', 'Our Story');
+$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'The Event');
+$galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Gallery');
+$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Registry');
+$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Bridemaids & Groomsman');
+$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'About The Couple');
+$quoteText = getText(
+    $copyPayload,
+    $defaults,
+    'quote_text',
+    'Being deeply loved by someone gives you strength, while loving someone deeply gives you courage.'
+);
+$saveDateText = getText(
+    $copyPayload,
+    $defaults,
+    'save_date_text',
+    'Gracias por acompañarnos en este día tan especial.'
+);
+$eventIntroTitle = getText($copyPayload, $defaults, 'event_intro_title', 'Celebrate With Us');
+$eventIntroText = getText(
+    $copyPayload,
+    $defaults,
+    'event_intro_text',
+    'Será un honor compartir este momento contigo.'
+);
+$eventDetailsTitle = getText($copyPayload, $defaults, 'event_details_title', 'A very special day...');
+$eventDetailsText = getText(
+    $copyPayload,
+    $defaults,
+    'event_details_text',
+    'Gracias por formar parte de nuestra historia.'
+);
+$eventAlertText = getText(
+    $copyPayload,
+    $defaults,
+    'event_alert_text',
+    'Esperamos celebrar contigo.'
+);
+
+$brideName = esc($event['bride_name'] ?? ($couplePayload['bride']['name'] ?? ''));
+$groomName = esc($event['groom_name'] ?? ($couplePayload['groom']['name'] ?? ''));
 
 $brideBio = esc($couplePayload['bride']['bio']
-    ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));
+    ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia.')));
 $groomBio = esc($couplePayload['groom']['bio']
-    ?? ($defaults['groom_bio'] ?? ($defaults['groom_bio_default'] ?? 'Estamos muy felices de compartir contigo este día tan especial.')));
+    ?? ($defaults['groom_bio'] ?? ($defaults['groom_bio_default'] ?? 'Estamos muy felices de compartir contigo este día.')));
+$brideSubtitle = esc($couplePayload['bride']['subtitle'] ?? ($defaults['bride_subtitle'] ?? ''));
+$groomSubtitle = esc($couplePayload['groom']['subtitle'] ?? ($defaults['groom_subtitle'] ?? ''));
 
 // --- Media helpers ---
 function getMediaUrl(array $mediaByCategory, string $category, int $index = 0, string $size = 'original'): string
 {
     $items = $mediaByCategory[$category] ?? [];
-    if (empty($items) || !isset($items[$index])) return '';
+    if (empty($items) || !isset($items[$index])) {
+        return '';
+    }
 
     $m = $items[$index];
     $fieldMap = ['original' => 'file_url_original', 'large' => 'file_url_large', 'thumb' => 'file_url_thumbnail'];
@@ -198,7 +250,9 @@ function getMediaUrl(array $mediaByCategory, string $category, int $index = 0, s
     $url = $m[$field]
         ?? ($m['file_url_original']
             ?? ($m['file_url_large'] ?? ($m['file_url_thumbnail'] ?? '')));
-    if ($url !== '' && !preg_match('#^https?://#i', $url)) $url = base_url($url);
+    if ($url !== '' && !preg_match('#^https?://#i', $url)) {
+        $url = base_url($url);
+    }
     return $url;
 }
 
@@ -208,37 +262,51 @@ function getAllMediaUrls(array $mediaByCategory, string $category): array
     $urls = [];
     foreach ($items as $m) {
         $url = $m['file_url_large'] ?? ($m['file_url_original'] ?? '');
-        if ($url !== '' && !preg_match('#^https?://#i', $url)) $url = base_url($url);
-        if ($url !== '') $urls[] = $url;
+        if ($url !== '' && !preg_match('#^https?://#i', $url)) {
+            $url = base_url($url);
+        }
+        if ($url !== '') {
+            $urls[] = $url;
+        }
     }
     return $urls;
 }
 
-// Hero slider images: event media → template defaults
+function getGalleryUrls(array $galleryAssets): array
+{
+    $urls = [];
+    foreach ($galleryAssets as $asset) {
+        $url = (string)($asset['full'] ?? ($asset['thumb'] ?? ''));
+        if ($url !== '') {
+            $urls[] = $url;
+        }
+    }
+    return $urls;
+}
+
+// Hero slider images: event media → gallery → template defaults
 $heroImages = getAllMediaUrls($mediaByCategory, 'hero');
 if (empty($heroImages)) {
-    $sliderDefaults = $tplAssets['slider_images'] ?? ['images/slider/slide-1.jpg', 'images/slider/slide-2.jpg'];
-    foreach ($sliderDefaults as $s) {
-        $heroImages[] = $assetsBase . '/' . $s;
-    }
+    $heroImages = getGalleryUrls($galleryAssets);
 }
+if (empty($heroImages)) {
+    $heroImages = [
+        $assetsBase . '/img/couplemain.jpg',
+        $assetsBase . '/img/couple1.jpg',
+        $assetsBase . '/img/couple2.jpg',
+    ];
+}
+$heroMainImage = $heroImages[0] ?? ($assetsBase . '/img/couplemain.jpg');
+$heroWallLeft = $heroImages[1] ?? ($assetsBase . '/img/couple1.jpg');
+$heroWallRight = $heroImages[2] ?? ($assetsBase . '/img/couple2.jpg');
 
 // Couple photos
-$groomPhoto = getMediaUrl($mediaByCategory, 'groom');
-if (!$groomPhoto) $groomPhoto = $assetsBase . '/' . ($tplAssets['couple_images'][0] ?? 'images/couple/img-1.jpg');
+$groomPhoto = getMediaUrl($mediaByCategory, 'groom') ?: ($assetsBase . '/img/groom.jpg');
+$bridePhoto = getMediaUrl($mediaByCategory, 'bride') ?: ($assetsBase . '/img/bride.jpg');
 
-$bridePhoto = getMediaUrl($mediaByCategory, 'bride');
-if (!$bridePhoto) $bridePhoto = $assetsBase . '/' . ($tplAssets['couple_images'][1] ?? 'images/couple/img-2.jpg');
-
-// Background images
-$countdownBg = getMediaUrl($mediaByCategory, 'countdown_bg') ?: ($assetsBase . '/' . ($tplAssets['countdown_bg'] ?? 'images/countdown-bg.jpg'));
-$ctaBg       = getMediaUrl($mediaByCategory, 'cta_bg') ?: ($assetsBase . '/' . ($tplAssets['cta_bg'] ?? 'images/cta-bg.jpg'));
-$rsvpBg      = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/' . ($tplAssets['rsvp_bg'] ?? 'images/rsvp-bg.jpg'));
-$eventImg = $primaryLocation['image_url'] ?? '';
-if ($eventImg !== '' && !preg_match('#^https?://#i', $eventImg)) {
-    $eventImg = base_url($eventImg);
-}
-$eventImg = $eventImg ?: (getMediaUrl($mediaByCategory, 'event') ?: ($assetsBase . '/' . ($tplAssets['event_image'] ?? 'images/events/img-1.jpg')));
+// Event images
+$eventImagePrimary = getMediaUrl($mediaByCategory, 'event', 0) ?: ($assetsBase . '/img/party2.jpg');
+$eventImageSecondary = getMediaUrl($mediaByCategory, 'event', 1) ?: ($assetsBase . '/img/party1.jpg');
 
 // --- Small helpers ---
 function moneyFmt($val, string $currency = 'MXN'): string
@@ -246,6 +314,7 @@ function moneyFmt($val, string $currency = 'MXN'): string
     $n = is_numeric($val) ? (float)$val : 0.0;
     return '$' . number_format($n, 2) . ' ' . $currency;
 }
+
 function safeText($v): string
 {
     return esc(trim((string)$v));
@@ -253,8 +322,12 @@ function safeText($v): string
 
 function parseSocialLinks($raw): array
 {
-    if (empty($raw)) return [];
-    if (is_array($raw)) return $raw;
+    if (empty($raw)) {
+        return [];
+    }
+    if (is_array($raw)) {
+        return $raw;
+    }
     $decoded = json_decode((string)$raw, true);
     return is_array($decoded) ? $decoded : [];
 }
@@ -262,8 +335,8 @@ function parseSocialLinks($raw): array
 $partyLabels = [
     'bride_side' => 'Lado de la novia',
     'groom_side' => 'Lado del novio',
-    'officiant'  => 'Oficiante',
-    'other'      => 'Otros',
+    'officiant' => 'Oficiante',
+    'other' => 'Otros',
 ];
 
 $partyByCategory = [];
@@ -271,6 +344,80 @@ foreach ($weddingParty as $member) {
     $cat = $member['category'] ?? 'other';
     $partyByCategory[$cat][] = $member;
 }
+
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
+
+$hasStory = !empty($storyItems);
+$hasBrideSide = !empty($partyByCategory['bride_side']);
+$hasGroomSide = !empty($partyByCategory['groom_side']);
+$hasWeddingParty = $hasBrideSide || $hasGroomSide;
+$hasRegistry = !empty($registryItems);
+$hasLocations = !empty($eventLocations) || ($lat !== '' && $lng !== '');
+
+$logoUrl = $tplAssets['logo'] ?? 'img/logo.png';
+if ($logoUrl !== '' && !preg_match('#^https?://#i', $logoUrl)) {
+    $logoUrl = $assetsBase . '/' . ltrim($logoUrl, '/');
+}
+
+$registryFallbacks = [
+    $assetsBase . '/img/brand1.png',
+    $assetsBase . '/img/brand2.png',
+    $assetsBase . '/img/brand3.png',
+    $assetsBase . '/img/brand4.png',
+];
+
+$galleryFallbacks = [
+    $assetsBase . '/img/gallery1.jpg',
+    $assetsBase . '/img/gallery2.jpg',
+    $assetsBase . '/img/gallery3.jpg',
+    $assetsBase . '/img/gallery4.jpg',
+    $assetsBase . '/img/gallery5.jpg',
+    $assetsBase . '/img/gallery6.jpg',
+    $assetsBase . '/img/gallery7.jpg',
+];
+
+$now = new DateTimeImmutable('now');
+$eventDate = $startRaw ? new DateTimeImmutable($startRaw) : null;
+$diffSeconds = $eventDate ? max(0, $eventDate->getTimestamp() - $now->getTimestamp()) : 0;
+$countdownDays = (int)floor($diffSeconds / 86400);
+$countdownHours = (int)floor(($diffSeconds % 86400) / 3600);
+$countdownMinutes = (int)floor(($diffSeconds % 3600) / 60);
+$countdownSeconds = (int)($diffSeconds % 60);
+
+$mapMarkers = [];
+foreach ($eventLocations as $loc) {
+    $locLat = $loc['geo_lat'] ?? null;
+    $locLng = $loc['geo_lng'] ?? null;
+    if ($locLat === null || $locLng === null || $locLat === '' || $locLng === '') {
+        continue;
+    }
+    $locName = (string)($loc['name'] ?? $venueName);
+    $mapMarkers[] = [
+        'title' => $locName,
+        'latitude' => (float)$locLat,
+        'longitude' => (float)$locLng,
+        'address' => (string)($loc['address'] ?? ''),
+    ];
+}
+if (empty($mapMarkers) && $lat !== '' && $lng !== '') {
+    $mapMarkers[] = [
+        'title' => $venueName,
+        'latitude' => (float)$lat,
+        'longitude' => (float)$lng,
+        'address' => $venueAddr,
+    ];
+}
+$mapInitialLat = $lat !== '' ? (float)$lat : ($mapMarkers[0]['latitude'] ?? null);
+$mapInitialLng = $lng !== '' ? (float)$lng : ($mapMarkers[0]['longitude'] ?? null);
+
+$pageTitle = $templateMeta['title'] ?? ($coupleTitle !== '' ? $coupleTitle : 'Invitación');
+$pageDescription = $templateMeta['description'] ?? $coupleTitle;
+$countdownDateString = $startRaw ? date('Y/m/d H:i:s', strtotime($startRaw)) : '';
+
+$brideSocial = parseSocialLinks($couplePayload['bride']['social_links'] ?? ($couplePayload['bride']['social'] ?? []));
+$groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($couplePayload['groom']['social'] ?? []));
 ?>
 
 <!DOCTYPE html>
@@ -282,10 +429,10 @@ foreach ($weddingParty as $member) {
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="">
+    <meta name="description" content="<?= esc($pageDescription) ?>">
     <meta name="author" content="">
     <!-- Page title -->
-    <title>Liebe - Wedding HTML5 Template</title>
+    <title><?= esc($pageTitle) ?> | 13Bodas</title>
     <!--[if lt IE 9]>
       <script src="js/respond.js"></script>
       <![endif]-->
@@ -305,9 +452,9 @@ foreach ($weddingParty as $member) {
     <!-- Color Style CSS -->
     <link href="<?= $assetsBase ?>/styles/lavender.css" rel="stylesheet">
     <!-- Favicons-->
-    <link rel="apple-touch-icon" sizes="72x72" href="../../apple-icon-72x72.html">
-    <link rel="apple-touch-icon" sizes="114x114" href="../../apple-icon-114x114.html">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="72x72" href="<?= $assetsBase ?>/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="<?= $assetsBase ?>/apple-icon-114x114.png">
+    <link rel="shortcut icon" href="<?= $assetsBase ?>/favicon.ico" type="image/x-icon">
     <!-- Switcher Only -->
     <link rel="stylesheet" id="switcher-css" type="text/css" href="<?= $assetsBase ?>/switcher/css/switcher.css" media="all" />
     <!-- END Switcher Styles -->
@@ -331,14 +478,14 @@ foreach ($weddingParty as $member) {
                     <div class="predefined_styles">
                         <h5>Choose a Color Skin</h5>
                         <!-- MODULE #3 -->
-                        <a href="summer.html" class="styleswitch"><img src="switcher/images/summer.png" alt="Summer"></a>
-                        <a href="serenity.html" class="styleswitch"><img src="switcher/images/serenity.png" alt="Serenity"></a>
-                        <a href="lavender.html" class="styleswitch"><img src="switcher/images/lavender.png" alt="Lavender"></a>
+                        <a href="summer.html" class="styleswitch"><img src="<?= $assetsBase ?>/switcher/images/summer.png" alt="Summer"></a>
+                        <a href="serenity.html" class="styleswitch"><img src="<?= $assetsBase ?>/switcher/images/serenity.png" alt="Serenity"></a>
+                        <a href="lavender.html" class="styleswitch"><img src="<?= $assetsBase ?>/switcher/images/lavender.png" alt="Lavender"></a>
                         <!-- END MODULE #3 -->
                         <h5>Choose a Header style</h5>
                         <div class="headerimg">
-                            <a href="index-2.html"><img src="switcher/images/photoheader.jpg" alt="Photo Header" class=""></a>
-                            <a href="index2.html"><img src="switcher/images/slideheader.jpg" alt="Slide Header" class=""></a>
+                            <a href="index-2.html"><img src="<?= $assetsBase ?>/switcher/images/photoheader.jpg" alt="Photo Header" class=""></a>
+                            <a href="index2.html"><img src="<?= $assetsBase ?>/switcher/images/slideheader.jpg" alt="Slide Header" class=""></a>
                         </div>
                     </div>
                 </div>
@@ -366,7 +513,7 @@ foreach ($weddingParty as $member) {
                 <div class="navbar-brand navbar-brand-centered page-scroll">
                     <a href="#page-top">
                         <!-- logo  -->
-                        <img src="img/logo.png" class="img-responsive" alt="">
+                        <img src="<?= esc($logoUrl) ?>" class="img-responsive" alt="<?= esc($coupleTitle) ?>">
                     </a>
                 </div>
                 <!--/navbar-brand -->
@@ -377,21 +524,27 @@ foreach ($weddingParty as $member) {
                 <ul class="nav navbar-nav page-scroll">
                     <li class="active"><a href="#page-top">Home</a></li>
                     <li><a href="#about">About</a></li>
-                    <li><a href="#story">Our Story</a></li>
-                    <li><a href="#attendants">Attendants</a></li>
+                    <?php if ($hasStory): ?>
+                        <li><a href="#story">Our Story</a></li>
+                    <?php endif; ?>
+                    <?php if ($hasWeddingParty): ?>
+                        <li><a href="#attendants">Attendants</a></li>
+                    <?php endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right page-scroll">
                     <li><a href="#event">The Event</a></li>
                     <li><a href="#gallery">Gallery</a></li>
                     <li><a href="#rsvp">RSVP</a></li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Pages<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="blog.html">Blog Home</a></li>
-                            <li><a href="blog-single.html">Blog Post</a></li>
-                            <li><a href="elements.html">Elements</a></li>
-                        </ul>
-                    </li>
+                    <?php if (!empty($blogPosts)): ?>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Pages<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="blog.html">Blog Home</a></li>
+                                <li><a href="blog-single.html">Blog Post</a></li>
+                                <li><a href="elements.html">Elements</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -411,11 +564,11 @@ foreach ($weddingParty as $member) {
         <!-- Background blurred images -->
         <div class="photowall">
             <div class="col-md-4 margin1">
-                <img src="img/couple1.jpg" alt="" class="rotate1 img-photo img-responsive">
+                <img src="<?= esc($heroWallLeft) ?>" alt="<?= esc($coupleTitle) ?>" class="rotate1 img-photo img-responsive">
             </div>
             <!-- /col-md-4 -->
             <div class="col-md-4  col-md-offset-4">
-                <img src="img/couple2.jpg" alt="" class="rotate2 img-photo img-responsive">
+                <img src="<?= esc($heroWallRight) ?>" alt="<?= esc($coupleTitle) ?>" class="rotate2 img-photo img-responsive">
             </div>
             <!-- /col-md-4 -->
         </div>
@@ -424,15 +577,15 @@ foreach ($weddingParty as $member) {
             data-100="margin-top:0px;transform: rotate(4deg);"
             data-center-center="margin-top:50px;transform: rotate(-10deg);">
             <!-- image-->
-            <img src="img/couplemain.jpg" alt="" class="img-photo img-responsive">
+            <img src="<?= esc($heroMainImage) ?>" alt="<?= esc($coupleTitle) ?>" class="img-photo img-responsive">
         </div>
         <!--/main picture-->
         <div class="intro-heading col-md-12 text-center" data-0="opacity:1;"
             data--100-start="transform:translatey(0%);"
             data-center-bottom="transform:translatey(30%);">
-            <h1>Maria <span class="italic"> & </span> Jonas
+            <h1><?= esc($brideName !== '' ? $brideName : 'Love') ?> <span class="italic"> & </span> <?= esc($groomName !== '' ? $groomName : 'Story') ?>
             </h1>
-            <h5 class="margin1 text-ornament">Are getting married</h5>
+            <h5 class="margin1 text-ornament"><?= $heroTagline ?></h5>
         </div>
         <!-- /col-md-6-->
     </section>
@@ -457,14 +610,16 @@ foreach ($weddingParty as $member) {
                 <!-- well starts-->
                 <div class="well col-md-10 col-md-offset-1 text-center">
                     <div class="section-heading">
-                        <h2>June 19, 2024</h2>
+                        <h2><?= $eventDateLabel !== '' ? esc($eventDateLabel) : $countdownTitle ?></h2>
                         <!-- divider -->
                         <div class="hr"></div>
                     </div>
                     <!--/section heading -->
-                    <h5 class="margin1">Please RSVP before 15th January 2024</h5>
+                    <?php if ($rsvpDeadlineLabel !== ''): ?>
+                        <h5 class="margin1">Please RSVP before <?= esc($rsvpDeadlineLabel) ?></h5>
+                    <?php endif; ?>
                     <p>
-                        Viverra elit liquam erat volut pat phas ellus ac lorem ipsuet sodales Lorem ipsum dolor sit amet, consectetur adipisicing elit uasi quidem minus id iprum omnis metus.
+                        <?= $saveDateText ?>
                     </p>
                     <div class="margin1">
                         <!-- countdown tag -->
@@ -489,48 +644,68 @@ foreach ($weddingParty as $member) {
         <!-- container -->
         <div class="container">
             <div class="section-heading">
-                <h2>About The Couple</h2>
+                <h2><?= $aboutTitle ?></h2>
                 <!-- divider -->
                 <div class="hr"></div>
             </div>
             <!-- /section-heading-->
             <!-- Bride Info -->
             <div class="col-md-5 col-md-offset-1">
-                <img src="img/bride.jpg" alt="" class="main-img img-responsive img-circle" />
-                <h4 class="text-ornament">Maria</h4>
-                <h6 class="main-subheader">A Free-Spirited Woman</h6>
+                <img src="<?= esc($bridePhoto) ?>" alt="<?= esc($brideName) ?>" class="main-img img-responsive img-circle" />
+                <h4 class="text-ornament"><?= esc($brideName !== '' ? $brideName : $brideSectionTitle) ?></h4>
+                <?php if ($brideSubtitle !== ''): ?>
+                    <h6 class="main-subheader"><?= esc($brideSubtitle) ?></h6>
+                <?php endif; ?>
                 <p>
-                    Imperdiet interdum donec eget metus auguen unc vel lorem ispuet Ibu lum orci eget, viverra elit liquam erat volut pat phas ellus ac sodales Lorem ipsum dolor sit amet, consectetur adipisicing elit uasi quidem minus id iprum omnis.
-                    Lorem ipsum dolor Phas ellus ac sodales felis tiam.
+                    <?= $brideBio ?>
                 </p>
                 <!-- small social-icons -->
-                <div class="social-media smaller">
-                    <a href="#" title=""><i class="fa fa-twitter"></i></a>
-                    <a href="#" title=""><i class="fa fa-facebook"></i></a>
-                    <a href="#" title=""><i class="fa fa-linkedin"></i></a>
-                    <a href="#" title=""><i class="fa fa-pinterest"></i></a>
-                    <a href="#" title=""><i class="fa fa-instagram"></i></a>
-                </div>
+                <?php if (!empty($brideSocial)): ?>
+                    <div class="social-media smaller">
+                        <?php foreach ($brideSocial as $social): ?>
+                            <?php
+                            $socialUrl = $social['url'] ?? ($social['link'] ?? '');
+                            $socialIcon = $social['icon'] ?? ($social['platform'] ?? 'link');
+                            if ($socialUrl === '') {
+                                continue;
+                            }
+                            ?>
+                            <a href="<?= esc($socialUrl) ?>" title="" target="_blank" rel="noopener">
+                                <i class="fa fa-<?= esc($socialIcon) ?>"></i>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
                 <!-- /social-icons -->
             </div>
             <!-- /col-md-5 -->
             <!-- Groom Info -->
             <div class="col-md-5 res-margin">
-                <img src="img/groom.jpg" alt="" class="main-img img-responsive img-circle" />
-                <h4 class="text-ornament">Jonas</h4>
-                <h6 class="main-subheader">Hopeless Romantic</h6>
+                <img src="<?= esc($groomPhoto) ?>" alt="<?= esc($groomName) ?>" class="main-img img-responsive img-circle" />
+                <h4 class="text-ornament"><?= esc($groomName !== '' ? $groomName : $groomSectionTitle) ?></h4>
+                <?php if ($groomSubtitle !== ''): ?>
+                    <h6 class="main-subheader"><?= esc($groomSubtitle) ?></h6>
+                <?php endif; ?>
                 <p>
-                    Imperdiet interdum donec eget metus auguen unc vel lorem ispuet Ibu lum orci eget, viverra elit liquam erat volut pat phas ellus ac sodales Lorem ipsum dolor sit amet, consectetur adipisicing elit uasi quidem minus id iprum omnis.
-                    Lorem ipsum dolor Phas ellus ac sodales felis tiam.
+                    <?= $groomBio ?>
                 </p>
                 <!-- small social-icons -->
-                <div class="social-media smaller">
-                    <a href="#" title=""><i class="fa fa-twitter"></i></a>
-                    <a href="#" title=""><i class="fa fa-facebook"></i></a>
-                    <a href="#" title=""><i class="fa fa-linkedin"></i></a>
-                    <a href="#" title=""><i class="fa fa-pinterest"></i></a>
-                    <a href="#" title=""><i class="fa fa-instagram"></i></a>
-                </div>
+                <?php if (!empty($groomSocial)): ?>
+                    <div class="social-media smaller">
+                        <?php foreach ($groomSocial as $social): ?>
+                            <?php
+                            $socialUrl = $social['url'] ?? ($social['link'] ?? '');
+                            $socialIcon = $social['icon'] ?? ($social['platform'] ?? 'link');
+                            if ($socialUrl === '') {
+                                continue;
+                            }
+                            ?>
+                            <a href="<?= esc($socialUrl) ?>" title="" target="_blank" rel="noopener">
+                                <i class="fa fa-<?= esc($socialIcon) ?>"></i>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
                 <!-- /social-icons -->
             </div>
             <!-- /col-md-5 -->
@@ -546,304 +721,171 @@ foreach ($weddingParty as $member) {
     </div>
     <!-- /ornament4 -->
     <!-- section:story -->
-    <section id="story">
-        <div class="container">
-            <div class="section-heading">
-                <h2>Our Story</h2>
-                <!-- divider -->
-                <div class="hr"></div>
+    <?php if ($hasStory): ?>
+        <section id="story">
+            <div class="container">
+                <div class="section-heading">
+                    <h2><?= $storyTitle ?></h2>
+                    <!-- divider -->
+                    <div class="hr"></div>
+                </div>
+                <!-- /section-heading -->
+                <!-- Polaroids -->
+                <div class="row">
+                    <ul id="story-carousel" class="polaroids owl-carousel margin1">
+                        <?php foreach ($storyItems as $idx => $item): ?>
+                            <?php
+                            $itemImage = trim((string)($item['image_url'] ?? ($item['image'] ?? '')));
+                            $fallbackImage = getMediaUrl($mediaByCategory, 'story', $idx) ?: ($assetsBase . '/img/polaroid' . (($idx % 5) + 1) . '.jpg');
+                            $storyImage = $itemImage !== '' ? $itemImage : $fallbackImage;
+                            if ($storyImage !== '' && !preg_match('#^https?://#i', $storyImage)) {
+                                $storyImage = base_url($storyImage);
+                            }
+                            $storyYear = $item['year'] ?? ($item['date'] ?? '');
+                            $storyText = $item['description'] ?? ($item['text'] ?? '');
+                            ?>
+                            <li class="polaroid-item"
+                                data-0="transform:translatey(0%);"
+                                data-center="transform:translatey(0%);transform:rotate(-4deg)">
+                                <a href="<?= esc($storyImage) ?>" data-gal="prettyPhoto[gallery]">
+                                    <img alt="" src="<?= esc($storyImage) ?>" class="img-responsive" />
+                                    <span><?= esc($storyYear) ?></span>
+                                    <p><?= esc($storyText) ?></p>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                        <!-- /li polaroid -->
+                    </ul>
+                    <!-- /ul-polaroids -->
+                </div>
+                <!-- /row-fluid -->
             </div>
-            <!-- /section-heading -->
-            <!-- Polaroids -->
-            <div class="row">
-                <ul id="story-carousel" class="polaroids owl-carousel margin1">
-                    <!-- image1 -->
-                    <li class="polaroid-item"
-                        data-0="transform:translatey(0%);"
-                        data-center="transform:translatey(0%);transform:rotate(-4deg)">
-                        <a href="img/polaroid1.jpg" data-gal="prettyPhoto[gallery]">
-                            <img alt="" src="img/polaroid1.jpg" class="img-responsive" />
-                            <span>2010</span>
-                            <p>Our first trip together after dating for 3 Months</p>
-                        </a>
-                    </li>
-                    <!-- image2 -->
-                    <li class="polaroid-item" data-0="transform:translatey(-0%);"
-                        data-center="transform:translatey(0%);transform:rotate(8deg)">
-                        <a href="img/polaroid2.jpg" data-gal="prettyPhoto[gallery]">
-                            <img alt="" src="img/polaroid2.jpg" class="img-responsive" />
-                            <span>2012</span>
-                            <p>Moving Together...</p>
-                        </a>
-                    </li>
-                    <!-- image3 -->
-                    <li class="polaroid-item" data-0="transform:translatey(0%);rotate:0;"
-                        data-center="transform:translatey(0%); transform:rotate(-2deg)">
-                        <a href="img/polaroid3.jpg" data-gal="prettyPhoto[gallery]">
-                            <img alt="" src="img/polaroid3.jpg" class="img-responsive" />
-                            <span>2014</span>
-                            <p>We even got a dog!</p>
-                        </a>
-                    </li>
-                    <!-- image4 -->
-                    <li class="polaroid-item" data-0="transform:translatey(0%);"
-                        data-center="transform:translatey(0%);transform:rotate(-12deg)">
-                        <a href="img/polaroid4.jpg" data-gal="prettyPhoto[gallery]">
-                            <img alt="" src="img/polaroid4.jpg" class="img-responsive" />
-                            <span>2016</span>
-                            <p>Valentines Day Surprise</p>
-                        </a>
-                    </li>
-                    <!-- image5 -->
-                    <li class="polaroid-item" data-0="transform:translatey(0%);"
-                        data-center="transform:translatey(0%);transform:rotate(-12deg)">
-                        <a href="img/polaroid5.jpg" data-gal="prettyPhoto[gallery]">
-                            <img alt="" src="img/polaroid5.jpg" class="img-responsive" />
-                            <span>2017</span>
-                            <p>The Proposal</p>
-                        </a>
-                    </li>
-                    <!-- /li polaroid -->
-                </ul>
-                <!-- /ul-polaroids -->
-            </div>
-            <!-- /row-fluid -->
-        </div>
-        <!-- /container-->
-    </section>
+            <!-- /container-->
+        </section>
+    <?php endif; ?>
     <!-- /section ends -->
     <!-- Section:attendants -->
-    <section id="attendants" class="watercolor">
-        <!-- parallax ornament -->
-        <div class="ornament5 hidden-sm hidden-xs hidden-md" data-0="opacity:1;"
-            data--100-start="transform:translatex(-10%);"
-            data-center-bottom="transform:translatex(100%);">
-            <!-- illustration path in the color template CSS -->
-        </div>
-        <div class="container">
-            <div class="section-heading">
-                <h2>Bridemaids <span class="italic">&</span> Groomsman</h2>
-                <!-- divider -->
-                <div class="hr"></div>
+    <?php if ($hasWeddingParty): ?>
+        <section id="attendants" class="watercolor">
+            <!-- parallax ornament -->
+            <div class="ornament5 hidden-sm hidden-xs hidden-md" data-0="opacity:1;"
+                data--100-start="transform:translatex(-10%);"
+                data-center-bottom="transform:translatex(100%);">
+                <!-- illustration path in the color template CSS -->
             </div>
-            <!-- /section-heading -->
-            <!-- /col-md-3 -->
-            <div class="col-md-12">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#bridemaids" data-toggle="tab">The Ladies</a></li>
-                    <li><a href="#groomsman" data-toggle="tab">The Gentlemen</a></li>
-                </ul>
-                <!--/nav nav-tabs -->
-                <div class="tabbable">
-                    <div class="tab-content">
-                        <!-- tab 1 -->
-                        <div class="tab-pane active in fade" id="bridemaids">
-                            <!-- attendants carousel 1-->
-                            <div id="owl-attendants1" class="owl-carousel">
-                                <!-- attendants member 1 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant1.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Jolie Smith</h5>
-                                                <h4 class="description">Best Friend</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 2 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant2.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Maria Smith</h5>
-                                                <h4 class="description">Sister</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 3 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant3.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Paula Larson</h5>
-                                                <h4 class="description">Cousin</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 4-->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant4.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Anna Luise </h5>
-                                                <h4 class="description">School Friend</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 5 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant5.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Jane Mars</h5>
-                                                <h4 class="description">Aunt</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                            </div>
-                            <!-- /owl-carousel -->
-                        </div>
-                        <!--/ tab 1 ends -->
-                        <!-- tab 2 -->
-                        <div class="tab-pane fade" id="groomsman">
-                            <!-- Attendants carousel 2 -->
-                            <div id="owl-attendants2" class="owl-carousel">
-                                <!-- attendants member 6 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant6.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Jonas Smith</h5>
-                                                <h4 class="description">Best Friend</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 7 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant7.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Lucas Fonseca</h5>
-                                                <h4 class="description">Cousin</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 8 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant8.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Paul Larson</h5>
-                                                <h4 class="description">Business Partner</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 9 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <div class="wrap">
-                                            <!-- image -->
-                                            <img src="img/attendant9.jpg" alt="" class="img-circle img-responsive">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">John Doe </h5>
-                                                <h4 class="description">Friend</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                                <!-- attendants member 10 -->
-                                <div class="attendants-wrap col-md-12">
-                                    <div class="member text-center">
-                                        <!-- image -->
-                                        <img src="img/attendant10.jpg" alt="" class="img-circle img-responsive">
-                                        <div class="wrap">
-                                            <!-- Info -->
-                                            <div class="info">
-                                                <h5 class="name">Marlon Mars</h5>
-                                                <h4 class="description">Uncle</h4>
-                                            </div>
-                                            <!-- /info -->
-                                        </div>
-                                        <!-- /wrap -->
-                                    </div>
-                                    <!-- / member -->
-                                </div>
-                                <!--/ attendants-wrap -->
-                            </div>
-                            <!-- /owl-carousel -->
-                        </div>
-                        <!-- /tab-pane -->
-                    </div>
-                    <!-- /tab-content -->
+            <div class="container">
+                <div class="section-heading">
+                    <h2><?= $partyTitle ?></h2>
+                    <!-- divider -->
+                    <div class="hr"></div>
                 </div>
-                <!-- /tabbable -->
+                <!-- /section-heading -->
+                <!-- /col-md-3 -->
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs">
+                        <?php if ($hasBrideSide): ?>
+                            <li class="<?= $hasBrideSide ? 'active' : '' ?>"><a href="#bridemaids" data-toggle="tab">The Ladies</a></li>
+                        <?php endif; ?>
+                        <?php if ($hasGroomSide): ?>
+                            <li class="<?= !$hasBrideSide ? 'active' : '' ?>"><a href="#groomsman" data-toggle="tab">The Gentlemen</a></li>
+                        <?php endif; ?>
+                    </ul>
+                    <!--/nav nav-tabs -->
+                    <div class="tabbable">
+                        <div class="tab-content">
+                            <!-- tab 1 -->
+                            <?php if ($hasBrideSide): ?>
+                                <div class="tab-pane active in fade" id="bridemaids">
+                                    <!-- attendants carousel 1-->
+                                    <div id="owl-attendants1" class="owl-carousel">
+                                        <?php foreach ($partyByCategory['bride_side'] as $idx => $member): ?>
+                                            <?php
+                                            $memberImage = (string)($member['image_url'] ?? ($member['photo_url'] ?? ''));
+                                            if ($memberImage !== '' && !preg_match('#^https?://#i', $memberImage)) {
+                                                $memberImage = base_url($memberImage);
+                                            }
+                                            $memberImage = $memberImage ?: ($assetsBase . '/img/attendant' . (($idx % 5) + 1) . '.jpg');
+                                            $memberName = esc($member['full_name'] ?? ($member['name'] ?? ''));
+                                            $memberRole = esc($member['role'] ?? ($partyLabels[$member['category'] ?? 'other'] ?? ''));
+                                            ?>
+                                            <!-- attendants member -->
+                                            <div class="attendants-wrap col-md-12">
+                                                <div class="member text-center">
+                                                    <div class="wrap">
+                                                        <!-- image -->
+                                                        <img src="<?= esc($memberImage) ?>" alt="<?= esc($memberName) ?>" class="img-circle img-responsive">
+                                                        <!-- Info -->
+                                                        <div class="info">
+                                                            <h5 class="name"><?= esc($memberName) ?></h5>
+                                                            <h4 class="description"><?= esc($memberRole) ?></h4>
+                                                        </div>
+                                                        <!-- /info -->
+                                                    </div>
+                                                    <!-- /wrap -->
+                                                </div>
+                                                <!-- / member -->
+                                            </div>
+                                            <!--/ attendants-wrap -->
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <!-- /owl-carousel -->
+                                </div>
+                            <?php endif; ?>
+                            <!--/ tab 1 ends -->
+                            <!-- tab 2 -->
+                            <?php if ($hasGroomSide): ?>
+                                <div class="tab-pane fade <?= !$hasBrideSide ? 'active in' : '' ?>" id="groomsman">
+                                    <!-- Attendants carousel 2 -->
+                                    <div id="owl-attendants2" class="owl-carousel">
+                                        <?php foreach ($partyByCategory['groom_side'] as $idx => $member): ?>
+                                            <?php
+                                            $memberImage = (string)($member['image_url'] ?? ($member['photo_url'] ?? ''));
+                                            if ($memberImage !== '' && !preg_match('#^https?://#i', $memberImage)) {
+                                                $memberImage = base_url($memberImage);
+                                            }
+                                            $memberImage = $memberImage ?: ($assetsBase . '/img/attendant' . (($idx % 5) + 6) . '.jpg');
+                                            $memberName = esc($member['full_name'] ?? ($member['name'] ?? ''));
+                                            $memberRole = esc($member['role'] ?? ($partyLabels[$member['category'] ?? 'other'] ?? ''));
+                                            ?>
+                                            <!-- attendants member -->
+                                            <div class="attendants-wrap col-md-12">
+                                                <div class="member text-center">
+                                                    <div class="wrap">
+                                                        <!-- image -->
+                                                        <img src="<?= esc($memberImage) ?>" alt="<?= esc($memberName) ?>" class="img-circle img-responsive">
+                                                        <!-- Info -->
+                                                        <div class="info">
+                                                            <h5 class="name"><?= esc($memberName) ?></h5>
+                                                            <h4 class="description"><?= esc($memberRole) ?></h4>
+                                                        </div>
+                                                        <!-- /info -->
+                                                    </div>
+                                                    <!-- /wrap -->
+                                                </div>
+                                                <!-- / member -->
+                                            </div>
+                                            <!--/ attendants-wrap -->
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <!-- /owl-carousel -->
+                                </div>
+                            <?php endif; ?>
+                            <!-- /tab-pane -->
+                        </div>
+                        <!-- /tab-content -->
+                    </div>
+                    <!-- /tabbable -->
+                </div>
+                <!-- /col-md-12 -->
             </div>
-            <!-- /col-md-12 -->
-        </div>
-        <!-- /.container -->
-    </section>
+            <!-- /.container -->
+        </section>
+    <?php endif; ?>
     <!-- /Section ends -->
     <!-- Section: Event-->
     <section id="event">
         <div class="section-heading">
-            <h2>The Event</h2>
+            <h2><?= $eventsTitle ?></h2>
             <!-- divider -->
             <div class="hr"></div>
         </div>
@@ -853,16 +895,12 @@ foreach ($weddingParty as $member) {
                 <div class="col-md-6" data--100-start="transform:translatey(-60%);"
                     data-center-bottom="transform:translatey(20%);">
                     <!-- image -->
-                    <img src="img/party2.jpg" alt="" class="img-photo rotate1 img-responsive">
+                    <img src="<?= esc($eventImagePrimary) ?>" alt="<?= esc($eventsTitle) ?>" class="img-photo rotate1 img-responsive">
                 </div>
                 <!-- paper well -->
                 <div class="well col-md-6">
-                    <h3>Celebrate With Us</h3>
-                    <p> Imperdiet interdum donec eget metus auguen unc vel lorem ispuet Ibu lum orci eget, viverra elit liquam erat Elit uasi quidem minus id omnis a nibh fusce mollis imperdie tlorem ipuset phas ellus ac sodales Lorem ipsum dolor Phas ellus
-                    </p>
-                    <p>
-                        Sed eu odio interdum, molestie lorem nec, interdum leo. Suspendisse et auctor justo. Donec fermentum, nibh sit amet commodo hendrerit, enim risus mattis dui, tincidunt ornare dolor purus vel eros. Integer porta ex massa. Morbi ut nisl mauris. Nullam mollis consectetur ex vitae bibendum. Phasellus rhoncus placerat scelerisque.
-                    </p>
+                    <h3><?= $eventIntroTitle ?></h3>
+                    <p><?= $eventIntroText ?></p>
                 </div>
                 <!-- /well -->
             </div>
@@ -870,93 +908,103 @@ foreach ($weddingParty as $member) {
             <div class="row margin1">
                 <!-- paper well -->
                 <div class="well col-md-7">
-                    <h5>A very special day...</h5>
-                    <p>Imperdiet interdum donec eget metus auguen unc vel lorem ispuet Ibu lum orci eget, viverra elit liquam erat Elit uasi quidem minus id omnis a nibh fusce mollis imperdie tlorem ipuset phas ellus ac sodales Lorem ipsum dolor Phas ellus
-                    </p>
+                    <h5><?= $eventDetailsTitle ?></h5>
+                    <p><?= $eventDetailsText ?></p>
                     <p class="alert">
-                        Yincidunt ornare dolor purus vel eros. Integer porta ex massa. Morbi ut nisl mauris. Nullam mollis consectetur ex vitae bibendum. Phasellus rhoncus placerat scelerisque.
+                        <?= $eventAlertText ?>
                     </p>
                 </div>
                 <!-- /well -->
                 <div class="col-md-5" data--100-start="transform:translatey(-60%);"
                     data-center-bottom="transform:translatey(20%);">
                     <!-- image -->
-                    <img src="img/party1.jpg" alt="" class="img-photo rotate2 img-responsive">
+                    <img src="<?= esc($eventImageSecondary) ?>" alt="<?= esc($eventsTitle) ?>" class="img-photo rotate2 img-responsive">
                 </div>
                 <!-- /col-md-5 -->
             </div>
             <!-- /row-->
         </div>
         <!-- /container -->
-        <!-- row-fluid -->
-        <div class="container-fluid" id="scroll-effect">
-            <div class="col-lg-7 col-md-7 no-padding">
-                <!-- map-->
-                <div id="map-canvas"></div>
-                <!-- image1 -->
-            </div>
-            <!-- paper well with effect -->
-            <div class="well col-lg-5 col-lg-offset-7 col-md-5 col-md-offset-7 " data-start="left: 20%;" data-center="left:0%;">
-                <div class="col-md-12 text-center">
-                    <h3 class="date">June 19, 2022</h3>
-                    <h6>6 PM - 11 PM</h6>
-                    <h6>Westminster Cathedral, London UK</h6>
-                    <hr>
-                    <p>Ispuet Ibu lum orci eget, viverra elit liquam erat Elit uasi quidem minus id omnis a nibh fusce mollis imperdie tlorem ipuset phas ellus ac sodales Lorem ipsum dolor Phas ellus
-                    </p>
+        <?php if ($hasLocations): ?>
+            <!-- row-fluid -->
+            <div class="container-fluid" id="scroll-effect">
+                <div class="col-lg-7 col-md-7 no-padding">
+                    <!-- map-->
+                    <div id="map-canvas"></div>
+                    <!-- image1 -->
                 </div>
+                <!-- paper well with effect -->
+                <div class="well col-lg-5 col-lg-offset-7 col-md-5 col-md-offset-7 " data-start="left: 20%;" data-center="left:0%;">
+                    <div class="col-md-12 text-center">
+                        <h3 class="date"><?= esc($eventDateLabel) ?></h3>
+                        <?php if ($eventTimeRange !== ''): ?>
+                            <h6><?= esc($eventTimeRange) ?></h6>
+                        <?php endif; ?>
+                        <?php if ($venueName !== '' || $venueAddr !== ''): ?>
+                            <h6><?= esc(trim($venueName . ($venueAddr ? ', ' . $venueAddr : ''))) ?></h6>
+                        <?php endif; ?>
+                        <hr>
+                        <?php if (!empty($primaryLocation['description']) || !empty($primaryLocation['notes']) || !empty($event['venue_description'])): ?>
+                            <p><?= esc($primaryLocation['description'] ?? ($primaryLocation['notes'] ?? ($event['venue_description'] ?? ''))) ?></p>
+                        <?php else: ?>
+                            <p><?= esc($ctaSubheading) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <!-- /well -->
             </div>
-            <!-- /well -->
-        </div>
-        <!-- /row-fluid -->
+            <!-- /row-fluid -->
+        <?php endif; ?>
     </section>
     <!-- Section ends -->
     <!-- Section: Quote -->
     <section id="quote" class="container-fluid">
         <div class="col-md-7 col-centered" data-center-top="opacity: 1" data-center-bottom="opacity: 0">
             <blockquote>
-                <h2>Being deeply loved by someone gives you strength, while loving someone deeply gives you courage.</h2>
+                <h2><?= $quoteText ?></h2>
             </blockquote>
         </div>
         <!-- /col-md-7-->
     </section>
     <!-- /section ends -->
     <!-- Section: Registry -->
-    <section id="registry">
-        <div class="section-heading text-center">
-            <h2>Registry</h2>
-            <!-- divider -->
-            <div class="hr"></div>
-        </div>
-        <!--/section-heading -->
-        <div class="container text-center">
-            <div class="row">
-                <!-- Brand 1 -->
-                <div class="col-sm-6 col-md-3">
-                    <a href="#"><img src="img/brand1.png" alt="" class="brand col-centered img-responsive" /></a>
-                </div>
-                <!-- Brand 2 -->
-                <div class="col-sm-6 col-md-3 res-margin">
-                    <a href="#"><img src="img/brand2.png" alt="" class="brand col-centered img-responsive" /></a>
-                </div>
-                <!-- Brand 3 -->
-                <div class="col-sm-6 col-md-3 res-margin">
-                    <a href="#"><img src="img/brand3.png" alt="" class="brand col-centered img-responsive" /></a>
-                </div>
-                <!-- Brand 4 -->
-                <div class="col-sm-6 col-md-3 res-margin">
-                    <a href="#"><img src="img/brand4.png" alt="" class="brand col-centered img-responsive" /></a>
-                </div>
+    <?php if ($hasRegistry): ?>
+        <section id="registry">
+            <div class="section-heading text-center">
+                <h2><?= $registryTitle ?></h2>
+                <!-- divider -->
+                <div class="hr"></div>
             </div>
-            <!-- /row -->
-        </div>
-        <!-- /container -->
-    </section>
+            <!--/section-heading -->
+            <div class="container text-center">
+                <div class="row">
+                    <?php foreach ($registryItems as $idx => $item): ?>
+                        <?php
+                        $itemTitle = safeText($item['title'] ?? ($item['name'] ?? ''));
+                        $itemImage = (string)($item['image_url'] ?? '');
+                        if ($itemImage !== '' && !preg_match('#^https?://#i', $itemImage)) {
+                            $itemImage = base_url($itemImage);
+                        }
+                        $itemImage = $itemImage ?: ($registryFallbacks[$idx % count($registryFallbacks)] ?? $registryFallbacks[0]);
+                        $itemUrl = safeText($item['product_url'] ?? ($item['external_url'] ?? '#'));
+                        ?>
+                        <div class="col-sm-6 col-md-3<?= $idx > 0 ? ' res-margin' : '' ?>">
+                            <a href="<?= esc($itemUrl) ?>" target="_blank" rel="noopener">
+                                <img src="<?= esc($itemImage) ?>" alt="<?= esc($itemTitle) ?>" class="brand col-centered img-responsive" />
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <!-- /row -->
+            </div>
+            <!-- /container -->
+        </section>
+    <?php endif; ?>
     <!-- Section ends -->
     <!-- Section: Gallery -->
     <section id="gallery" class="watercolor">
         <div class="section-heading text-center">
-            <h2>Gallery</h2>
+            <h2><?= $galleryTitle ?></h2>
             <!-- divider -->
             <div class="hr"></div>
         </div>
@@ -975,83 +1023,43 @@ foreach ($weddingParty as $member) {
                 <!-- Gallery -->
                 <div class="col-md-12 gallery margin1">
                     <div id="lightbox">
-                        <!-- Image 1 -->
-                        <div class="wedding col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery1.jpg" alt="">
-                                    <a href="img/gallery1.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
+                        <?php if (!empty($galleryAssets)): ?>
+                            <?php foreach ($galleryAssets as $idx => $g): ?>
+                                <?php
+                                $full = safeText($g['full'] ?? '');
+                                $thumb = safeText($g['thumb'] ?? $full);
+                                $alt = safeText($g['alt'] ?? $coupleTitle);
+                                if ($full === '') {
+                                    continue;
+                                }
+                                $class = $idx % 2 === 0 ? 'wedding' : 'our-photos';
+                                ?>
+                                <div class="<?= esc($class) ?> col-lg-4 col-sm-6 col-md-6">
+                                    <div class="isotope-item">
+                                        <div class="gallery-thumb">
+                                            <img class="img-responsive" src="<?= esc($thumb) ?>" alt="<?= esc($alt) ?>">
+                                            <a href="<?= esc($full) ?>" data-gal="prettyPhoto[gallery]" title="<?= esc($alt) ?>">
+                                                <span class="overlay-mask"></span>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Image 2 -->
-                        <div class="our-photos col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery2.jpg" alt="">
-                                    <a href="img/gallery2.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach ($galleryFallbacks as $idx => $fallback): ?>
+                                <?php $class = $idx % 2 === 0 ? 'wedding' : 'our-photos'; ?>
+                                <div class="<?= esc($class) ?> col-lg-4 col-sm-6 col-md-6">
+                                    <div class="isotope-item">
+                                        <div class="gallery-thumb">
+                                            <img class="img-responsive" src="<?= esc($fallback) ?>" alt="<?= esc($coupleTitle) ?>">
+                                            <a href="<?= esc($fallback) ?>" data-gal="prettyPhoto[gallery]" title="<?= esc($coupleTitle) ?>">
+                                                <span class="overlay-mask"></span>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Image 3 -->
-                        <div class="wedding col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery3.jpg" alt="">
-                                    <a href="img/gallery3.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Image 4 -->
-                        <div class="wedding col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery4.jpg" alt="">
-                                    <a href="img/gallery4.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Image 5 -->
-                        <div class="wedding col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery5.jpg" alt="">
-                                    <a href="img/gallery5.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Image 6 -->
-                        <div class="our-photos col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery6.jpg" alt="">
-                                    <a href="img/gallery6.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Image 7 -->
-                        <div class="our-photos col-lg-4 col-sm-6 col-md-6">
-                            <div class="isotope-item">
-                                <div class="gallery-thumb">
-                                    <img class="img-responsive" src="img/gallery7.jpg" alt="">
-                                    <a href="img/gallery7.jpg" data-gal="prettyPhoto[gallery]" title="You can add caption to pictures.">
-                                        <span class="overlay-mask"></span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                     <!-- /lightbox-->
                 </div>
@@ -1078,26 +1086,31 @@ foreach ($weddingParty as $member) {
         </div>
         <div class="container">
             <div class="section-heading">
-                <h2>RSVP</h2>
+                <h2><?= $rsvpHeading ?></h2>
                 <!-- divider -->
                 <div class="hr"></div>
             </div>
             <!-- /section-heading -->
             <div class="col-lg-5">
                 <!-- image -->
-                <img src="img/rsvp.jpg" alt="" class="margin1 img-photo rotate2 img-responsive">
+                <img src="<?= esc($assetsBase . '/img/rsvp.jpg') ?>" alt="<?= esc($rsvpHeading) ?>" class="margin1 img-photo rotate2 img-responsive">
             </div>
             <!-- well -->
             <div class="col-lg-7 well">
-                <div id="rsvp_form">
+                <form id="rsvp_form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                    <?= csrf_field() ?>
                     <div class="form-group text-center">
                         <!-- name field-->
                         <h5>Full Name<span class="required">*</span></h5>
                         <input type="text" name="name" class="form-control input-field" required="">
+                        <h5>Email<span class="required">*</span></h5>
+                        <input type="email" name="email" class="form-control input-field" required="">
+                        <h5>Phone<span class="required">*</span></h5>
+                        <input type="text" name="phone" class="form-control input-field" required="">
                         <!-- checkbox attending-->
-                        <input id="yes" type="radio" value="Accepts with pleasure" name="attending" />
+                        <input id="yes" type="radio" value="yes" name="attending" required="" />
                         <label for="yes" class="side-label">Accepts with pleasure</label>
-                        <input id="no" type="radio" value="Declines with regrets" name="attending" />
+                        <input id="no" type="radio" value="no" name="attending" />
                         <label for="no" class="side-label">Declines with regrets</label>
                         <!-- if attending=yes then the form bellow will show -->
                         <div class="accept-form">
@@ -1115,6 +1128,8 @@ foreach ($weddingParty as $member) {
                         <!--/accept form -->
                         <!-- if attending=no then only the message box will show -->
                         <div class="message-comments">
+                            <h5>Song Request</h5>
+                            <input type="text" name="song_request" class="form-control input-field">
                             <h5>Message</h5>
                             <textarea name="message" id="message-box" class="textarea-field form-control" rows="3"></textarea>
                         </div>
@@ -1127,7 +1142,7 @@ foreach ($weddingParty as $member) {
                     <!-- /Form-group -->
                     <!-- Contact results -->
                     <div id="contact_results"></div>
-                </div>
+                </form>
                 <!-- /rsvp form-->
             </div>
             <!-- /well-->
@@ -1140,12 +1155,12 @@ foreach ($weddingParty as $member) {
         <div class="container">
             <div class="col-md-12 text-center">
                 <!-- Footer logo -->
-                <img src="img/logo.png" alt="" class="center-block img-responsive">
+                <img src="<?= esc($logoUrl) ?>" alt="<?= esc($coupleTitle) ?>" class="center-block img-responsive">
             </div>
             <!-- /col-md-12 -->
             <!-- Credits-->
             <div class="credits col-md-12 text-center">
-                Copyright © 2022 - Designed by <a href="http://www.ingridkuhn.com/">Ingrid Kuhn</a>
+                Copyright © <?= esc((string)date('Y')) ?> - <?= esc($templateMeta['footer_owner'] ?? '13Bodas') ?>
                 <!-- Go To Top Link -->
                 <div class="page-scroll hidden-sm hidden-xs">
                     <a href="#page-top" class="back-to-top"><i class="fa fa-angle-up"></i></a>
@@ -1159,6 +1174,18 @@ foreach ($weddingParty as $member) {
     <!-- Core JavaScript Files -->
     <script src="<?= $assetsBase ?>/js/jquery.min.js"></script>
     <script src="<?= $assetsBase ?>/js/bootstrap.min.js"></script>
+    <script>
+        var c_days = <?= (int)$countdownDays ?>;
+        var c_hours = <?= (int)$countdownHours ?>;
+        var c_minutes = <?= (int)$countdownMinutes ?>;
+        var c_seconds = <?= (int)$countdownSeconds ?>;
+        var map_markers = <?= json_encode($mapMarkers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var map_initial_latitude = <?= $mapInitialLat !== null ? (float)$mapInitialLat : 'null' ?>;
+        var map_initial_longitude = <?= $mapInitialLng !== null ? (float)$mapInitialLng : 'null' ?>;
+        var slidehow_images = <?= json_encode($heroImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var map_marker_icon = <?= json_encode($assetsBase . '/img/mapmarker.png', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var countdown_date = <?= json_encode($countdownDateString, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
     <!-- Main Js -->
     <script src="<?= $assetsBase ?>/js/main.js"></script>
     <!-- RSVP form -->
@@ -1172,7 +1199,7 @@ foreach ($weddingParty as $member) {
     <!-- Bootstrap Select Tool (For Module #4) -->
     <script src="<?= $assetsBase ?>/switcher/js/bootstrap-select.js"></script>
     <!-- UI jQuery (For Module #5 and #6) -->
-    <script src="../../../ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.js" type="text/javascript"></script>
     <!-- All Scripts & Plugins -->
     <script src="<?= $assetsBase ?>/switcher/js/dmss.js"></script>
 </body>
