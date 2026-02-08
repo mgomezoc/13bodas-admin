@@ -178,25 +178,25 @@ function getText(array $copyPayload, array $defaults, string $key, string $hardc
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline = getText($copyPayload, $defaults, 'hero_tagline', 'Are getting married');
-$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Save the date');
+$heroTagline = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Guarda la fecha');
 $countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
 $ctaHeading = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
 $ctaSubheading = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'RSVP');
+$rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
 $brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
 $groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle = getText($copyPayload, $defaults, 'story_title', 'Our Story');
-$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'The Event');
-$galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Gallery');
-$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Registry');
-$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Bridemaids & Groomsman');
-$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'About The Couple');
+$storyTitle = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'El evento');
+$galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
+$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
+$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Damas y Caballeros');
+$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'Sobre la pareja');
 $quoteText = getText(
     $copyPayload,
     $defaults,
     'quote_text',
-    'Being deeply loved by someone gives you strength, while loving someone deeply gives you courage.'
+    'Ser profundamente amado por alguien te da fuerza, mientras que amar profundamente a alguien te da valentía.'
 );
 $saveDateText = getText(
     $copyPayload,
@@ -204,14 +204,14 @@ $saveDateText = getText(
     'save_date_text',
     'Gracias por acompañarnos en este día tan especial.'
 );
-$eventIntroTitle = getText($copyPayload, $defaults, 'event_intro_title', 'Celebrate With Us');
+$eventIntroTitle = getText($copyPayload, $defaults, 'event_intro_title', 'Celebra con nosotros');
 $eventIntroText = getText(
     $copyPayload,
     $defaults,
     'event_intro_text',
     'Será un honor compartir este momento contigo.'
 );
-$eventDetailsTitle = getText($copyPayload, $defaults, 'event_details_title', 'A very special day...');
+$eventDetailsTitle = getText($copyPayload, $defaults, 'event_details_title', 'Un día muy especial...');
 $eventDetailsText = getText(
     $copyPayload,
     $defaults,
@@ -303,6 +303,7 @@ $heroWallRight = $heroImages[2] ?? ($assetsBase . '/img/couple2.jpg');
 // Couple photos
 $groomPhoto = getMediaUrl($mediaByCategory, 'groom') ?: ($assetsBase . '/img/groom.jpg');
 $bridePhoto = getMediaUrl($mediaByCategory, 'bride') ?: ($assetsBase . '/img/bride.jpg');
+$rsvpBg = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/img/rsvp.jpg');
 
 // Event images
 $eventImagePrimary = getMediaUrl($mediaByCategory, 'event', 0) ?: ($assetsBase . '/img/party2.jpg');
@@ -522,26 +523,26 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
             <!-- Collect the nav links, forms, and other content for toggling  -->
             <div class="collapse navbar-collapse" id="navbar-brand-centered">
                 <ul class="nav navbar-nav page-scroll">
-                    <li class="active"><a href="#page-top">Home</a></li>
-                    <li><a href="#about">About</a></li>
+                    <li class="active"><a href="#page-top">Inicio</a></li>
+                    <li><a href="#about">Sobre nosotros</a></li>
                     <?php if ($hasStory): ?>
-                        <li><a href="#story">Our Story</a></li>
+                        <li><a href="#story">Nuestra historia</a></li>
                     <?php endif; ?>
                     <?php if ($hasWeddingParty): ?>
-                        <li><a href="#attendants">Attendants</a></li>
+                        <li><a href="#attendants">Cortejo</a></li>
                     <?php endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right page-scroll">
-                    <li><a href="#event">The Event</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
-                    <li><a href="#rsvp">RSVP</a></li>
+                    <li><a href="#event">El evento</a></li>
+                    <li><a href="#gallery">Galería</a></li>
+                    <li><a href="#rsvp">Confirmación</a></li>
                     <?php if (!empty($blogPosts)): ?>
                         <li class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Pages<b class="caret"></b></a>
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Páginas<b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li><a href="blog.html">Blog Home</a></li>
-                                <li><a href="blog-single.html">Blog Post</a></li>
-                                <li><a href="elements.html">Elements</a></li>
+                                <li><a href="blog.html">Blog</a></li>
+                                <li><a href="blog-single.html">Entrada</a></li>
+                                <li><a href="elements.html">Elementos</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>
@@ -583,7 +584,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
         <div class="intro-heading col-md-12 text-center" data-0="opacity:1;"
             data--100-start="transform:translatey(0%);"
             data-center-bottom="transform:translatey(30%);">
-            <h1><?= esc($brideName !== '' ? $brideName : 'Love') ?> <span class="italic"> & </span> <?= esc($groomName !== '' ? $groomName : 'Story') ?>
+            <h1><?= esc($brideName !== '' ? $brideName : 'Amor') ?> <span class="italic"> & </span> <?= esc($groomName !== '' ? $groomName : 'Historia') ?>
             </h1>
             <h5 class="margin1 text-ornament"><?= $heroTagline ?></h5>
         </div>
@@ -616,7 +617,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                     </div>
                     <!--/section heading -->
                     <?php if ($rsvpDeadlineLabel !== ''): ?>
-                        <h5 class="margin1">Please RSVP before <?= esc($rsvpDeadlineLabel) ?></h5>
+                        <h5 class="margin1">Por favor confirma antes del <?= esc($rsvpDeadlineLabel) ?></h5>
                     <?php endif; ?>
                     <p>
                         <?= $saveDateText ?>
@@ -628,7 +629,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                     </div>
                     <!-- /margin1-->
                     <div class="page-scroll">
-                        <a href="#rsvp" class="btn">RSVP now</a>
+                        <a href="#rsvp" class="btn">Confirma ahora</a>
                     </div>
                     <!-- /page-scroll -->
                 </div>
@@ -1015,9 +1016,9 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <!-- Navigation -->
                 <div class="text-center col-md-12">
                     <ul class="nav nav-pills category text-center" role="tablist" id="gallerytab">
-                        <li class="active"><a href="#" data-toggle="tab" data-filter="*">All</a>
-                        <li><a href="#" data-toggle="tab" data-filter=".our-photos">Our Photos</a></li>
-                        <li><a href="#" data-toggle="tab" data-filter=".wedding">Wedding</a></li>
+                        <li class="active"><a href="#" data-toggle="tab" data-filter="*">Todas</a>
+                        <li><a href="#" data-toggle="tab" data-filter=".our-photos">Nuestras fotos</a></li>
+                        <li><a href="#" data-toggle="tab" data-filter=".wedding">Boda</a></li>
                     </ul>
                 </div>
                 <!-- Gallery -->
@@ -1093,7 +1094,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
             <!-- /section-heading -->
             <div class="col-lg-5">
                 <!-- image -->
-                <img src="<?= esc($assetsBase . '/img/rsvp.jpg') ?>" alt="<?= esc($rsvpHeading) ?>" class="margin1 img-photo rotate2 img-responsive">
+                <img src="<?= esc($rsvpBg) ?>" alt="<?= esc($rsvpHeading) ?>" class="margin1 img-photo rotate2 img-responsive">
             </div>
             <!-- well -->
             <div class="col-lg-7 well">
@@ -1101,26 +1102,26 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                     <?= csrf_field() ?>
                     <div class="form-group text-center">
                         <!-- name field-->
-                        <h5>Full Name<span class="required">*</span></h5>
+                        <h5>Nombre completo<span class="required">*</span></h5>
                         <input type="text" name="name" class="form-control input-field" required="">
-                        <h5>Email<span class="required">*</span></h5>
+                        <h5>Correo electrónico<span class="required">*</span></h5>
                         <input type="email" name="email" class="form-control input-field" required="">
-                        <h5>Phone<span class="required">*</span></h5>
+                        <h5>Teléfono<span class="required">*</span></h5>
                         <input type="text" name="phone" class="form-control input-field" required="">
                         <!-- checkbox attending-->
                         <input id="yes" type="radio" value="yes" name="attending" required="" />
-                        <label for="yes" class="side-label">Accepts with pleasure</label>
+                        <label for="yes" class="side-label">Acepta con gusto</label>
                         <input id="no" type="radio" value="no" name="attending" />
-                        <label for="no" class="side-label">Declines with regrets</label>
+                        <label for="no" class="side-label">No podrá asistir</label>
                         <!-- if attending=yes then the form bellow will show -->
                         <div class="accept-form">
                             <!-- guests checkbox -->
-                            <h5>Are you bringing guests?<span class="required">*</span></h5>
-                            <input id="bringing-guests" type="radio" value="yes" name="guest" /><label for="bringing-guests" class="side-label">Yes</label>
+                            <h5>¿Traerás invitados?<span class="required">*</span></h5>
+                            <input id="bringing-guests" type="radio" value="yes" name="guest" /><label for="bringing-guests" class="side-label">Sí</label>
                             <input type="radio" id="just-me" value="no" name="guest" /><label for="just-me" class="side-label">No</label><br>
                             <!-- guest name text field-->
                             <div id="guest-name">
-                                <h5>Guest Names</h5>
+                                <h5>Nombres de invitados</h5>
                                 <input type="text" name="guests" class="form-control input-field">
                             </div>
                             <!--/guest-name -->
@@ -1128,14 +1129,14 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                         <!--/accept form -->
                         <!-- if attending=no then only the message box will show -->
                         <div class="message-comments">
-                            <h5>Song Request</h5>
+                            <h5>Canción sugerida</h5>
                             <input type="text" name="song_request" class="form-control input-field">
-                            <h5>Message</h5>
+                            <h5>Mensaje</h5>
                             <textarea name="message" id="message-box" class="textarea-field form-control" rows="3"></textarea>
                         </div>
                         <!--/message-comments -->
                         <div class="text-center">
-                            <button type="submit" id="submit_rsvp" value="Submit" class="btn">Submit</button>
+                            <button type="submit" id="submit_rsvp" value="Submit" class="btn">Enviar</button>
                         </div>
                         <!-- /col-md-12 -->
                     </div>
