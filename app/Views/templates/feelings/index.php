@@ -914,6 +914,8 @@ $storyItems = array_map(static function (array $item): array {
     <script src="<?= $assetsBase ?>/js/countdown.js"></script>
     <script src="<?= $assetsBase ?>/js/owl-carousel.js"></script>
     <script src="<?= $assetsBase ?>/js/fancybox.min.js"></script>
+    <script src="<?= $assetsBase ?>/js/wow.min.js"></script>
+    <script src="<?= $assetsBase ?>/js/magnific-popup.js"></script>
     <script src="<?= $assetsBase ?>/js/scripts.js"></script>
 
     <script>
