@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 // ================================================================
 // TEMPLATE: FEELINGS — app/Views/templates/feelings/index.php
 // Versión: 1.0
@@ -14,11 +16,16 @@ $mediaByCategory = $mediaByCategory ?? [];
 $galleryAssets = $galleryAssets ?? [];
 $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
+$guestGroups   = $guestGroups ?? [];
+$guests        = $guests ?? [];
+$rsvpResponses = $rsvpResponses ?? [];
 $menuOptions   = $menuOptions ?? [];
 $weddingParty  = $weddingParty ?? [];
 $faqs          = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
+$timelineItems = $timelineItems ?? [];
+$venueConfig   = $venueConfig ?? [];
 
 // --- Defaults from template meta_json ---
 $rawDefaults = $templateMeta['defaults'] ?? [];
@@ -143,7 +150,9 @@ if ($modStory && !empty($modStory['content_payload'])) {
     $raw = $modStory['content_payload'];
     $storyPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
-$storyItems = $storyPayload['items'] ?? $storyPayload['events'] ?? [];
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
 
 // --- Schedule module ---
 $modSchedule = findModule($modules, 'schedule');
@@ -153,6 +162,15 @@ if ($modSchedule && !empty($modSchedule['content_payload'])) {
     $schedulePayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
 }
 $scheduleItems = !empty($scheduleItems) ? $scheduleItems : ($schedulePayload['items'] ?? ($schedulePayload['events'] ?? []));
+
+// --- FAQ module ---
+$modFaq = findModule($modules, 'faq');
+$faqPayload = [];
+if ($modFaq && !empty($modFaq['content_payload'])) {
+    $raw = $modFaq['content_payload'];
+    $faqPayload = is_string($raw) ? (json_decode($raw, true) ?: []) : (is_array($raw) ? $raw : []);
+}
+$faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text helper ---
 function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
@@ -168,6 +186,10 @@ $galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Momentos
 $eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
 $rsvpHeading       = getText($copyPayload, $defaults, 'rsvp_heading', '¿Nos acompañas?');
 $registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
+$partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$faqTitle          = getText($copyPayload, $defaults, 'faq_title', 'Preguntas frecuentes');
+$locationTitle     = getText($copyPayload, $defaults, 'location_title', 'Ubicación');
+$guestSummaryTitle = getText($copyPayload, $defaults, 'guest_summary_title', 'Resumen de invitados');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? 'Gracias por ser parte de nuestra historia'));
@@ -185,13 +207,68 @@ function getMediaUrl(array $mediaByCategory, string $category, int $index = 0, s
     $field = $fieldMap[$size] ?? 'file_url_original';
 
     $url = $m[$field] ?? ($m['file_url_original'] ?? ($m['file_url_large'] ?? ($m['file_url_thumbnail'] ?? '')));
+    if ($url !== '' && !preg_match('#^https?://#i', $url)) {
+        $url = base_url($url);
+    }
     return $url ? esc($url) : '';
 }
 
 $heroImage = getMediaUrl($mediaByCategory, 'hero', 0, 'large') ?: getMediaUrl($mediaByCategory, 'hero', 0, 'original');
-$coupleImage = getMediaUrl($mediaByCategory, 'couple', 0, 'large') ?: getMediaUrl($mediaByCategory, 'couple', 0, 'original');
 $brideImage = getMediaUrl($mediaByCategory, 'bride', 0, 'original');
+$coupleImage = $brideImage ?: (getMediaUrl($mediaByCategory, 'couple', 0, 'large') ?: getMediaUrl($mediaByCategory, 'couple', 0, 'original'));
 $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
+
+$partyLabels = [
+    'bride' => 'Damas de honor',
+    'groom' => 'Caballeros de honor',
+    'parents' => 'Padres',
+    'maids' => 'Damas',
+    'groomsmen' => 'Caballeros',
+    'family' => 'Familia',
+    'other' => 'Cortejo',
+];
+
+$partyByCategory = [];
+foreach ($weddingParty as $member) {
+    $category = $member['category'] ?? 'other';
+    $partyByCategory[$category][] = $member;
+}
+
+function findLocationLabel(array $eventLocations, array $item): string
+{
+    $locationId = $item['location_id'] ?? null;
+    if (!$locationId) {
+        return esc((string)($item['location'] ?? ''));
+    }
+    foreach ($eventLocations as $location) {
+        if (($location['id'] ?? null) === $locationId) {
+            return esc((string)($location['name'] ?? ''));
+        }
+    }
+    return '';
+}
+
+function normalizeAssetUrl(string $url): string
+{
+    if ($url === '') {
+        return '';
+    }
+    if (!preg_match('#^https?://#i', $url)) {
+        return base_url($url);
+    }
+    return $url;
+}
+
+$storyItems = array_map(static function (array $item): array {
+    if (!empty($item['image_url'])) {
+        $item['image_url'] = normalizeAssetUrl((string) $item['image_url']);
+    } elseif (!empty($item['image'])) {
+        $item['image_url'] = normalizeAssetUrl((string) $item['image']);
+    }
+    $item['date'] = $item['date'] ?? ($item['year'] ?? '');
+    $item['description'] = $item['description'] ?? ($item['text'] ?? '');
+    return $item;
+}, $storyItems);
 
 ?>
 <!DOCTYPE html>
@@ -242,6 +319,54 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
 
         .wpo-section-title h2 {
             color: var(--primary-color);
+        }
+
+        .wpo-story-section .wpo-section-title {
+            margin-bottom: 40px;
+        }
+
+        .wpo-story-section .tablinks {
+            margin-top: 12px;
+        }
+
+        .wpo-registry-section .registry-item {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wpo-registry-section .registry-img {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 220px;
+            background: #fff;
+        }
+
+        .wpo-registry-section .registry-img img {
+            max-height: 220px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .wpo-registry-section .registry-content {
+            flex: 1;
+        }
+
+        .feelings-faqs .faq-card {
+            padding: 24px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            height: 100%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .feelings-faqs .faq-card h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -383,11 +508,20 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
 
                                 <div class="tab-content">
                                     <?php foreach ($storyItems as $idx => $item): ?>
+                                        <?php
+                                        $fallbackImg = getMediaUrl($mediaByCategory, 'story', $idx, 'large')
+                                            ?: $assetsBase . '/images/story/img-' . (($idx % 8) + 1) . '.jpg';
+                                        $itemImg = trim((string)($item['image_url'] ?? ''));
+                                        $storyImg = $itemImg !== '' ? $itemImg : $fallbackImg;
+                                        if ($storyImg !== '') {
+                                            $storyImg = normalizeAssetUrl($storyImg);
+                                        }
+                                        ?>
                                         <div class="tab-pane <?= $idx === 0 ? 'active' : 'fade' ?>" id="story-<?= $idx ?>">
                                             <div class="wpo-story-item">
                                                 <div class="wpo-story-img">
-                                                    <?php if (!empty($item['image_url'])): ?>
-                                                        <img src="<?= esc($item['image_url']) ?>" alt="<?= esc($item['title']) ?>">
+                                                    <?php if ($storyImg): ?>
+                                                        <img src="<?= esc($storyImg) ?>" alt="<?= esc($item['title']) ?>">
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="wpo-story-content">
@@ -429,17 +563,26 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
                             <div class="col-lg-12">
                                 <div class="portfolio-grids gallery-container clearfix">
                                     <?php foreach ($galleryAssets as $item): ?>
+                                        <?php
+                                        $fullUrl = esc($item['full'] ?? '');
+                                        $thumbUrl = esc($item['thumb'] ?? $fullUrl);
+                                        $altText = esc($item['alt'] ?? $coupleTitle);
+                                        $caption = esc($item['caption'] ?? '');
+                                        ?>
                                         <div class="grid">
                                             <div class="img-holder">
-                                                <a href="<?= esc($item['file_url_original'] ?? '') ?>"
+                                                <a href="<?= $fullUrl ?>"
                                                     class="fancybox"
-                                                    data-fancybox-group="gall-1">
-                                                    <img src="<?= esc($item['file_url_large'] ?? $item['file_url_original'] ?? '') ?>"
-                                                        alt="<?= esc($item['alt_text'] ?? '') ?>"
+                                                    data-fancybox="gallery">
+                                                    <img src="<?= $thumbUrl ?>"
+                                                        alt="<?= $altText ?>"
                                                         class="img img-responsive">
                                                     <div class="hover-content">
                                                         <i class="ti-plus"></i>
                                                     </div>
+                                                    <?php if ($caption): ?>
+                                                        <span class="sr-only"><?= $caption ?></span>
+                                                    <?php endif; ?>
                                                 </a>
                                             </div>
                                         </div>
@@ -482,8 +625,8 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
                                         <div class="col-lg-6 col-md-6 col-12">
                                             <select class="form-control" name="attending" required>
                                                 <option value="">¿Asistirás? *</option>
-                                                <option value="1">Sí, asistiré</option>
-                                                <option value="0">No podré asistir</option>
+                                                <option value="accepted">Sí, asistiré</option>
+                                                <option value="declined">No podré asistir</option>
                                             </select>
                                         </div>
 
@@ -561,6 +704,11 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
                                                 <?php endif; ?>
                                                 <?php if (!empty($item['location'])): ?>
                                                     <li><?= esc($item['location']) ?></li>
+                                                <?php else: ?>
+                                                    <?php $locationLabel = findLocationLabel($eventLocations, $item);
+                                                    if ($locationLabel): ?>
+                                                        <li><?= $locationLabel ?></li>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </ul>
                                         </div>
@@ -582,6 +730,13 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
                             <img src="<?= $assetsBase ?>/images/section-title.png" alt="">
                         </div>
                         <h2><?= $registryTitle ?></h2>
+                        <?php if (!empty($registryStats['total'])): ?>
+                            <p>
+                                <?= esc((string)$registryStats['total']) ?> regalos ·
+                                <?= esc((string)$registryStats['available']) ?> disponibles ·
+                                <?= esc((string)$registryStats['claimed']) ?> apartados
+                            </p>
+                        <?php endif; ?>
                     </div>
 
                     <div class="row">
@@ -601,12 +756,133 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
                                             <p><?= esc($item['description']) ?></p>
                                         <?php endif; ?>
                                         <?php if (!empty($item['price'])): ?>
-                                            <span class="price"><?= esc($item['currency_code'] ?? 'MXN') ?> $<?= number_format($item['price'], 2) ?></span>
+                                            <?php $priceValue = (float) ($item['price'] ?? 0); ?>
+                                            <span class="price"><?= esc($item['currency_code'] ?? 'MXN') ?> $<?= number_format($priceValue, 2) ?></span>
                                         <?php endif; ?>
                                         <?php if (!empty($item['external_url'])): ?>
                                             <a href="<?= esc($item['external_url']) ?>" target="_blank" class="registry-link">Ver regalo</a>
                                         <?php endif; ?>
                                     </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- LOCATION SECTION -->
+        <?php if ($sectionVisibility['location'] ?? true): ?>
+            <section class="wpo-event-section" id="location">
+                <div class="container">
+                    <div class="wpo-section-title">
+                        <div class="section-title-img">
+                            <img src="<?= $assetsBase ?>/images/section-title2.png" alt="">
+                        </div>
+                        <h2><?= $locationTitle ?></h2>
+                        <?php if ($eventDateLabel): ?>
+                            <p><?= $eventDateLabel ?><?= $eventTimeRange ? ' · ' . esc($eventTimeRange) : '' ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="wpo-event-wrap">
+                        <div class="row">
+                            <div class="col col-lg-6 col-md-12 col-12">
+                                <div class="wpo-event-item">
+                                    <div class="wpo-event-text">
+                                        <h2><?= $venueName ?: esc((string)($venueConfig['name'] ?? '')) ?></h2>
+                                        <?php if ($venueAddr || !empty($venueConfig['address'])): ?>
+                                            <p><?= $venueAddr ?: esc((string)($venueConfig['address'] ?? '')) ?></p>
+                                        <?php endif; ?>
+                                        <?php if ($lat && $lng): ?>
+                                            <a href="https://www.google.com/maps?q=<?= esc((string)$lat) ?>,<?= esc((string)$lng) ?>" target="_blank" rel="noopener">Ver mapa</a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php if (!empty($eventLocations)): ?>
+                                <div class="col col-lg-6 col-md-12 col-12">
+                                    <div class="wpo-event-item">
+                                        <div class="wpo-event-text">
+                                            <h2>Otras ubicaciones</h2>
+                                            <ul>
+                                                <?php foreach ($eventLocations as $index => $location):
+                                                    if ($index === 0) continue;
+                                                ?>
+                                                    <li>
+                                                        <strong><?= esc((string)($location['name'] ?? '')) ?></strong>
+                                                        <?php if (!empty($location['address'])): ?>
+                                                            <span> · <?= esc((string)$location['address']) ?></span>
+                                                        <?php endif; ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- WEDDING PARTY SECTION -->
+        <?php if (!empty($weddingParty)): ?>
+            <section class="wpo-story-section" id="party">
+                <div class="container">
+                    <div class="wpo-section-title">
+                        <div class="section-title-img">
+                            <img src="<?= $assetsBase ?>/images/section-title.png" alt="">
+                        </div>
+                        <h2><?= $partyTitle ?></h2>
+                    </div>
+
+                    <div class="row">
+                        <?php foreach ($partyByCategory as $category => $members): ?>
+                            <div class="col col-lg-4 col-md-6 col-12">
+                                <div class="wpo-story-item">
+                                    <div class="wpo-story-content">
+                                        <div class="wpo-story-content-inner">
+                                            <h2><?= esc($partyLabels[$category] ?? 'Cortejo') ?></h2>
+                                            <ul>
+                                                <?php foreach ($members as $member): ?>
+                                                    <li>
+                                                        <?= esc((string)($member['name'] ?? ($member['full_name'] ?? ''))) ?>
+                                                        <?php if (!empty($member['role'])): ?>
+                                                            <span> · <?= esc((string)$member['role']) ?></span>
+                                                        <?php endif; ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- FAQ SECTION -->
+        <?php if (!empty($faqs)): ?>
+            <section class="wpo-story-section feelings-faqs" id="faqs">
+                <div class="container">
+                    <div class="wpo-section-title">
+                        <div class="section-title-img">
+                            <img src="<?= $assetsBase ?>/images/section-title.png" alt="">
+                        </div>
+                        <h2><?= $faqTitle ?></h2>
+                    </div>
+
+                    <div class="row">
+                        <?php foreach ($faqs as $faq): ?>
+                            <div class="col col-lg-6 col-md-6 col-12">
+                                <div class="faq-card">
+                                    <h3><?= esc((string)($faq['question'] ?? '')) ?></h3>
+                                    <p><?= esc((string)($faq['answer'] ?? '')) ?></p>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -638,6 +914,8 @@ $groomImage = getMediaUrl($mediaByCategory, 'groom', 0, 'original');
     <script src="<?= $assetsBase ?>/js/countdown.js"></script>
     <script src="<?= $assetsBase ?>/js/owl-carousel.js"></script>
     <script src="<?= $assetsBase ?>/js/fancybox.min.js"></script>
+    <script src="<?= $assetsBase ?>/js/wow.min.js"></script>
+    <script src="<?= $assetsBase ?>/js/magnific-popup.js"></script>
     <script src="<?= $assetsBase ?>/js/scripts.js"></script>
 
     <script>
