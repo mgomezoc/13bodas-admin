@@ -690,7 +690,7 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
                         <div class="col-md-6 offset-md-3 bg-white p-40"> <span class="oliven-title-meta text-center"><?= esc($rsvpHeading) ?></span>
                             <h2 class="oliven-title text-center"><?= esc($rsvpHeading) ?></h2>
                             <br>
-                            <form class="contact__form" method="post" action="<?= esc(base_url('i/' . $slug . '/rsvp')) ?>">
+                            <form class="contact__form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
                                 <!-- form message -->
                                 <?= csrf_field() ?>
                                 <div class="row">
@@ -709,7 +709,7 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input name="email" type="email" class="form-control" placeholder="Correo electrónico">
+                                            <input name="email" type="email" class="form-control" placeholder="Correo electrónico*" required>
                                         </div>
                                     </div>
                                     <div class="col-md-12">

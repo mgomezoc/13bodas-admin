@@ -617,7 +617,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
                 </div>
 
                 <div class="w-rsvp" data-reveal>
-                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= site_url("i/{$slug}/rsvp") ?>">
+                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
                         <?= csrf_field() ?>
 
                         <div class="w-field">
@@ -626,8 +626,8 @@ if (!empty($registryItems) && is_array($registryItems)) {
                         </div>
 
                         <div class="w-field">
-                            <label>Email (opcional)</label>
-                            <input type="email" name="email" autocomplete="email" placeholder="correo@ejemplo.com">
+                            <label>Email*</label>
+                            <input type="email" name="email" autocomplete="email" placeholder="correo@ejemplo.com" required>
                         </div>
 
                         <div class="w-field">
@@ -673,7 +673,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
             eventId: <?= json_encode($eventId) ?>,
             slug: <?= json_encode($slug) ?>,
             eventDateISO: <?= json_encode($eventDateISO) ?>,
-            rsvpUrl: <?= json_encode(site_url("i/{$slug}/rsvp")) ?>,
+            rsvpUrl: <?= json_encode(route_to('rsvp.submit', $slug)) ?>,
         };
     </script>
     <script src="<?= $assetsBase ?>/js/weddingo.js"></script>

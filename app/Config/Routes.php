@@ -228,7 +228,7 @@ $routes->post('api/leads', 'Api\Leads::store');
 // =============================================================================
 // RUTAS PÚBLICAS DE INVITACIONES
 // =============================================================================
-$routes->get('i/(:segment)', 'Invitation::view/$1');
+$routes->get('i/(:segment)', 'Invitation::view/$1', ['as' => 'invitation.view']);
 $routes->get('i/(:segment)/rsvp', 'Invitation::rsvp/$1');
-$routes->post('i/(:segment)/rsvp', 'Invitation::submitRsvp/$1');
+$routes->post('i/(:segment)/rsvp', 'RsvpController::submit/$1', ['as' => 'rsvp.submit']);
 $routes->get('i/(:segment)/rsvp/(:segment)', 'Invitation::rsvpWithCode/$1/$2');
