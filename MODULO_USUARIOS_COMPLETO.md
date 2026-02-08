@@ -47,4 +47,4 @@ Verifica que las rutas existan en app/Config/Routes.php dentro del grupo admin/u
 - `POST /admin/users/toggle-status/{id}` - Soporta AJAX
 
 ---
-Fecha: 2025-02-04 | Versión: 1.1
+Fecha: 2025-02-04 | Versión: 1.1 (sin cambios funcionales recientes)

@@ -31,15 +31,15 @@ Este documento describe los “agentes” (roles funcionales) del sistema y cóm
   - `GET /i/{slug}` (ruta pública). (app/Config/Routes.php)
 
 ### Agente: RSVP público (submit)
-- **Ubicación**: `app/Controllers/Invitation.php` (método `submitRsvp`).
-- **Responsabilidad**: Validar solicitudes RSVP públicas, crear grupo e invitado, registrar la respuesta en `rsvp_responses`, y devolver JSON. (app/Controllers/Invitation.php)
+- **Ubicación**: `app/Controllers/RsvpController.php` (método `submit`).
+- **Responsabilidad**: Validar solicitudes RSVP públicas, crear grupo e invitado, registrar la respuesta en `rsvp_responses` y enviar confirmación por email vía Resend. (app/Controllers/RsvpController.php, app/Libraries/RsvpSubmissionService.php, app/Libraries/RsvpMailer.php)
 - **Entradas/Disparadores**: `POST /i/{slug}/rsvp`. (app/Config/Routes.php)
-- **Salidas**: JSON con `success`, `message` y `data` (IDs generados). (app/Controllers/Invitation.php)
-- **Dependencias**: `EventModel` y acceso directo a `guest_groups`, `guests`, `rsvp_responses`. (app/Controllers/Invitation.php)
-- **Configuración**: Respeta `event.service_status` y `event.access_mode` para validar disponibilidad. (app/Controllers/Invitation.php)
-- **Errores comunes y manejo**: Respuestas JSON de error para método inválido, evento inexistente, evento no disponible o acceso restringido. (app/Controllers/Invitation.php)
+- **Salidas**: JSON con `success`, `message` y `data` (IDs generados) o redirect con flash message. (app/Controllers/RsvpController.php)
+- **Dependencias**: `EventModel`, `RsvpSubmissionService`, acceso a tablas `guest_groups`, `guests`, `rsvp_responses` y configuración `Config\Resend`. (app/Controllers/RsvpController.php, app/Libraries/RsvpSubmissionService.php, app/Config/Resend.php)
+- **Configuración**: Respeta `event.service_status` y `event.access_mode` para validar disponibilidad; requiere email válido. (app/Libraries/RsvpSubmissionService.php, app/Controllers/RsvpController.php)
+- **Errores comunes y manejo**: Respuestas JSON de error para validación, evento inexistente, evento no disponible o errores de envío. (app/Controllers/RsvpController.php, app/Libraries/RsvpMailer.php)
 - **Ejemplo de uso**:
-  - `POST /i/{slug}/rsvp` con `name`, `email`, `phone`, `attending`, `message`, `song_request`. (app/Controllers/Invitation.php)
+  - `POST /i/{slug}/rsvp` con `name`, `email`, `phone`, `attending`, `message`, `song_request`. (app/Controllers/RsvpController.php)
 
 ### Agente: Autenticación del panel (login)
 - **Ubicación**: `app/Controllers/Admin/Auth.php`.
@@ -72,12 +72,13 @@ Este documento describe los “agentes” (roles funcionales) del sistema y cóm
 **Observabilidad**: No se observan logs explícitos; errores se transforman en `PageNotFoundException`. (app/Controllers/Invitation.php)
 
 ### 2) Envío de RSVP público
-1. `POST /i/{slug}/rsvp` llega a `Invitation::submitRsvp`. (app/Config/Routes.php)
-2. Validación de disponibilidad del evento y payload mínimo. (app/Controllers/Invitation.php)
-3. Inserción en `guest_groups`, `guests`, `rsvp_responses`. (app/Controllers/Invitation.php)
-4. Respuesta JSON con éxito o error. (app/Controllers/Invitation.php)
+1. `POST /i/{slug}/rsvp` llega a `RsvpController::submit`. (app/Config/Routes.php)
+2. Validación de payload (`name`, `email`, `attending`) y disponibilidad del evento. (app/Controllers/RsvpController.php)
+3. Inserción en `guest_groups`, `guests`, `rsvp_responses`. (app/Libraries/RsvpSubmissionService.php)
+4. Envío de correo de confirmación vía Resend. (app/Libraries/RsvpMailer.php)
+5. Respuesta JSON con éxito o error / redirect con flash. (app/Controllers/RsvpController.php)
 
-**Observabilidad**: Errores capturados devuelven JSON; no hay logging explícito. (app/Controllers/Invitation.php)
+**Observabilidad**: Errores capturados devuelven JSON; no hay logging explícito. (app/Controllers/RsvpController.php)
 
 ### 3) Login de administración
 1. `GET /admin/login` muestra formulario de acceso. (app/Controllers/Admin/Auth.php)
@@ -122,7 +123,7 @@ class NuevoAgente extends BaseController
 | Agente | Path | Trigger | Output |
 | --- | --- | --- | --- |
 | Invitación pública (render) | `app/Controllers/Invitation.php` | `GET /i/{slug}` | HTML de template | 
-| RSVP público (submit) | `app/Controllers/Invitation.php` | `POST /i/{slug}/rsvp` | JSON `success/message` | 
+| RSVP público (submit) | `app/Controllers/RsvpController.php` | `POST /i/{slug}/rsvp` | JSON `success/message` o redirect | 
 | Auth admin | `app/Controllers/Admin/Auth.php` | `GET/POST /admin/login` | Sesión + redirección | 
 | AuthFilter | `app/Filters/AuthFilter.php` | `admin/*` | Redirección/continuación | 
 

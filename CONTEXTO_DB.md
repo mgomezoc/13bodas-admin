@@ -102,13 +102,14 @@
   - guest_id -> guests
   - meal_option_id -> menu_options
 - **Cols Importantes:**
+  - event_id (UUID) - Evento asociado
   - guest_id (UUID) - Invitado que responde
-  - attending_status (enum: pending/accepted/declined) - ¿Asistirá?
+  - attending / attending_status (enum: pending/accepted/declined) - ¿Asistirá?
   - meal_option_id (UUID) - Opción de menú seleccionada
   - dietary_restrictions (text) - Restricciones alimentarias
   - transportation_requested (tinyint) - Solicita transporte
   - song_request (varchar) - Canción solicitada
-  - message_to_couple (text) - Mensaje para los novios
+  - message / message_to_couple (text) - Mensaje para los novios
   - responded_at (datetime) - Fecha de respuesta
   - response_method (varchar) - Método de respuesta (web/email/etc)
 - **Propósito:** Respuestas RSVP de invitados. Captura preferencias y confirmaciones.

@@ -6,6 +6,7 @@
 - **Entorno**: Development
 - **Base URL**: `http://localhost/13bodas/public/`
 - **Base de datos**: `invitaciones_ci4` (MySQL)
+- **Email transaccional (RSVP)**: Resend (API)
 
 ## 🗂️ Estructura App/
 
@@ -26,6 +27,12 @@ app/
 │   ├── BaseController.php
 │   ├── Home.php
 │   └── Invitation.php
+│   └── RsvpController.php
+├── Libraries/
+│   ├── RsvpMailer.php
+│   └── RsvpSubmissionService.php
+├── Config/
+│   ├── Resend.php
 ├── Database/
 │   ├── Migrations/  # 2025-01-24 CreateUsersTable
 │   └── Seeds/       # UserSeeder
@@ -52,7 +59,7 @@ app/
 | `/privacidad` | `Home::privacidad` | Aviso de privacidad |
 | `/gracias` | `Home::gracias` | Página de agradecimiento |
 | `/i/:slug` | `Invitation::view` | Ver invitación pública |
-| `/i/:slug/rsvp` | `Invitation::rsvp` | Confirmación RSVP |
+| `/i/:slug/rsvp` | `RsvpController::submit` | Envío de RSVP público |
 
 ### Admin (Protegidas con filtro `auth`)
 | Módulo | Base Route | Funcionalidades |
@@ -100,9 +107,15 @@ app/
 
 ## 🎨 Templates Disponibles
 
-- **lovelove**: Template completo con slider, galería, RSVP
+- **aurora**: Template editorial con secciones destacadas
+- **feelings**: Template romántico con FAQ/agenda
+- **granboda**: Template clásico con módulos de evento
+- **lovely**: Template completo con slider, galería, RSVP
+- **majestic**: Template moderno con secciones modulares
+- **olivia**: Template minimalista con énfasis visual
 - **solene**: Template minimalista
 - **sukun**: Template moderno
+- **vibranza**: Template vibrante con galerías
 - **weddingo**: Template elegante
 
 ## 🔐 Autenticación
@@ -139,9 +152,10 @@ public/
    - Crear lista de regalos
 4. **Invitación Pública** (`/i/:slug`):
    - Vista personalizada por template
-   - Formulario RSVP con código de invitado
+   - Formulario RSVP público (POST `/i/:slug/rsvp`)
    - Selección de menú
    - Petición de canciones
+   - Confirmación por email vía Resend
 5. **Reportes**:
    - Exportar confirmaciones
    - Exportar opciones de comida
