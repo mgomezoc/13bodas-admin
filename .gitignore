@@ -130,3 +130,8 @@ _modules/*
 templates
 public/uploads/*
 !public/uploads/index.html
+#-------------------------
+# Templates y Archivos Temporales
+#-------------------------
+templates/
+*.tmp
