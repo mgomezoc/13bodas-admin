@@ -30,7 +30,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="<?= $item
+                <form method="POST" enctype="multipart/form-data" action="<?= $item
                     ? url_to('admin.timeline.update', $event['id'], $item['id'])
                     : url_to('admin.timeline.create', $event['id']) ?>">
                     <?= csrf_field() ?>
@@ -76,15 +76,25 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="image_url" class="form-label">URL de imagen</label>
+                        <label for="image_file" class="form-label">Imagen</label>
                         <input
-                            type="url"
-                            class="form-control <?= isset($errors['image_url']) ? 'is-invalid' : '' ?>"
-                            id="image_url"
-                            name="image_url"
-                            value="<?= esc(old('image_url', $item['image_url'] ?? '')) ?>">
-                        <?php if (isset($errors['image_url'])): ?>
-                            <div class="invalid-feedback"><?= esc($errors['image_url']) ?></div>
+                            type="file"
+                            class="form-control <?= isset($errors['image_file']) ? 'is-invalid' : '' ?>"
+                            id="image_file"
+                            name="image_file"
+                            accept="image/*">
+                        <?php if (isset($errors['image_file'])): ?>
+                            <div class="invalid-feedback"><?= esc($errors['image_file']) ?></div>
+                        <?php else: ?>
+                            <small class="form-text text-muted">Formatos permitidos: JPG, PNG, WEBP o GIF. Máximo 10MB.</small>
+                        <?php endif; ?>
+                        <?php if (!empty($item['image_url'])): ?>
+                            <?php $imageUrl = str_starts_with($item['image_url'], 'http') ? $item['image_url'] : base_url($item['image_url']); ?>
+                            <div class="mt-2">
+                                <a href="<?= esc($imageUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                    <i class="bi bi-image me-1"></i>Ver imagen actual
+                                </a>
+                            </div>
                         <?php endif; ?>
                     </div>
 

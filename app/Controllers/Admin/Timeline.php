@@ -67,9 +67,13 @@ class Timeline extends BaseController
             'year' => 'required|max_length[20]',
             'title' => 'required|max_length[150]',
             'description' => 'permit_empty',
-            'image_url' => 'permit_empty|max_length[255]',
             'sort_order' => 'permit_empty|integer',
         ];
+
+        $imageFile = $this->request->getFile('image_file');
+        if ($imageFile && $imageFile->getSize() > 0) {
+            $rules['image_file'] = 'uploaded[image_file]|is_image[image_file]|mime_in[image_file,image/jpg,image/jpeg,image/png,image/webp,image/gif]|max_size[image_file,10240]';
+        }
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
@@ -81,9 +85,19 @@ class Timeline extends BaseController
             'year' => $this->request->getPost('year'),
             'title' => $this->request->getPost('title'),
             'description' => $this->request->getPost('description'),
-            'image_url' => $this->request->getPost('image_url'),
             'sort_order' => (int) ($this->request->getPost('sort_order') ?? 0),
         ];
+
+        if ($imageFile && $imageFile->getSize() > 0 && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            $uploadPath = FCPATH . 'uploads/events/' . $eventId . '/timeline/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
+            $newName = $imageFile->getRandomName();
+            $imageFile->move($uploadPath, $newName);
+            $data['image_url'] = 'uploads/events/' . $eventId . '/timeline/' . $newName;
+        }
 
         if ($this->timelineModel->insert($data)) {
             return redirect()->to(url_to('admin.timeline.index', $eventId))
@@ -135,9 +149,13 @@ class Timeline extends BaseController
             'year' => 'required|max_length[20]',
             'title' => 'required|max_length[150]',
             'description' => 'permit_empty',
-            'image_url' => 'permit_empty|max_length[255]',
             'sort_order' => 'permit_empty|integer',
         ];
+
+        $imageFile = $this->request->getFile('image_file');
+        if ($imageFile && $imageFile->getSize() > 0) {
+            $rules['image_file'] = 'uploaded[image_file]|is_image[image_file]|mime_in[image_file,image/jpg,image/jpeg,image/png,image/webp,image/gif]|max_size[image_file,10240]';
+        }
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
@@ -147,9 +165,19 @@ class Timeline extends BaseController
             'year' => $this->request->getPost('year'),
             'title' => $this->request->getPost('title'),
             'description' => $this->request->getPost('description'),
-            'image_url' => $this->request->getPost('image_url'),
             'sort_order' => (int) ($this->request->getPost('sort_order') ?? 0),
         ];
+
+        if ($imageFile && $imageFile->getSize() > 0 && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            $uploadPath = FCPATH . 'uploads/events/' . $eventId . '/timeline/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
+            $newName = $imageFile->getRandomName();
+            $imageFile->move($uploadPath, $newName);
+            $data['image_url'] = 'uploads/events/' . $eventId . '/timeline/' . $newName;
+        }
 
         if ($this->timelineModel->update($itemId, $data)) {
             return redirect()->to(url_to('admin.timeline.index', $eventId))

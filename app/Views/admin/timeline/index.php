@@ -53,7 +53,8 @@
                                 </td>
                                 <td>
                                     <?php if (!empty($item['image_url'])): ?>
-                                        <a href="<?= esc($item['image_url']) ?>" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                        <?php $imageUrl = str_starts_with($item['image_url'], 'http') ? $item['image_url'] : base_url($item['image_url']); ?>
+                                        <a href="<?= esc($imageUrl) ?>" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
                                             <i class="bi bi-image me-1"></i>Ver imagen
                                         </a>
                                     <?php else: ?>
