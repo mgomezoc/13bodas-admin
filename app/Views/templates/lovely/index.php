@@ -540,6 +540,14 @@ foreach ($weddingParty as $member) {
                 padding: 20px;
             }
         }
+
+        .site-footer {
+            background: url("<?= esc($countdownBg) ?>") center center/cover no-repeat local;
+            text-align: center;
+            color: #fff;
+            padding: 160px 0;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -1068,45 +1076,6 @@ foreach ($weddingParty as $member) {
                 </div>
 
                 <?php if (!empty($registryItems)): ?>
-                    <div class="row registry-kpis">
-                        <div class="col-md-3">
-                            <div class="kpi d-flex align-items-center">
-                                <div class="icon"><i class="fa fa-gift"></i></div>
-                                <div>
-                                    <div style="font-weight:700; font-size:20px;"><?= (int)($registryStats['total'] ?? 0) ?></div>
-                                    <div style="opacity:.75;">Total regalos</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="kpi d-flex align-items-center">
-                                <div class="icon"><i class="fa fa-check"></i></div>
-                                <div>
-                                    <div style="font-weight:700; font-size:20px;"><?= (int)($registryStats['claimed'] ?? 0) ?></div>
-                                    <div style="opacity:.75;">Reclamados</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="kpi d-flex align-items-center">
-                                <div class="icon"><i class="fa fa-hourglass-half"></i></div>
-                                <div>
-                                    <div style="font-weight:700; font-size:20px;"><?= (int)($registryStats['available'] ?? 0) ?></div>
-                                    <div style="opacity:.75;">Disponibles</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="kpi d-flex align-items-center">
-                                <div class="icon"><i class="fa fa-money"></i></div>
-                                <div>
-                                    <div style="font-weight:700; font-size:20px;"><?= moneyFmt((float)($registryStats['total_value'] ?? 0), 'MXN') ?></div>
-                                    <div style="opacity:.75;">Valor total</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="row" style="margin-top:10px;">
                         <?php foreach ($registryItems as $it): ?>
                             <?php

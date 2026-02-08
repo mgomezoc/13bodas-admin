@@ -1144,6 +1144,7 @@ a:focus {
   color: #5e9a8e;
   margin: 0;
   text-shadow: 1px 1px 2px #999999;
+  background: transparent !important;
 }
 .site-header .navbar .navbar-nav .nav-item .nav-link {
   color: #413d3d;
@@ -2280,8 +2281,7 @@ a:focus {
 .wedding-couple-section .img-holder img {
   width: 100%;
   max-width: 100%;
-  opacity: 0;
-  visibility: hidden;
+  
 }
 .event .img-holder img {
   width: 100%;
@@ -2329,13 +2329,12 @@ a:focus {
   font-weight: 600;
   color: #3d3d3d;
   margin: 0 0 0.7em;
-  text-transform: uppercase;
 }
 
 @media (max-width: 1199px) {
   .wedding-couple-section .details h3 {
     font-size: 22px;
-    font-size: 1.22222rem;
+    font-size: 2.22222rem;
   }
 }
 
@@ -2753,13 +2752,12 @@ a:focus {
   font-weight: 600;
   color: #5e9a8e;
   margin: 0 0 0.5em;
-  text-transform: uppercase;
 }
 
 @media (max-width: 991px) {
   .story-section .story-timeline h3 {
     font-size: 20px;
-    font-size: 1.11111rem;
+    font-size: 2.11111rem;
   }
 }
 
@@ -2941,13 +2939,12 @@ a:focus {
   font-weight: 600;
   color: #3e3e3e;
   margin: 0 0 0.9em;
-  text-transform: uppercase;
 }
 
 @media (max-width: 1199px) {
   .events-section .event .details h3 {
     font-size: 18px;
-    font-size: 1rem;
+    font-size: 2rem;
   }
 }
 
