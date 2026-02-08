@@ -221,6 +221,12 @@ function getAllMediaUrls(array $mediaByCategory, string $category): array
 }
 
 $heroImages = getAllMediaUrls($mediaByCategory, 'hero');
+if (empty($heroImages) && !empty($galleryAssets)) {
+    foreach ($galleryAssets as $asset) {
+        $heroImages[] = $asset['full'] ?? '';
+    }
+    $heroImages = array_values(array_filter($heroImages));
+}
 if (empty($heroImages)) {
     $sliderDefaults = $tplAssets['slider_images'] ?? ['images/slider/slide-1.jpg', 'images/slider/slide-2.jpg'];
     foreach ($sliderDefaults as $s) {
@@ -406,19 +412,6 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
 
     <!-- Modernizr JS -->
     <script src="<?= $assetsBase ?>/js/modernizr-3.6.0.min.js"></script>
-
-    <script>
-        var c_days = <?= (int)$countdownDays ?>;
-        var c_hours = <?= (int)$countdownHours ?>;
-        var c_minutes = <?= (int)$countdownMinutes ?>;
-        var c_seconds = <?= (int)$countdownSeconds ?>;
-        var countdown_end_msg = <?= json_encode($defaults['countdown_end_msg'] ?? '¡El evento ya comenzó!', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-        var map_initial_latitude = <?= $mapInitialLat !== null ? (float)$mapInitialLat : 'null' ?>;
-        var map_initial_longitude = <?= $mapInitialLng !== null ? (float)$mapInitialLng : 'null' ?>;
-        var map_initial_zoom = <?= (int)($defaults['map_initial_zoom'] ?? 15) ?>;
-        var map_markers = <?= json_encode($mapMarkers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-        var slidehow_images = <?= json_encode($heroImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-    </script>
 </head>
 
 <body>
@@ -1118,6 +1111,18 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
 
     <!-- Template Scripts -->
     <script src="<?= $assetsBase ?>/js/variables.js"></script>
+    <script>
+        var c_days = <?= (int)$countdownDays ?>;
+        var c_hours = <?= (int)$countdownHours ?>;
+        var c_minutes = <?= (int)$countdownMinutes ?>;
+        var c_seconds = <?= (int)$countdownSeconds ?>;
+        var countdown_end_msg = <?= json_encode($defaults['countdown_end_msg'] ?? '¡El evento ya comenzó!', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var map_initial_latitude = <?= $mapInitialLat !== null ? (float)$mapInitialLat : 'null' ?>;
+        var map_initial_longitude = <?= $mapInitialLng !== null ? (float)$mapInitialLng : 'null' ?>;
+        var map_initial_zoom = <?= (int)($defaults['map_initial_zoom'] ?? 15) ?>;
+        var map_markers = <?= json_encode($mapMarkers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        var slidehow_images = <?= json_encode($heroImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
     <script src="<?= $assetsBase ?>/js/scripts.js"></script>
 </body>
 
