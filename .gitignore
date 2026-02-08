@@ -133,5 +133,5 @@ public/uploads/*
 #-------------------------
 # Templates y Archivos Temporales
 #-------------------------
-templates/
+/templates/
 *.tmp
