@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
@@ -68,6 +70,7 @@ class EventLocations extends BaseController
             'geo_lng' => $this->request->getPost('geo_lng') ?: null,
             'maps_url' => $this->request->getPost('maps_url'),
             'waze_url' => $this->request->getPost('waze_url'),
+            'image_url' => $this->request->getPost('image_url'),
             'notes' => $this->request->getPost('notes'),
             'sort_order' => $this->request->getPost('sort_order') ?: 0,
         ];
@@ -125,6 +128,7 @@ class EventLocations extends BaseController
             'geo_lng' => $this->request->getPost('geo_lng') ?: null,
             'maps_url' => $this->request->getPost('maps_url'),
             'waze_url' => $this->request->getPost('waze_url'),
+            'image_url' => $this->request->getPost('image_url'),
             'notes' => $this->request->getPost('notes'),
             'sort_order' => $this->request->getPost('sort_order') ?: 0,
         ];

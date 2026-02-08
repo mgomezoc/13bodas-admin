@@ -36,6 +36,7 @@
                         <th>Código</th>
                         <th>Nombre</th>
                         <th>Dirección</th>
+                        <th>Imagen</th>
                         <th>Orden</th>
                         <th class="text-end">Acciones</th>
                     </tr>
@@ -46,6 +47,13 @@
                         <td><?= esc($location['code']) ?></td>
                         <td><?= esc($location['name']) ?></td>
                         <td><?= esc($location['address'] ?? '-') ?></td>
+                        <td>
+                            <?php if (!empty($location['image_url'])): ?>
+                                <img src="<?= base_url(esc($location['image_url'])) ?>" alt="<?= esc($location['name']) ?>" style="width:60px;height:40px;object-fit:cover;border-radius:6px;">
+                            <?php else: ?>
+                                <span class="text-muted">—</span>
+                            <?php endif; ?>
+                        </td>
                         <td><?= esc($location['sort_order'] ?? 0) ?></td>
                         <td class="text-end">
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openLocationModal(<?= json_encode($location) ?>)' title="Editar">
@@ -103,6 +111,11 @@
                             <input type="url" name="waze_url" id="waze_url" class="form-control">
                         </div>
                         <div class="col-md-12 mb-3">
+                            <label class="form-label">Imagen del lugar</label>
+                            <input type="url" name="image_url" id="image_url" class="form-control" placeholder="URL de la imagen del lugar">
+                            <small class="text-muted">URL directa a la foto del lugar (ceremonia, recepción, etc.)</small>
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Notas</label>
                             <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
                         </div>
@@ -143,6 +156,7 @@ function openLocationModal(location = null) {
         $('#maps_url').val(location.maps_url);
         $('#waze_url').val(location.waze_url);
         $('#notes').val(location.notes);
+        $('#image_url').val(location.image_url);
         $('#sort_order').val(location.sort_order);
     }
 

@@ -3,6 +3,7 @@ $event            = $event ?? [];
 $template         = $template ?? [];
 $theme            = $theme ?? [];
 $modules          = $modules ?? [];
+$mediaByCategory  = $mediaByCategory ?? [];
 $galleryAssets    = $galleryAssets ?? [];
 $registryItems    = $registryItems ?? [];
 $registryStats    = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0.0];
@@ -13,6 +14,7 @@ $menuOptions      = $menuOptions ?? [];
 $weddingParty     = $weddingParty ?? [];
 $faqs             = $faqs ?? [];
 $scheduleItems    = $scheduleItems ?? [];
+$eventLocations   = $eventLocations ?? [];
 
 $assetsBase = base_url('templates/granboda');
 
@@ -22,10 +24,11 @@ $startRaw    = $event['event_date_start'] ?? null;
 $endRaw      = $event['event_date_end'] ?? null;
 $rsvpDeadline = $event['rsvp_deadline'] ?? null;
 
-$venueName = esc($event['venue_name'] ?? '');
-$venueAddr = esc($event['venue_address'] ?? '');
-$venueLat  = $event['venue_geo_lat'] ?? '';
-$venueLng  = $event['venue_geo_lng'] ?? '';
+$primaryLocation = $eventLocations[0] ?? [];
+$venueName = esc($primaryLocation['name'] ?? ($event['venue_name'] ?? ''));
+$venueAddr = esc($primaryLocation['address'] ?? ($event['venue_address'] ?? ''));
+$venueLat  = $primaryLocation['geo_lat'] ?? ($event['venue_geo_lat'] ?? '');
+$venueLng  = $primaryLocation['geo_lng'] ?? ($event['venue_geo_lng'] ?? '');
 
 $primaryColor = $theme['primary'] ?? '#7b4b94';
 $accentColor  = $theme['accent'] ?? '#f2c7cf';
@@ -61,6 +64,25 @@ function decodePayload(?string $payload): array
     if (!$payload) return [];
     $decoded = json_decode($payload, true);
     return is_array($decoded) ? $decoded : [];
+}
+
+function getMediaUrl(array $mediaByCategory, string $category, int $index = 0): string
+{
+    $items = $mediaByCategory[$category] ?? [];
+    if (!isset($items[$index]) || !is_array($items[$index])) {
+        return '';
+    }
+
+    $candidate = (string)($items[$index]['file_url_large'] ?? $items[$index]['file_url_thumbnail'] ?? $items[$index]['file_url_original'] ?? '');
+    if ($candidate === '') {
+        return '';
+    }
+
+    if (!preg_match('#^https?://#i', $candidate)) {
+        $candidate = base_url($candidate);
+    }
+
+    return $candidate;
 }
 
 $eventDateLabel = formatDateLabel($startRaw, 'd M Y');
@@ -160,8 +182,8 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                         <?php if (!empty($event['time_zone'])): ?>
                             <li><strong>Zona horaria:</strong> <?= safeText($event['time_zone']) ?></li>
                         <?php endif; ?>
-                        <?php if (!empty($event['venue_geo_lat']) && !empty($event['venue_geo_lng'])): ?>
-                            <li><strong>Coordenadas:</strong> <?= safeText($event['venue_geo_lat']) ?>, <?= safeText($event['venue_geo_lng']) ?></li>
+                        <?php if (!empty($venueLat) && !empty($venueLng)): ?>
+                            <li><strong>Coordenadas:</strong> <?= safeText($venueLat) ?>, <?= safeText($venueLng) ?></li>
                         <?php endif; ?>
                     </ul>
                 </div>
@@ -201,11 +223,18 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                 <div class="container">
                     <h2>Nuestra historia</h2>
                     <div class="timeline">
-                        <?php foreach ($timeline as $item): ?>
+                        <?php foreach ($timeline as $index => $item): ?>
+                            <?php
+                                $storyImage = $item['image'] ?? $item['image_url'] ?? getMediaUrl($mediaByCategory, 'story', $index);
+                                $storyText = $item['text'] ?? ($item['description'] ?? '');
+                            ?>
                             <div class="timeline__item">
+                                <?php if (!empty($storyImage)): ?>
+                                    <img src="<?= esc($storyImage) ?>" alt="<?= esc($item['title'] ?? 'Momento especial') ?>">
+                                <?php endif; ?>
                                 <span class="timeline__date"><?= esc($item['date'] ?? '') ?></span>
                                 <h3><?= esc($item['title'] ?? 'Momento especial') ?></h3>
-                                <p><?= esc($item['description'] ?? '') ?></p>
+                                <p><?= esc($storyText) ?></p>
                             </div>
                         <?php endforeach; ?>
                     </div>

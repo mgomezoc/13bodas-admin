@@ -16,6 +16,7 @@ $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' =>
 $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
 $venueConfig = $venueConfig ?? [];
+$eventLocations = $eventLocations ?? [];
 
 $tz = $event['time_zone'] ?? 'America/Mexico_City';
 $slug = $event['slug'] ?? '';
@@ -153,7 +154,7 @@ if (empty($galleryList)) {
     }
 }
 
-$venueLocations = $venueConfig['locations'] ?? [];
+$venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
 if (empty($venueLocations) && (!empty($event['venue_name']) || !empty($event['venue_address']))) {
     $venueLocations = [[
         'name' => $event['venue_name'] ?? '',
@@ -361,7 +362,8 @@ $sectionLinks = [
                         <?php foreach ($storyItems as $index => $item): ?>
                             <?php
                             $tabId = 'story-' . $index;
-                            $storyImg = $item['image'] ?? $item['image_url'] ?? skMediaUrl($mediaByCategory, 'story', $index);
+                            $rawStoryImg = $item['image'] ?? ($item['image_url'] ?? '');
+                            $storyImg = trim((string) $rawStoryImg) !== '' ? $rawStoryImg : skMediaUrl($mediaByCategory, 'story', $index);
                             $storyTitle = $item['title'] ?? 'Nuestra historia';
                             $storyDate = $item['year'] ?? ($item['date'] ?? '');
                             $storyText = $item['text'] ?? ($item['description'] ?? '');
@@ -495,15 +497,20 @@ $sectionLinks = [
             </div>
 
             <div class="sk-events">
-                <?php foreach ($venueLocations as $location): ?>
+                <?php foreach ($venueLocations as $index => $location): ?>
                     <?php
                     $locName = $location['name'] ?? ($event['venue_name'] ?? 'Evento');
                     $locAddress = $location['address'] ?? ($event['venue_address'] ?? '');
                     $locTime = $location['time'] ?? $eventDateHuman;
                     $locMap = $location['maps_url'] ?? '';
+                    $rawLocImage = $location['image_url'] ?? '';
+                    $locImage = trim((string) $rawLocImage) !== '' ? $rawLocImage : skMediaUrl($mediaByCategory, 'event', $index);
+                    if ($locImage !== '' && !preg_match('#^https?://#i', $locImage)) {
+                        $locImage = base_url($locImage);
+                    }
                     ?>
                     <article class="sk-event-card sk-reveal">
-                        <div class="sk-event-card__image"></div>
+                        <div class="sk-event-card__image"<?= $locImage ? ' style="background-image:url(' . esc($locImage) . ')"' : '' ?>></div>
                         <div class="sk-event-card__body">
                             <h3><?= esc($locName) ?></h3>
                             <?php if ($locTime): ?><p><span>📅</span><?= esc($locTime) ?></p><?php endif; ?>
