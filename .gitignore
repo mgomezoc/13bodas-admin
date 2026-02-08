@@ -127,5 +127,6 @@ _modules/*
 #-------------------------
 # Public Uploads
 #-------------------------
+templates
 public/uploads/*
 !public/uploads/index.html
