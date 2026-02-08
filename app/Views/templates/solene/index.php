@@ -315,12 +315,12 @@ $slug = $event['slug'] ?? '';
 
         <section id="rsvp" class="solene-section solene-section--alt">
             <div class="solene-container solene-rsvp">
-                <form class="solene-rsvp-form" method="post" action="<?= site_url("i/{$slug}/rsvp") ?>" data-rsvp-form>
+                <form class="solene-rsvp-form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>" data-rsvp-form>
                     <?= csrf_field() ?>
                     <h3><?= esc($rsvpTitle) ?></h3>
                     <?php if ($rsvpSubtitle): ?><p><?= esc($rsvpSubtitle) ?></p><?php endif; ?>
                     <input type="text" name="name" placeholder="Nombre*" required>
-                    <input type="email" name="email" placeholder="Email">
+                    <input type="email" name="email" placeholder="Email*" required>
                     <input type="text" name="phone" placeholder="Teléfono">
                     <select name="attending" required>
                         <option value="" disabled selected>¿Asistirás?</option>

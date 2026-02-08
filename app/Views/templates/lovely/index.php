@@ -1150,14 +1150,14 @@ foreach ($weddingParty as $member) {
                             <p>Por favor confirma tu asistencia.</p>
                         <?php endif; ?>
 
-                        <form id="rsvp-form" class="form row" method="post" action="<?= site_url("i/{$slug}/rsvp") ?>">
+                        <form id="rsvp-form" class="form row" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
                             <?= csrf_field() ?>
 
                             <div class="col-md-6 mb-4">
                                 <input type="text" name="name" class="form-control" placeholder="Tu nombre*" required>
                             </div>
                             <div class="col-md-6 mb-4">
-                                <input type="email" name="email" class="form-control" placeholder="Tu email (opcional)">
+                                <input type="email" name="email" class="form-control" placeholder="Tu email*" required>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <input type="text" name="phone" class="form-control" placeholder="Teléfono (opcional)">
@@ -1218,7 +1218,7 @@ foreach ($weddingParty as $member) {
         window.__INVITATION__ = {
             eventDateISO: <?= json_encode($eventDateISO) ?>,
             slug: <?= json_encode($slug) ?>,
-            rsvpUrl: <?= json_encode(site_url("i/{$slug}/rsvp")) ?>,
+            rsvpUrl: <?= json_encode(route_to('rsvp.submit', $slug)) ?>,
             galleryCount: <?= json_encode(count($galleryAssets ?? [])) ?>,
             registryCount: <?= json_encode(count($registryItems ?? [])) ?>
         };

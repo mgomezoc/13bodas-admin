@@ -6,7 +6,7 @@
         </p>
         
         <div class="rsvp-form-container" data-aos="fade-up" data-aos-delay="200">
-            <form id="rsvpForm" class="rsvp-form" method="POST" action="<?= base_url('i/' . $event['slug'] . '/rsvp') ?>">
+            <form id="rsvpForm" class="rsvp-form" method="POST" action="<?= esc(route_to('rsvp.submit', $event['slug'])) ?>">
                 <?= csrf_field() ?>
                 
                 <div class="form-group">
@@ -24,7 +24,7 @@
                     <label for="guest_name">Nombre Completo</label>
                     <input type="text" 
                            id="guest_name" 
-                           name="guest_name" 
+                           name="name" 
                            class="form-control"
                            placeholder="Tu nombre"
                            required>
@@ -34,16 +34,17 @@
                     <label for="guest_email">Email</label>
                     <input type="email" 
                            id="guest_email" 
-                           name="guest_email" 
+                           name="email" 
                            class="form-control"
-                           placeholder="tu@email.com">
+                           placeholder="tu@email.com"
+                           required>
                 </div>
                 
                 <div class="form-group">
                     <label for="guest_phone">Teléfono</label>
                     <input type="tel" 
                            id="guest_phone" 
-                           name="guest_phone" 
+                           name="phone" 
                            class="form-control"
                            placeholder="(555) 123-4567">
                 </div>
@@ -52,11 +53,11 @@
                     <label>¿Confirmas tu asistencia?</label>
                     <div class="radio-group">
                         <label class="radio-option">
-                            <input type="radio" name="attending" value="yes" required>
+                            <input type="radio" name="attending" value="accepted" required>
                             <span><i class="bi bi-check-circle"></i> Sí, asistiré</span>
                         </label>
                         <label class="radio-option">
-                            <input type="radio" name="attending" value="no">
+                            <input type="radio" name="attending" value="declined">
                             <span><i class="bi bi-x-circle"></i> No podré asistir</span>
                         </label>
                         <label class="radio-option">
@@ -68,7 +69,7 @@
                 
                 <div class="form-group">
                     <label for="guest_count">Número de Acompañantes</label>
-                    <select id="guest_count" name="guest_count" class="form-control">
+                    <select id="guest_count" name="guests" class="form-control">
                         <option value="0">Solo yo</option>
                         <option value="1">1 acompañante</option>
                         <option value="2">2 acompañantes</option>

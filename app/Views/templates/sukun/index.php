@@ -171,7 +171,7 @@ $parallaxBg = skMediaUrl($mediaByCategory, 'cta_bg') ?: skMediaUrl($mediaByCateg
 
 $eventDateIso = skDateIso($event['event_date_start'] ?? null, $tz);
 $eventDateHuman = skDateEs($event['event_date_start'] ?? null, $tz);
-$rsvpUrl = site_url("i/{$slug}/rsvp");
+$rsvpUrl = route_to('rsvp.submit', $slug);
 
 $hasGallery = !empty($galleryList);
 $hasStory = !empty($storyItems);
@@ -459,7 +459,7 @@ $sectionLinks = [
                     <?= csrf_field() ?>
                     <div class="sk-form-grid">
                         <input type="text" name="name" placeholder="Nombre*" required>
-                        <input type="email" name="email" placeholder="Email">
+                        <input type="email" name="email" placeholder="Email*" required>
                         <select name="attending" required>
                             <option value="" disabled selected>¿Asistirás?</option>
                             <option value="accepted">Sí, asistiré</option>

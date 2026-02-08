@@ -609,7 +609,7 @@ $storyItems = array_map(static function (array $item): array {
                             </div>
 
                             <div class="form-area">
-                                <form action="<?= base_url("i/{$slug}/rsvp") ?>" method="POST" class="contact-validation-active" id="rsvp-form">
+                                <form action="<?= esc(route_to('rsvp.submit', $slug)) ?>" method="POST" class="contact-validation-active" id="rsvp-form">
                                     <?= csrf_field() ?>
 
                                     <div class="row">
