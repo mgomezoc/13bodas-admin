@@ -687,7 +687,8 @@ function findLocationLabel(array $eventLocations, array $item): string
                                             <p><?= esc($item['description']) ?></p>
                                         <?php endif; ?>
                                         <?php if (!empty($item['price'])): ?>
-                                            <span class="price"><?= esc($item['currency_code'] ?? 'MXN') ?> $<?= number_format($item['price'], 2) ?></span>
+                                            <?php $priceValue = (float) ($item['price'] ?? 0); ?>
+                                            <span class="price"><?= esc($item['currency_code'] ?? 'MXN') ?> $<?= number_format($priceValue, 2) ?></span>
                                         <?php endif; ?>
                                         <?php if (!empty($item['external_url'])): ?>
                                             <a href="<?= esc($item['external_url']) ?>" target="_blank" class="registry-link">Ver regalo</a>
