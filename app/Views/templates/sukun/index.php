@@ -136,7 +136,9 @@ if (!$heroImg) {
 $coupleImg = skMediaUrl($mediaByCategory, 'event');
 if (!$coupleImg && !empty($galleryAssets[0]['full'])) $coupleImg = $galleryAssets[0]['full'];
 
-$storyItems = $storyPayload['items'] ?? ($storyPayload['events'] ?? []);
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
 $storyItems = array_values(array_filter($storyItems, 'is_array'));
 
 $galleryList = $galleryAssets;
@@ -362,11 +364,14 @@ $sectionLinks = [
                         <?php foreach ($storyItems as $index => $item): ?>
                             <?php
                             $tabId = 'story-' . $index;
-                            $rawStoryImg = $item['image'] ?? ($item['image_url'] ?? '');
+                            $rawStoryImg = $item['image_url'] ?? ($item['image'] ?? '');
                             $storyImg = trim((string) $rawStoryImg) !== '' ? $rawStoryImg : skMediaUrl($mediaByCategory, 'story', $index);
+                            if ($storyImg !== '' && !preg_match('#^https?://#i', $storyImg)) {
+                                $storyImg = base_url($storyImg);
+                            }
                             $storyTitle = $item['title'] ?? 'Nuestra historia';
                             $storyDate = $item['year'] ?? ($item['date'] ?? '');
-                            $storyText = $item['text'] ?? ($item['description'] ?? '');
+                            $storyText = $item['description'] ?? ($item['text'] ?? '');
                             ?>
                             <article class="sk-tab-content<?= $index === 0 ? ' sk-tab-content--active' : '' ?>" data-tab-content="<?= esc($tabId) ?>">
                                 <div class="sk-story-card">
@@ -635,10 +640,13 @@ $sectionLinks = [
                 <div class="sk-news">
                     <?php foreach (array_slice($storyItems, 0, 3) as $item): ?>
                         <?php
-                        $newsImg = $item['image'] ?? $item['image_url'] ?? '';
+                        $newsImg = $item['image_url'] ?? ($item['image'] ?? '');
+                        if ($newsImg !== '' && !preg_match('#^https?://#i', $newsImg)) {
+                            $newsImg = base_url($newsImg);
+                        }
                         $newsTitle = $item['title'] ?? 'Historia';
                         $newsDate = $item['year'] ?? ($item['date'] ?? '');
-                        $newsText = $item['text'] ?? ($item['description'] ?? '');
+                        $newsText = $item['description'] ?? ($item['text'] ?? '');
                         ?>
                         <article class="sk-news__card sk-reveal">
                             <div class="sk-news__image">

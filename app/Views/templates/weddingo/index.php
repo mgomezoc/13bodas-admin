@@ -93,7 +93,9 @@ foreach ($modules as $module) {
     $moduleData[$type] = decodePayload($module['content_payload'] ?? null);
 }
 
-$storyItems = $moduleData['story']['items'] ?? ($moduleData['timeline']['items'] ?? ($moduleData['timeline']['events'] ?? []));
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($moduleData['story']['items'] ?? ($moduleData['timeline']['items'] ?? ($moduleData['timeline']['events'] ?? [])));
 $storyItems = array_values(array_filter($storyItems, 'is_array'));
 
 // Base de assets del template (public/templates/weddingo/...)
@@ -326,12 +328,12 @@ if (!empty($registryItems) && is_array($registryItems)) {
                     <?php if (!empty($storyItems)): ?>
                         <?php foreach ($storyItems as $index => $item): ?>
                             <?php
-                                $storyImage = $item['image'] ?? $item['image_url'] ?? getMediaUrl($mediaByCategory, 'story', $index);
+                                $storyImage = $item['image_url'] ?? ($item['image'] ?? getMediaUrl($mediaByCategory, 'story', $index));
                                 if ($storyImage !== '' && !preg_match('#^https?://#i', $storyImage)) {
                                     $storyImage = base_url($storyImage);
                                 }
                                 $storyTitle = $item['title'] ?? 'Momento especial';
-                                $storyText = $item['text'] ?? ($item['description'] ?? '');
+                                $storyText = $item['description'] ?? ($item['text'] ?? '');
                             ?>
                             <article class="w-card" data-reveal>
                                 <?php if (!empty($storyImage)): ?>

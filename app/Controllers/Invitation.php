@@ -170,6 +170,7 @@ class Invitation extends BaseController
         $weddingPartyMembers = [];
         $faqs = [];
         $scheduleItems = [];
+        $timelineItems = [];
 
         try {
             $guestGroups = $db->table('guest_groups')
@@ -240,6 +241,35 @@ class Invitation extends BaseController
                 ->findAll();
         } catch (\Throwable $e) {
             $scheduleItems = [];
+        }
+
+        try {
+            $timelineRows = $db->table('event_timeline_items')
+                ->select('id, year, title, description, image_url, sort_order, created_at')
+                ->where('event_id', $event['id'])
+                ->orderBy('sort_order', 'ASC')
+                ->orderBy('created_at', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            foreach ($timelineRows as $row) {
+                $imageUrl = (string) ($row['image_url'] ?? '');
+                if ($imageUrl !== '' && !preg_match('#^https?://#i', $imageUrl)) {
+                    $imageUrl = base_url($imageUrl);
+                }
+
+                $timelineItems[] = [
+                    'id' => $row['id'] ?? null,
+                    'year' => (string) ($row['year'] ?? ''),
+                    'title' => (string) ($row['title'] ?? ''),
+                    'description' => (string) ($row['description'] ?? ''),
+                    'image_url' => $imageUrl,
+                    'sort_order' => (int) ($row['sort_order'] ?? 0),
+                    'created_at' => $row['created_at'] ?? null,
+                ];
+            }
+        } catch (\Throwable $e) {
+            $timelineItems = [];
         }
 
         /**
@@ -317,6 +347,7 @@ class Invitation extends BaseController
             'faqs'            => $faqs,
             'scheduleItems'   => $scheduleItems,
             'eventLocations'  => $eventLocations,
+            'timelineItems'   => $timelineItems,
         ];
 
         // 7) Cargar la vista basada en el CÓDIGO del template

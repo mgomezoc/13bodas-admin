@@ -4,22 +4,26 @@
         <div class="story-timeline">
             <?php
             $storyItems = [];
-            foreach ($modules ?? [] as $module) {
-                if (!in_array($module['module_type'] ?? '', ['story', 'timeline'], true)) {
-                    continue;
-                }
-                $payload = $module['content_payload'] ?? [];
-                if (is_string($payload)) {
-                    $payload = json_decode($payload, true) ?: [];
-                }
-                if (!is_array($payload)) {
-                    continue;
-                }
-                $items = $payload['items'] ?? ($payload['events'] ?? []);
-                if (is_array($items)) {
-                    foreach ($items as $item) {
-                        if (is_array($item)) {
-                            $storyItems[] = $item;
+            if (!empty($timelineItems)) {
+                $storyItems = $timelineItems;
+            } else {
+                foreach ($modules ?? [] as $module) {
+                    if (!in_array($module['module_type'] ?? '', ['story', 'timeline'], true)) {
+                        continue;
+                    }
+                    $payload = $module['content_payload'] ?? [];
+                    if (is_string($payload)) {
+                        $payload = json_decode($payload, true) ?: [];
+                    }
+                    if (!is_array($payload)) {
+                        continue;
+                    }
+                    $items = $payload['items'] ?? ($payload['events'] ?? []);
+                    if (is_array($items)) {
+                        foreach ($items as $item) {
+                            if (is_array($item)) {
+                                $storyItems[] = $item;
+                            }
                         }
                     }
                 }
@@ -27,7 +31,7 @@
             ?>
             <?php foreach ($storyItems as $index => $item): ?>
                 <?php
-                $rawImage = $item['image'] ?? ($item['image_url'] ?? '');
+                $rawImage = $item['image_url'] ?? ($item['image'] ?? '');
                 $storyImage = trim((string) $rawImage);
                 if ($storyImage === '') {
                     $mediaItem = $mediaByCategory['story'][$index] ?? [];
@@ -38,7 +42,7 @@
                 }
                 $storyTitle = $item['title'] ?? 'Momento especial';
                 $storyDate = $item['year'] ?? ($item['date'] ?? '');
-                $storyText = $item['text'] ?? ($item['description'] ?? '');
+                $storyText = $item['description'] ?? ($item['text'] ?? '');
                 ?>
                 <div class="story-item" data-aos="fade-<?= $index % 2 == 0 ? 'right' : 'left' ?>" data-aos-delay="<?= $index * 100 ?>">
                     <?php if (!empty($storyImage)): ?>

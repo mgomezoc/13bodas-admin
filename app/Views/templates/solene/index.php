@@ -152,7 +152,9 @@ if ($eventDateStart) {
 }
 $eventDateHuman = soleneDateEs($eventDateStart, $tz);
 
-$storyItems = $timelinePayload['items'] ?? ($storyPayload['items'] ?? []);
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($timelinePayload['items'] ?? ($storyPayload['items'] ?? []));
 $galleryList = $galleryAssets;
 
 $venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
@@ -446,15 +448,18 @@ $slug = $event['slug'] ?? '';
                         <article class="solene-article-card">
                             <?php
                                 $fallbackImage = soleneGetMediaUrl($mediaByCategory, 'story', $index);
-                                $itemImage = trim((string)($item['image'] ?? ''));
+                                $itemImage = trim((string)($item['image_url'] ?? ($item['image'] ?? '')));
                                 $storyImage = $itemImage !== '' ? $itemImage : $fallbackImage;
+                                if (!empty($storyImage) && !preg_match('#^https?://#i', $storyImage)) {
+                                    $storyImage = base_url($storyImage);
+                                }
                             ?>
                             <?php if (!empty($storyImage)): ?>
                                 <img data-src="<?= esc($storyImage) ?>" src="<?= esc($storyImage) ?>" alt="<?= esc($item['title'] ?? '') ?>">
                             <?php endif; ?>
                             <span class="solene-muted"><?= esc($item['year'] ?? ($item['date'] ?? '')) ?></span>
                             <h3><?= esc($item['title'] ?? '') ?></h3>
-                            <p><?= esc($item['text'] ?? ($item['description'] ?? '')) ?></p>
+                            <p><?= esc($item['description'] ?? ($item['text'] ?? '')) ?></p>
                         </article>
                     <?php endforeach; ?>
                 </div>
