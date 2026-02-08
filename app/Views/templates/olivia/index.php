@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // ================================================================
 // TEMPLATE: LOVELY — app/Views/templates/lovely/index.php
 // Versión: 2.0 — Con soporte completo de datos dinámicos + fallbacks
@@ -271,6 +272,41 @@ foreach ($weddingParty as $member) {
     $cat = $member['category'] ?? 'other';
     $partyByCategory[$cat][] = $member;
 }
+
+$storySubtitle = getText($copyPayload, $defaults, 'story_subtitle', 'Our love.');
+$storyHighlight = getText($copyPayload, $defaults, 'story_highlight', '');
+
+$storyParagraphs = [];
+if (!empty($storyPayload['paragraphs']) && is_array($storyPayload['paragraphs'])) {
+    $storyParagraphs = $storyPayload['paragraphs'];
+} elseif (!empty($storyPayload['content']) && is_array($storyPayload['content'])) {
+    $storyParagraphs = $storyPayload['content'];
+} elseif (!empty($storyPayload['text'])) {
+    $storyParagraphs = preg_split("/\n+/", (string) $storyPayload['text']);
+} elseif (!empty($storyPayload['description'])) {
+    $storyParagraphs = preg_split("/\n+/", (string) $storyPayload['description']);
+} elseif (!empty($event['description'])) {
+    $storyParagraphs = preg_split("/\n+/", (string) $event['description']);
+}
+
+$brideSocial = parseSocialLinks($couplePayload['bride']['social_links'] ?? ($couplePayload['bride']['social'] ?? []));
+$groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($couplePayload['groom']['social'] ?? []));
+
+$scheduleLookup = [];
+foreach ($scheduleItems as $scheduleItem) {
+    $locationId = $scheduleItem['location_id'] ?? null;
+    if (!$locationId || isset($scheduleLookup[$locationId])) {
+        continue;
+    }
+    $scheduleLookup[$locationId] = $scheduleItem;
+}
+
+$venueSummary = trim(($eventDateLabel !== '' ? $eventDateLabel : '') . ($venueName !== '' ? ' — ' . $venueName : ''));
+$heroLocation = trim(($eventDateLabel !== '' ? $eventDateLabel : '') . ($venueName !== '' ? ' – ' . $venueName : ''));
+$pageDescription = esc((string) ($event['description'] ?? $heroTagline));
+
+$logoImage = $tplAssets['logo'] ?? 'images/logo.png';
+$logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
 ?>
 <!DOCTYPE HTML>
 <html lang="en">
@@ -280,13 +316,13 @@ foreach ($weddingParty as $member) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Olivia & Enrico Wedding Template</title>
+    <title><?= $coupleTitle ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Olivia & Enrico – Wedding Template is perfect for wedding planners, coordinators, photographers, and event organizers. Minimal, clean, responsive and SEO friendly design with Bootstrap 5+, video background, working contact form, and retina-ready layout.">
-    <meta name="keywords" content="wedding template, wedding planner, wedding website, event organizer, wedding coordinator, wedding photographer, modern wedding template, bootstrap wedding theme, responsive wedding template, minimal wedding design">
-    <meta name="author" content="DuruThemes">
+    <meta name="description" content="<?= $pageDescription ?>">
+    <meta name="keywords" content="<?= esc($event['keywords'] ?? 'boda, wedding, invitacion') ?>">
+    <meta name="author" content="<?= esc($event['organizer_name'] ?? ($templateMeta['author'] ?? '13Bodas')) ?>">
     <meta name="robots" content="index, follow">
-    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="icon" type="image/png" href="<?= $assetsBase ?>/images/favicon.png" />
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/animate.css">
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/themify-icons.css">
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/bootstrap.min.css">
@@ -309,47 +345,50 @@ foreach ($weddingParty as $member) {
         <aside id="oliven-aside">
             <!-- Logo -->
             <div class="oliven-logo">
-                <a href="index.html">
-                    <img src="images/logo.png" alt="">
-                    <span>Olivia <small>&</small> Enrico</span>
-                    <h6>15.11.2026</h6>
+                <a href="#home">
+                    <img src="<?= esc($logoUrl) ?>" alt="<?= $coupleTitle ?>">
+                    <span><?= $coupleTitle ?></span>
+                    <?php if ($eventDateLabel !== '') : ?>
+                        <h6><?= esc($eventDateLabel) ?></h6>
+                    <?php endif; ?>
                 </a>
             </div>
             <!-- Menu -->
             <nav class="oliven-main-menu">
                 <ul>
-                    <li><a href="index.html#home">Home</a></li>
-                    <li><a href="index.html#couple">Couple</a></li>
-                    <li><a href="index.html#story">Our Story</a></li>
-                    <li><a href="index.html#friends">Friends</a></li>
-                    <li><a href="index.html#organization">Organization</a></li>
-                    <li><a href="index.html#gallery">Gallery</a></li>
-                    <li><a href="index.html#whenwhere">When & Where</a></li>
-                    <li><a href="index.html#rsvp">R.S.V.P</a></li>
-                    <li><a href="index.html#gift">Gift Registry</a></li>
-                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#couple">Couple</a></li>
+                    <li><a href="#story">Our Story</a></li>
+                    <li><a href="#friends">Friends</a></li>
+                    <li><a href="#organization">Organization</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#whenwhere">When &amp; Where</a></li>
+                    <li><a href="#rsvp">R.S.V.P</a></li>
+                    <li><a href="#gift">Gift Registry</a></li>
                 </ul>
             </nav>
             <!-- Sidebar Footer -->
             <div class="footer1"> <span class="separator"></span>
-                <p>Olivia & Enrico wedding<br />15 Dec 2026, New York</p>
+                <p><?= $coupleTitle ?> wedding<br /><?= esc($venueSummary) ?></p>
             </div>
         </aside>
         <!-- Content Section -->
         <div id="oliven-main">
             <!-- Header & Slider -->
-            <header id="home" class="header valign bg-img parallaxie" data-background="images/slider.jpg">
+            <header id="home" class="header valign bg-img parallaxie" data-background="<?= esc($heroImages[0] ?? $assetsBase . '/images/slider.jpg') ?>">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12 text-center caption">
-                            <h1 class="animate-box" data-animate-effect="fadeInUp">Olivia & Enrico</h1>
-                            <h5 class="animate-box" data-animate-effect="fadeInUp">15 December, 2026 – New York</h5>
+                            <h1 class="animate-box" data-animate-effect="fadeInUp"><?= $coupleTitle ?></h1>
+                            <?php if ($heroLocation !== '') : ?>
+                                <h5 class="animate-box" data-animate-effect="fadeInUp"><?= esc($heroLocation) ?></h5>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="arrow bounce text-center">
-                                <a href="index.html#couple"> <i class="ti-heart"></i> </a>
+                                <a href="#couple"> <i class="ti-heart"></i> </a>
                             </div>
                         </div>
                     </div>
@@ -361,36 +400,52 @@ foreach ($weddingParty as $member) {
                     <div class="row mb-60">
                         <div class="col-md-6">
                             <div class="item toright mb-30 animate-box" data-animate-effect="fadeInLeft">
-                                <div class="img"> <img src="images/bride.jpg" alt=""> </div>
+                                <div class="img"> <img src="<?= esc($bridePhoto) ?>" alt="<?= esc($brideName) ?>"> </div>
                                 <div class="info valign">
                                     <div class="full-width">
-                                        <h6>Olivia Martin <i class="ti-heart"></i></h6> <span>The Bride</span>
-                                        <p>Olivia fringilla dui at elit finibus viverra thenec a lacus seda themo the miss druane semper non the fermen.</p>
-                                        <div class="social">
-                                            <div class="full-width">
-                                                <a href="#0" class="icon"> <i class="ti-facebook"></i> </a>
-                                                <a href="#0" class="icon"> <i class="ti-twitter"></i> </a>
-                                                <a href="#0" class="icon"> <i class="ti-instagram"></i> </a>
+                                        <h6><?= esc($brideName) ?> <i class="ti-heart"></i></h6> <span><?= esc($brideSectionTitle) ?></span>
+                                        <p><?= $brideBio ?></p>
+                                        <?php if (!empty($brideSocial)) : ?>
+                                            <div class="social">
+                                                <div class="full-width">
+                                                    <?php foreach ($brideSocial as $social) : ?>
+                                                        <?php
+                                                        $socialUrl = esc($social['url'] ?? ($social['link'] ?? '#'));
+                                                        $socialIcon = esc($social['icon'] ?? ($social['type'] ?? 'ti-heart'));
+                                                        ?>
+                                                        <a href="<?= $socialUrl ?>" class="icon" target="_blank" rel="noopener">
+                                                            <i class="<?= $socialIcon ?>"></i>
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             </div>
-                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="item mb-30 animate-box" data-animate-effect="fadeInRight">
-                                <div class="img"> <img src="images/groom.jpg" alt=""> </div>
+                                <div class="img"> <img src="<?= esc($groomPhoto) ?>" alt="<?= esc($groomName) ?>"> </div>
                                 <div class="info valign">
                                     <div class="full-width">
-                                        <h6>Enrico Danilo <i class="ti-heart"></i></h6> <span>The Groom</span>
-                                        <p>Enrico fringilla dui at elit finibus viverra thenec a lacus seda themo the miss druane semper non the fermen.</p>
-                                        <div class="social">
-                                            <div class="full-width">
-                                                <a href="#0" class="icon"> <i class="ti-facebook"></i> </a>
-                                                <a href="#0" class="icon"> <i class="ti-twitter"></i> </a>
-                                                <a href="#0" class="icon"> <i class="ti-instagram"></i> </a>
+                                        <h6><?= esc($groomName) ?> <i class="ti-heart"></i></h6> <span><?= esc($groomSectionTitle) ?></span>
+                                        <p><?= $groomBio ?></p>
+                                        <?php if (!empty($groomSocial)) : ?>
+                                            <div class="social">
+                                                <div class="full-width">
+                                                    <?php foreach ($groomSocial as $social) : ?>
+                                                        <?php
+                                                        $socialUrl = esc($social['url'] ?? ($social['link'] ?? '#'));
+                                                        $socialIcon = esc($social['icon'] ?? ($social['type'] ?? 'ti-heart'));
+                                                        ?>
+                                                        <a href="<?= $socialUrl ?>" class="icon" target="_blank" rel="noopener">
+                                                            <i class="<?= $socialIcon ?>"></i>
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             </div>
-                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -398,18 +453,18 @@ foreach ($weddingParty as $member) {
                     </div>
                     <div class="row">
                         <div class="col-md-12 text-center animate-box" data-animate-effect="fadeInUp">
-                            <h3 class="oliven-couple-title">Are getting married!</h3>
-                            <h4 class="oliven-couple-subtitle">December 15, 2026 — New York, Brooklyn</h4>
+                            <h3 class="oliven-couple-title"><?= esc($ctaHeading) ?></h3>
+                            <h4 class="oliven-couple-subtitle"><?= esc($ctaSubheading) ?></h4>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Countdown -->
-            <div id="countdown" class="section-padding bg-img bg-fixed" data-background="images/banner-1.jpg">
+            <div id="countdown" class="section-padding bg-img bg-fixed" data-background="<?= esc($countdownBg) ?>">
                 <div class="container">
                     <div class="row">
                         <div class="section-head col-md-12">
-                            <h4>We will become a family in</h4>
+                            <h4><?= esc($countdownTitle) ?></h4>
                         </div>
                     </div>
                     <div class="row">
@@ -430,18 +485,21 @@ foreach ($weddingParty as $member) {
                     <div class="row">
                         <div class="col-md-5 mb-30">
                             <div class="story-img animate-box" data-animate-effect="fadeInLeft">
-                                <div class="img"> <img src="images/story.jpg" class="img-fluid" alt=""> </div>
-                                <div class="story-img-2 story-wedding" style="background-image: url(images/wedding-logo.png);"></div>
+                                <div class="img"> <img src="<?= esc($eventImg) ?>" class="img-fluid" alt="<?= $coupleTitle ?>"> </div>
+                                <div class="story-img-2 story-wedding" style="background-image: url('<?= $assetsBase ?>/images/wedding-logo.png');"></div>
                             </div>
                         </div>
                         <div class="col-md-7 animate-box" data-animate-effect="fadeInRight">
-                            <h4 class="oliven-story-subtitle">Our love.</h4>
-                            <h3 class="oliven-story-title">Our Story</h3>
-                            <p>Curabit aliquet orci elit genes tristique lorem commodo vitae. Tuliaum tincidunt nete sede gravida aliquam, neque libero hendrerit magna, sit amet mollis lacus ithe maurise. Dunya erat volutpat edat themo the druanye semper.</p>
-                            <p>Luality fringilla duiman at elit vinibus viverra nec a lacus themo the druanye sene sollicitudin mi suscipit non sagie the fermen.</p>
-                            <p>Phasellus viverra tristique justo duis vitae diam neque nivamus ac est augue artine aringilla dui at elit finibus viverra nec a lacus. Nedana themo eros odio semper soe suscipit non. Curabit aliquet orci elit genes tristique.</p>
-                            <h4>Dec 5th, 2026, We Said Yes!</h4>
-                            <p>Luality fringilla duiman at elit finibus viverra nec a lacus themo the druanye sene sollicitudin mi suscipit non sagie the fermen.</p>
+                            <h4 class="oliven-story-subtitle"><?= esc($storySubtitle) ?></h4>
+                            <h3 class="oliven-story-title"><?= esc($storyTitle) ?></h3>
+                            <?php foreach ($storyParagraphs as $paragraph) : ?>
+                                <?php if (trim((string) $paragraph) !== '') : ?>
+                                    <p><?= esc((string) $paragraph) ?></p>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                            <?php if ($storyHighlight !== '') : ?>
+                                <h4><?= esc($storyHighlight) ?></h4>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -451,80 +509,49 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12 mb-30">
-                            <span class="oliven-title-meta">Our best friends ever</span>
-                            <h2 class="oliven-title mb-30">Thanks for being there</h2>
+                            <span class="oliven-title-meta"><?= esc($partyTitle) ?></span>
+                            <h2 class="oliven-title mb-30"><?= esc($partyTitle) ?></h2>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="owl-carousel owl-theme">
-                                <div class="item">
-                                    <div class="img"> <img src="images/friends/b1.jpg" alt=""> </div>
-                                    <div class="info valign">
-                                        <div class="full-width">
-                                            <h6>Eleanor Chris</h6><span>Bridesmaids</span>
-                                            <p>Enstibulum eringilla dui athe elitene miss minibus viverra nectar.</p>
+                                <?php foreach ($weddingParty as $member) : ?>
+                                    <?php
+                                    $memberImage = (string) ($member['image_url'] ?? '');
+                                    if ($memberImage !== '' && !preg_match('#^https?://#i', $memberImage)) {
+                                        $memberImage = base_url($memberImage);
+                                    }
+                                    $memberImage = $memberImage ?: ($assetsBase . '/images/friends/b1.jpg');
+                                    ?>
+                                    <div class="item">
+                                        <div class="img"> <img src="<?= esc($memberImage) ?>" alt="<?= esc($member['full_name'] ?? '') ?>"> </div>
+                                        <div class="info valign">
+                                            <div class="full-width">
+                                                <h6><?= esc($member['full_name'] ?? '') ?></h6>
+                                                <span><?= esc($member['role'] ?? ($partyLabels[$member['category'] ?? 'other'] ?? '')) ?></span>
+                                                <?php if (!empty($member['bio'])) : ?>
+                                                    <p><?= esc((string) $member['bio']) ?></p>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="item">
-                                    <div class="img"> <img src="images/friends/w1.jpg" alt=""> </div>
-                                    <div class="info valign">
-                                        <div class="full-width">
-                                            <h6>Stefano Smiht</h6><span>Groomsmen</span>
-                                            <p>Enstibulum eringilla dui athe elitene miss minibus viverra nectar.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="img"> <img src="images/friends/b2.jpg" alt=""> </div>
-                                    <div class="info valign">
-                                        <div class="full-width">
-                                            <h6>Vanessa Brown</h6><span>Bridesmaids</span>
-                                            <p>Enstibulum eringilla dui athe elitene miss minibus viverra nectar.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="img"> <img src="images/friends/w2.jpg" alt=""> </div>
-                                    <div class="info valign">
-                                        <div class="full-width">
-                                            <h6>Matthew Brown</h6><span>Groomsmen</span>
-                                            <p>Enstibulum eringilla dui athe elitene miss minibus viverra nectar.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="img"> <img src="images/friends/b3.jpg" alt=""> </div>
-                                    <div class="info valign">
-                                        <div class="full-width">
-                                            <h6>Fredia Halle</h6><span>Bridesmaids</span>
-                                            <p>Enstibulum eringilla dui athe elitene miss minibus viverra nectar.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="img"> <img src="images/friends/w3.jpg" alt=""> </div>
-                                    <div class="info valign">
-                                        <div class="full-width">
-                                            <h6>Pablo Dante</h6><span>Groomsmen</span>
-                                            <p>Enstibulum eringilla dui athe elitene miss minibus viverra nectar.</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- See you -->
-            <div id="seeyou" class="seeyou section-padding bg-img bg-fixed" data-background="images/banner-3.jpg">
+            <div id="seeyou" class="seeyou section-padding bg-img bg-fixed" data-background="<?= esc($ctaBg) ?>">
                 <div class="container">
                     <div class="row">
                         <div class="section-head col-md-12 text-center">
                             <span><i class="ti-heart"></i></span>
-                            <h4>Looking forward to see you!</h4>
-                            <h3>15.11.2026</h3>
+                            <h4><?= esc($countdownSubtitle) ?></h4>
+                            <?php if ($eventDateLabel !== '') : ?>
+                                <h3><?= esc($eventDateLabel) ?></h3>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -534,31 +561,20 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12 mb-30">
-                            <span class="oliven-title-meta">Wedding</span>
-                            <h2 class="oliven-title">Organization</h2>
+                            <span class="oliven-title-meta"><?= esc($eventsTitle) ?></span>
+                            <h2 class="oliven-title"><?= esc($eventsTitle) ?></h2>
                         </div>
                     </div>
-                    <div class="row bord-box bg-img" data-background="images/slider.jpg">
-                        <div class="col-md-3 item-box">
-                            <h2 class="custom-font numb">01</h2>
-                            <h6 class="title">Ceremony</h6>
-                            <p>Delta tristiu the jusone duise vitae diam neque nivami mis est augue artine aringilla the at elit finibus vivera.</p>
-                        </div>
-                        <div class="col-md-3 item-box">
-                            <h2 class="custom-font numb">02</h2>
-                            <h6 class="title">Lunch Time</h6>
-                            <p>Delta tristiu the jusone duise vitae diam neque nivami mis est augue artine aringilla the at elit finibus vivera.</p>
-                        </div>
-                        <div class="col-md-3 item-box">
-                            <h2 class="custom-font numb">03</h2>
-                            <h6 class="title">Party</h6>
-                            <p>Delta tristiu the jusone duise vitae diam neque nivami mis est augue artine aringilla the at elit finibus vivera.</p>
-                        </div>
-                        <div class="col-md-3 item-box">
-                            <h2 class="custom-font numb">04</h2>
-                            <h6 class="title">Cake Cutting</h6>
-                            <p>Delta tristiu the jusone duise vitae diam neque nivami mis est augue artine aringilla the at elit finibus vivera.</p>
-                        </div>
+                    <div class="row bord-box bg-img" data-background="<?= esc($heroImages[1] ?? $heroImages[0] ?? ($assetsBase . '/images/slider.jpg')) ?>">
+                        <?php foreach ($scheduleItems as $index => $item) : ?>
+                            <div class="col-md-3 item-box">
+                                <h2 class="custom-font numb"><?= esc(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></h2>
+                                <h6 class="title"><?= esc($item['title'] ?? '') ?></h6>
+                                <?php if (!empty($item['description'])) : ?>
+                                    <p><?= esc((string) $item['description']) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -567,80 +583,30 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12 mb-30">
-                            <span class="oliven-title-meta">Gallery</span>
-                            <h2 class="oliven-title">Our Memories</h2>
+                            <span class="oliven-title-meta"><?= esc($galleryTitle) ?></span>
+                            <h2 class="oliven-title"><?= esc($galleryTitle) ?></h2>
                         </div>
                     </div>
-                    <div class="row">
-                        <ul class="col list-unstyled list-inline mb-0 gallery-menu" id="gallery-filter">
-                            <li class="list-inline-item"><a class="active" data-filter="*">All</a></li>
-                            <li class="list-inline-item"><a class="" data-filter=".ceremony">Ceremony</a></li>
-                            <li class="list-inline-item"><a class="" data-filter=".party">Party</a></li>
-                        </ul>
-                    </div>
+                    <div class="row"></div>
                 </div>
                 <div class="container">
                     <div class="row gallery-filter mt-3">
-                        <div class="col-md-4 gallery-item ceremony">
-                            <a href="images/gallery/1.jpg" class="img-zoom">
-                                <div class="gallery-box">
-                                    <div class="gallery-img"> <img src="images/gallery/1.jpg" class="img-fluid mx-auto d-block" alt=""> </div>
-                                    <div class="gallery-detail">
-                                        <h4 class="mb-0">Wedding Ceremony</h4>
+                        <?php foreach ($galleryAssets as $asset) : ?>
+                            <div class="col-md-4 gallery-item">
+                                <a href="<?= esc($asset['full'] ?? '') ?>" class="img-zoom">
+                                    <div class="gallery-box">
+                                        <div class="gallery-img">
+                                            <img src="<?= esc($asset['thumb'] ?? ($asset['full'] ?? '')) ?>" class="img-fluid mx-auto d-block" alt="<?= esc($asset['alt'] ?? $coupleTitle) ?>">
+                                        </div>
+                                        <?php if (!empty($asset['caption'])) : ?>
+                                            <div class="gallery-detail">
+                                                <h4 class="mb-0"><?= esc((string) $asset['caption']) ?></h4>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-4 gallery-item party">
-                            <a href="images/gallery/2.jpg" class="img-zoom">
-                                <div class="gallery-box">
-                                    <div class="gallery-img"> <img src="images/gallery/2.jpg" class="img-fluid mx-auto d-block" alt=""> </div>
-                                    <div class="gallery-detail">
-                                        <h4 class="mb-0">Wedding Party</h4>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-4 gallery-item ceremony">
-                            <a href="images/gallery/3.jpg" class="img-zoom">
-                                <div class="gallery-box">
-                                    <div class="gallery-img"> <img src="images/gallery/3.jpg" class="img-fluid mx-auto d-block" alt=""> </div>
-                                    <div class="gallery-detail">
-                                        <h4 class="mb-0">Wedding Ceremony</h4>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-4 gallery-item party">
-                            <a href="images/gallery/4.jpg" class="img-zoom">
-                                <div class="gallery-box">
-                                    <div class="gallery-img"> <img src="images/gallery/4.jpg" class="img-fluid mx-auto d-block" alt=""> </div>
-                                    <div class="gallery-detail">
-                                        <h4 class="mb-0">Wedding Party</h4>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-4 gallery-item ceremony">
-                            <a href="images/gallery/5.jpg" class="img-zoom">
-                                <div class="gallery-box">
-                                    <div class="gallery-img"> <img src="images/gallery/5.jpg" class="img-fluid mx-auto d-block" alt=""> </div>
-                                    <div class="gallery-detail">
-                                        <h4 class="mb-0">Wedding Ceremony</h4>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-4 gallery-item party">
-                            <a href="images/gallery/6.jpg" class="img-zoom">
-                                <div class="gallery-box">
-                                    <div class="gallery-img"> <img src="images/gallery/6.jpg" class="img-fluid mx-auto d-block" alt=""> </div>
-                                    <div class="gallery-detail">
-                                        <h4 class="mb-0">Wedding Party</h4>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -649,50 +615,49 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12 mb-30"> <span class="oliven-title-meta">Questions</span>
-                            <h2 class="oliven-title">When & Where</h2>
+                            <h2 class="oliven-title"><?= esc($eventsTitle) ?></h2>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="owl-carousel owl-theme">
-                                <div class="item">
-                                    <div class="whenwhere-img"> <img src="images/whenwhere/3.jpg" alt=""></div>
-                                    <div class="content">
-                                        <h5>Wedding Ceremony</h5>
-                                        <p><i class="ti-location-pin"></i> 175 Broadway, Brooklyn, New York 11244, USA</p>
-                                        <p><i class="ti-time"></i> <span>12:00am – 13:00pm</span></p>
+                                <?php foreach ($eventLocations as $location) : ?>
+                                    <?php
+                                    $locationImage = (string) ($location['image_url'] ?? '');
+                                    if ($locationImage !== '' && !preg_match('#^https?://#i', $locationImage)) {
+                                        $locationImage = base_url($locationImage);
+                                    }
+                                    $locationImage = $locationImage ?: $eventImg;
+                                    $locationSchedule = $scheduleLookup[$location['id'] ?? ''] ?? null;
+                                    ?>
+                                    <div class="item">
+                                        <div class="whenwhere-img"> <img src="<?= esc($locationImage) ?>" alt="<?= esc($location['name'] ?? '') ?>"></div>
+                                        <div class="content">
+                                            <h5><?= esc($location['name'] ?? '') ?></h5>
+                                            <?php if (!empty($location['address'])) : ?>
+                                                <p><i class="ti-location-pin"></i> <?= esc((string) $location['address']) ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($locationSchedule)) : ?>
+                                                <p><i class="ti-time"></i> <span><?= esc(formatScheduleTime($locationSchedule)) ?></span></p>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="item">
-                                    <div class="whenwhere-img"> <img src="images/whenwhere/1.jpg" alt=""></div>
-                                    <div class="content">
-                                        <h5>Weddding Party</h5>
-                                        <p><i class="ti-location-pin"></i> Fortune Brooklyn restaurant, 149 Broadway, Brooklyn, NY, USA</p>
-                                        <p><i class="ti-time"></i> <span>14:00pm</span></p>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="whenwhere-img"> <img src="images/whenwhere/2.jpg" alt=""></div>
-                                    <div class="content">
-                                        <h5>Accomodations</h5>
-                                        <p><i class="ti-direction-alt"></i> Hotel and distance from wedding party restaurant:</p>
-                                        <p><i class="ti-direction"></i> The William Vale (7 min)</p>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Confirmation -->
-            <div id="rsvp" class="section-padding bg-img bg-fixed" data-background="images/banner-2.jpg">
+            <div id="rsvp" class="section-padding bg-img bg-fixed" data-background="<?= esc($rsvpBg) ?>">
                 <div class="container">
                     <div class="row">
-                        <div class="col-md-6 offset-md-3 bg-white p-40"> <span class="oliven-title-meta text-center">Will you attend?</span>
-                            <h2 class="oliven-title text-center">R.S.V.P</h2>
+                        <div class="col-md-6 offset-md-3 bg-white p-40"> <span class="oliven-title-meta text-center"><?= esc($rsvpHeading) ?></span>
+                            <h2 class="oliven-title text-center"><?= esc($rsvpHeading) ?></h2>
                             <br>
-                            <form class="contact__form" method="post" action="https://duruthemes.com/demo/html/olivia-enrico/demo1/mail.php">
+                            <form class="contact__form" method="post" action="<?= esc(base_url('i/' . $slug . '/rsvp')) ?>">
                                 <!-- form message -->
+                                <?= csrf_field() ?>
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="alert alert-success contact__msg" style="display: none" role="alert">
@@ -704,27 +669,41 @@ foreach ($weddingParty as $member) {
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input name="name" type="text" class="form-control" placeholder="Name" required>
+                                            <input name="name" type="text" class="form-control" placeholder="Nombre" required>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input name="email" type="email" class="form-control" placeholder="Email" required>
+                                            <input name="email" type="email" class="form-control" placeholder="Correo electrónico">
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input name="guests" type="text" class="form-control" placeholder="Guests" required>
+                                            <input name="phone" type="text" class="form-control" placeholder="Teléfono">
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <textarea name="message" id="message" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
+                                            <select name="attending" class="form-control" required>
+                                                <option value="" selected disabled>¿Asistirás?</option>
+                                                <option value="accepted">Sí, asistiré</option>
+                                                <option value="declined">No podré asistir</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input name="submit" type="submit" class="btn buttono" value="SEND">
+                                            <textarea name="message" id="message" cols="30" rows="7" class="form-control" placeholder="Mensaje"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input name="song_request" type="text" class="form-control" placeholder="Canción sugerida">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input name="submit" type="submit" class="btn buttono" value="ENVIAR">
                                         </div>
                                     </div>
                                 </div>
@@ -739,29 +718,25 @@ foreach ($weddingParty as $member) {
                 <div class="container">
                     <div class="row">
                         <div class="col-md-3 mb-30">
-                            <br> <span class="oliven-title-meta">Gift</span>
-                            <h2 class="oliven-title">Gift Registry</h2>
+                            <br> <span class="oliven-title-meta"><?= esc($registryTitle) ?></span>
+                            <h2 class="oliven-title"><?= esc($registryTitle) ?></h2>
                         </div>
                         <div class="col-md-9">
                             <div class="owl-carousel owl-theme">
-                                <div class="client-logo">
-                                    <a href="#"><img src="images/gift/1.jpg" alt=""></a>
-                                </div>
-                                <div class="client-logo">
-                                    <a href="#"><img src="images/gift/2.jpg" alt=""></a>
-                                </div>
-                                <div class="client-logo">
-                                    <a href="#"><img src="images/gift/3.jpg" alt=""></a>
-                                </div>
-                                <div class="client-logo">
-                                    <a href="#"><img src="images/gift/4.jpg" alt=""></a>
-                                </div>
-                                <div class="client-logo">
-                                    <a href="#"><img src="images/gift/5.jpg" alt=""></a>
-                                </div>
-                                <div class="client-logo">
-                                    <a href="#"><img src="images/gift/6.jpg" alt=""></a>
-                                </div>
+                                <?php foreach ($registryItems as $item) : ?>
+                                    <?php
+                                    $itemImage = (string) ($item['image_url'] ?? '');
+                                    if ($itemImage !== '' && !preg_match('#^https?://#i', $itemImage)) {
+                                        $itemImage = base_url($itemImage);
+                                    }
+                                    $itemLink = (string) ($item['product_url'] ?? ($item['external_url'] ?? '#'));
+                                    ?>
+                                    <div class="client-logo">
+                                        <a href="<?= esc($itemLink) ?>" target="_blank" rel="noopener">
+                                            <img src="<?= esc($itemImage ?: ($assetsBase . '/images/gift/1.jpg')) ?>" alt="<?= esc($item['title'] ?? $item['name'] ?? '') ?>">
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
@@ -774,15 +749,14 @@ foreach ($weddingParty as $member) {
                     <div class="row">
                         <div class="col-md-12 text-center">
                             <h2>
-                                <a href="index.html"><img src="images/logo.png" alt=""><span>Olivia <small>&</small> Enrico</span></a>
+                                <a href="#home"><img src="<?= esc($logoUrl) ?>" alt="<?= $coupleTitle ?>"><span><?= $coupleTitle ?></span></a>
                             </h2>
-                            <p class="copyright">December 15, 2026 – New York, Brooklyn</p>
+                            <p class="copyright"><?= esc($heroLocation) ?></p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <script src="<?= $assetsBase ?>/js/jquery.min.js"></script>
         <script src="<?= $assetsBase ?>/js/jquery.min.js"></script>
         <script src="<?= $assetsBase ?>/js/modernizr-2.6.2.min.js"></script>
         <script src="<?= $assetsBase ?>/js/jquery.easing.1.3.js"></script>
