@@ -441,7 +441,7 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-12">
-                            <a href="#hero" class="nav-logo"><img src="<?= $assetsBase ?>/images/logo.png" alt="<?= esc($coupleTitle) ?>" /></a>
+                            <a href="#hero" class="nav-logo"><?= esc($coupleTitle) ?></a>
 
                             <!-- BEGIN MAIN MENU -->
                             <nav class="navbar">
@@ -627,14 +627,9 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
                                     $itemText = esc($item['description'] ?? ($item['text'] ?? ''));
                                     $fallbackImg = getMediaUrl($mediaByCategory, 'timeline', $idx) ?: getMediaUrl($mediaByCategory, 'story', $idx) ?: ($assetsBase . '/images/timeline-first-date.jpg');
                                     $itemImg = trim((string)($item['image_url'] ?? ($item['image'] ?? '')));
-                                    $itemImg2 = trim((string)($item['image_secondary'] ?? ($item['image_2'] ?? '')));
                                     $imgPrimary = $itemImg !== '' ? $itemImg : $fallbackImg;
-                                    $imgSecondary = $itemImg2 !== '' ? $itemImg2 : $imgPrimary;
                                     if ($imgPrimary !== '' && !preg_match('#^https?://#i', $imgPrimary)) {
                                         $imgPrimary = base_url($imgPrimary);
-                                    }
-                                    if ($imgSecondary !== '' && !preg_match('#^https?://#i', $imgSecondary)) {
-                                        $imgSecondary = base_url($imgSecondary);
                                     }
                                     $isEven = ($idx % 2 === 0);
                                     ?>
@@ -651,10 +646,6 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
 
                                         <div class="image-1" data-parallax="-4" data-animation-direction="from-left" data-animation-delay="250">
                                             <img src="<?= esc($imgPrimary) ?>" alt="<?= $itemTitle ?>" width="600" height="600">
-                                        </div>
-
-                                        <div class="image-2" data-parallax="6" data-animation-direction="from-right" data-animation-delay="250">
-                                            <img src="<?= esc($imgSecondary) ?>" alt="<?= $itemTitle ?>" width="600" height="818">
                                         </div>
 
                                         <div class="description-wrapper" data-parallax="-6" data-animation-direction="from-bottom" data-animation-delay="250">
@@ -1124,6 +1115,41 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
         var slidehow_images = <?= json_encode($heroImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
     </script>
     <script src="<?= $assetsBase ?>/js/scripts.js"></script>
+    <script>
+        (function($) {
+            'use strict';
+
+            const $form = $('#form-rsvp');
+            const $status = $form.find('.form_status_message');
+
+            if (!$form.length) {
+                return;
+            }
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                $status.html('');
+
+                $.ajax({
+                        url: $form.attr('action'),
+                        method: 'POST',
+                        data: $form.serialize(),
+                        dataType: 'json'
+                    })
+                    .done(function(resp) {
+                        if (resp && resp.success) {
+                            $status.html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + (resp.message || 'Confirmación registrada. ¡Gracias!') + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                            $form.trigger('reset');
+                        } else {
+                            $status.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + ((resp && resp.message) ? resp.message : 'No fue posible registrar tu confirmación.') + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                        }
+                    })
+                    .fail(function() {
+                        $status.html('<div class="alert alert-danger alert-dismissible fade show" role="alert">No fue posible registrar tu confirmación.<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                    });
+            });
+        })(jQuery);
+    </script>
 </body>
 
 </html>
