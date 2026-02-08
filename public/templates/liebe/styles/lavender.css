@@ -1,0 +1,250 @@
+/*
+  Liebe Template
+  Lavender Color Scheme
+ 
+*/
+/*________  Pink  ________  */
+
+.pager li>a:hover,
+.pager li > a,
+.pager li > span,
+.pagination>.active>a,
+.pagination>.active>a:focus,
+.blog-tags a:hover,
+.blog-tags a:focus,
+.pagination>li>a:hover,
+.pagination>li>a:focus,
+.pagination>.active>a,
+.pagination>.active>a:focus,
+.pagination>.active>a:hover,
+.pagination>.active>span,
+.pagination>.active>span:focus,
+.pagination>.active>span:hover,
+.list-group-item,
+.social-media a i,
+.nav-pills>li>a,
+.nav.nav-tabs > li.active > a:focus,
+.nav.nav-tabs>li.active>a,
+.nav.nav-tabs > li.active > a:hover,
+.nav.nav-tabs>li>a,
+.img-hover,
+.panel-heading a.collapsed,
+.label.default,
+.btn-radio.active, .btn-radio:active,
+ul.breadcrumb,
+.side-label:after
+{background-color: #D884B9;}
+
+.media-heading small,
+.smaller.social-media a i,
+hr,
+.hr,
+a,
+.description,
+i,
+.back-to-top i:hover,
+.social-media a i:hover,
+ul.custom li,
+.section-heading hr:after,
+.nav .open>a,
+.nav .open>a:hover,
+.owl-next i:hover,
+.owl-prev i:hover
+{color: #D884B9;}
+
+.comment,
+.small-heading,
+.search-group .form-control,
+.breadcrumb,
+.social-media a i,
+.img-blog img:hover,
+#elements h3.sub-header,
+.section-heading hr,
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th,
+.blog-latest img
+{border-color: #D884B9;}
+
+
+/*________  Purple ________  */
+
+.smaller.social-media a i:hover,
+.post-info i,
+a:hover,
+a:focus,
+#about .media i,
+h6,
+.page-header h2,
+.small-heading,
+.bounce1:after,
+h5,
+h3,
+h2,
+label,
+.owl-next i,
+.owl-prev i,
+.sidebar-header,
+.back-to-top i,
+.navbar-custom ul.nav li a:hover,
+.navbar-custom .nav > .active > a,
+h1,
+.breadcrumb>.active,
+.breadcrumb a:hover,
+.breadcrumb a:focus
+{color: #6f738a;}
+
+a.list-group-item:focus,
+a.list-group-item:hover,
+button.list-group-item:focus,
+button.list-group-item:hover,
+.open>.dropdown-toggle.btn-primary:focus,
+.open>.dropdown-toggle.btn-primary:hover,
+.nav-pills .nav > li > a:focus,
+.pager li > a:hover,
+.pager li > a:focus,
+.blog-tags a,
+.date-category,
+.dropdown-menu>li>a:focus,
+.dropdown-menu>li>a:hover,
+.pagination>li>a,
+.pagination>li>span,
+.nav-pills>li.active>a,
+.nav.nav-pills > li > a:focus,
+.nav.nav-pills > li > a:hover,
+.nav.nav-pills > li > .active,
+.nav.nav-tabs > li.active > a:focus,
+.nav.nav-tabs>li.active>a,
+.nav.nav-tabs>li>a:hover,
+.input-group.date .input-group-addon,
+.owl-theme .owl-dots .owl-dot span,
+.owl-theme .owl-dots .owl-dot span:before,
+.owl-theme .owl-dots .owl-dot.active span,
+.owl-theme .owl-dots .owl-dot:hover span,
+#elements h3.sub-header,
+.panel-heading a,
+.panel-heading a:hover
+{background-color: #6f738a;}
+
+.elements h5,
+.open>.dropdown-toggle.btn-default:focus,
+.open>.dropdown-toggle.btn-default:hover,
+.form-control:focus,
+select.form-control 
+{border-color: #6f738a;}
+
+
+/*________  Lavender ________  */
+
+
+nav.navbar.shrink,
+.section-heading h2:before,
+.section-heading h2:after,
+.alert.alert-success,
+.btn-primary.focus,
+.btn-primary:focus,
+.btn:focus,
+.btn,
+.btn .btn-primary,
+.option-input:checked,
+.option-input:checked::after,
+.back-to-top,
+.dropdown-menu,
+.option-input:hover,
+footer 
+{background-color: #B6BAD6;}
+
+.form-control,
+select.form-control,
+input[type="checkbox"],
+input[type=radio],
+.blog-post 
+{border-color: #B6BAD6;}
+
+.btn-primary:hover,
+.btn:hover 
+{outline-color: #B6BAD6;}
+
+.date-category i,
+blockquote:before
+{color: #B6BAD6;}
+
+.slideshow-image,
+.jumbotron,
+.navbar-custom
+{box-shadow:inset 0 0 0 1000px rgba(147, 137, 177, 0.52);}
+
+
+/*________  Light Pink  ________  */
+
+.bg.row,
+.jumbotron,
+#elements h5.sub-header,
+.img-circle,
+.blog-post,
+.sidebar,
+.accordion-group 
+{border-color: #fdf2f9;}
+
+body,
+.label-default,
+.bg-lightcolor,
+#preloader,
+.features i,
+.sidebar .well,
+.blog-row,
+.well.lightcolor,
+#elements h5.sub-header,
+.comment,
+.table-hover>tbody>tr:hover 
+{background-color: #fdf2f9;}
+
+.nav.nav-tabs > li > a 
+{outline-color: #fdf2f9;}
+
+/*________  Ilustrations  ________  */
+
+.ornament1 {
+    background-image: url(../img/ornaments/lavender/flower1.png);
+    width: 250px;
+    height: 250px;
+}
+.ornament2 {
+    background-image: url(../img/ornaments/lavender/ornament2.png);
+    width: 280px;
+    height: 410px;
+}
+.ornament3 {
+    background-image: url(../img/ornaments/lavender/ornament3.png);
+    width: 350px;
+    height: 291px;
+}
+.ornament4 {	
+    background-image: url(../img/ornaments/lavender/bouquet4.png);
+    width: 300px;
+    height: 300px;
+}
+.ornament5 {
+    background-image: url(../img/ornaments/lavender/flower5.png);
+    width: 250px;
+    height: 433px;
+}
+.ornament6 {
+    background-image: url(../img/ornaments/lavender/flower6.png);
+    width: 300px;
+    height: 300px;
+}
+.ornament7 {
+    background-image: url(../img/ornaments/lavender/branch7.png);
+    width: 191px;
+    height: 300px;
+}
+.text-ornament {
+    background-image: url(../img/ornaments/lavender/bgname.png);
+}
+.btn {
+   	background-image: url(../img/ornaments/lavender/btn.png);
+}

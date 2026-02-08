@@ -1,0 +1,249 @@
+/*
+  Liebe Template
+  Summer Color Scheme
+ 
+*/
+/*________  Light Red  ________  */
+
+.pager li>a:hover,
+.pager li > a,
+.pager li > span,
+.pagination>.active>a,
+.pagination>.active>a:focus,
+.blog-tags a:hover,
+.blog-tags a:focus,
+.pagination>li>a:hover,
+.pagination>li>a:focus,
+.pagination>.active>a,
+.pagination>.active>a:focus,
+.pagination>.active>a:hover,
+.pagination>.active>span,
+.pagination>.active>span:focus,
+.pagination>.active>span:hover,
+.list-group-item,
+.social-media a i,
+.nav-pills>li>a,
+.nav.nav-tabs > li.active > a:focus,
+.nav.nav-tabs>li.active>a,
+.nav.nav-tabs > li.active > a:hover,
+.nav.nav-tabs>li>a,
+.img-hover,
+.panel-heading a.collapsed,
+.label.default,
+.btn-radio.active, .btn-radio:active,
+.side-label:after
+{background-color: #FF7F78;}
+
+.media-heading small,
+.smaller.social-media a i,
+hr,
+.hr,
+a,
+.description,
+i,
+.back-to-top i:hover,
+.social-media a i:hover,
+ul.custom li,
+.section-heading hr:after,
+.nav .open>a,
+.nav .open>a:hover,
+.owl-next i:hover,
+.owl-prev i:hover
+{color: #FF7F78;}
+
+.comment,
+.small-heading,
+.search-group .form-control,
+.breadcrumb,
+.social-media a i,
+.img-blog img:hover,
+#elements h3.sub-header,
+.section-heading hr,
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th,
+.blog-latest img
+{border-color: #FF7F78;}
+
+
+/*________  Dark Orange ________  */
+
+.smaller.social-media a i:hover,
+.post-info i,
+a:hover,
+a:focus,
+#about .media i,
+h6,
+.page-header h2,
+.small-heading,
+.bounce1:after,
+h5,
+h3,
+h2,
+label,
+.owl-next i,
+.owl-prev i,
+.sidebar-header,
+.back-to-top i,
+.navbar-custom ul.nav li a:hover,
+.navbar-custom .nav > .active > a,
+h1
+{color: #7b3e24;}
+
+a.list-group-item:focus,
+a.list-group-item:hover,
+button.list-group-item:focus,
+button.list-group-item:hover,
+.open>.dropdown-toggle.btn-primary:focus,
+.open>.dropdown-toggle.btn-primary:hover,
+.nav-pills .nav > li > a:focus,
+.pager li > a:hover,
+.pager li > a:focus,
+.blog-tags a,
+.date-category,
+.dropdown-menu>li>a:focus,
+.dropdown-menu>li>a:hover,
+.pagination>li>a,
+.pagination>li>span,
+.nav-pills>li.active>a,
+.nav.nav-pills > li > a:focus,
+.nav.nav-pills > li > a:hover,
+.nav.nav-pills > li > .active,
+.nav.nav-tabs > li.active > a:focus,
+.nav.nav-tabs>li.active>a,
+.nav.nav-tabs>li>a:hover,
+.input-group.date .input-group-addon,
+.owl-theme .owl-dots .owl-dot span,
+.owl-theme .owl-dots .owl-dot span:before,
+.owl-theme .owl-dots .owl-dot.active span,
+.owl-theme .owl-dots .owl-dot:hover span,
+#elements h3.sub-header,
+.panel-heading a,
+.panel-heading a:hover,
+ul.breadcrumb
+{background-color: #7b3e24;}
+
+.elements h5,
+.open>.dropdown-toggle.btn-default:focus,
+.open>.dropdown-toggle.btn-default:hover,
+.form-control:focus,
+select.form-control 
+{border-color: #7b3e24;}
+
+.slideshow-image,
+.jumbotron,
+.navbar-custom
+{box-shadow:inset 0 0 0 1000px rgba(172, 90, 61, 0.52);}
+
+/*________  Light Orange ________  */
+
+
+nav.navbar.shrink,
+.section-heading h2:before,
+.section-heading h2:after,
+.alert.alert-success,
+.btn-primary.focus,
+.btn-primary:focus,
+.btn:focus,
+.btn,
+.btn .btn-primary,
+.option-input:checked,
+.option-input:checked::after,
+.back-to-top,
+.dropdown-menu,
+.option-input:hover,
+footer 
+{background-color: #f08b67;}
+
+.form-control,
+select.form-control,
+input[type="checkbox"],
+input[type=radio],
+.blog-post 
+{border-color: #f08b67;}
+
+.btn-primary:hover,
+.btn:hover 
+{outline-color: #f08b67;}
+
+.date-category i,
+blockquote:before,
+.breadcrumb>.active,
+.breadcrumb a:hover,
+.breadcrumb a:focus
+{color: #f08b67;}
+
+/*________  Light Yellow  ________  */
+
+.bg.row,
+.jumbotron,
+#elements h5.sub-header,
+.img-circle,
+.blog-post,
+.sidebar,
+.accordion-group 
+{border-color: #ffffe5;}
+
+body,
+.label-default,
+.bg-lightcolor,
+#preloader,
+.features i,
+.sidebar .well,
+.blog-row,
+.well.lightcolor,
+#elements h5.sub-header,
+.comment,
+.table-hover>tbody>tr:hover 
+{background-color: #ffffe5;}
+
+.nav.nav-tabs > li > a 
+{outline-color: #ffffe5;}
+
+/*________  Ilustrations  ________  */
+
+.ornament1 {
+    background-image: url(../img/ornaments/summer/flower1.png);
+    width: 250px;
+    height: 250px;
+}
+.ornament2 {
+    background-image: url(../img/ornaments/summer/ornament2.png);
+    width: 210px;
+    height: 410px;
+}
+.ornament3 {
+    background-image: url(../img/ornaments/summer/ornament3.png);
+    width: 250px;
+    height: 400px;
+}
+.ornament4 {
+    background-image: url(../img/ornaments/summer/bouquet4.png);
+    width: 308px;
+    height: 301px;
+}
+.ornament5 {
+    background-image: url(../img/ornaments/summer/flower5.png);
+    width: 250px;
+    height: 350px;
+}
+.ornament6 {
+    background-image: url(../img/ornaments/summer/flower6.png);
+    width: 250px;
+    height: 380px;
+}
+.ornament7 {
+    background-image: url(../img/ornaments/summer/branch7.png);
+    width: 215px;
+    height: 300px;
+}
+
+.text-ornament {
+    background-image: url(../img/ornaments/summer/bgname.png);
+}
+.btn {
+   	background-image: url(../img/ornaments/summer/btn.png);
+}
