@@ -20,6 +20,7 @@ $weddingParty  = $weddingParty ?? [];
 $faqs          = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
+$timelineItems = $timelineItems ?? [];
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -180,6 +181,8 @@ $eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles 
 $galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
 $registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
 $partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$whenWhereTitle    = getText($copyPayload, $defaults, 'whenwhere_title', 'Cuándo y dónde');
+$whenWhereMeta     = getText($copyPayload, $defaults, 'whenwhere_meta', 'Questions');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));
@@ -288,6 +291,19 @@ if (!empty($storyPayload['paragraphs']) && is_array($storyPayload['paragraphs'])
 } elseif (!empty($event['description'])) {
     $storyParagraphs = preg_split("/\n+/", (string) $event['description']);
 }
+
+$storyItems = !empty($timelineItems)
+    ? $timelineItems
+    : ($storyPayload['items'] ?? ($storyPayload['events'] ?? []));
+
+$storyMedia = '';
+if (!empty($storyItems[0])) {
+    $storyMedia = (string) ($storyItems[0]['image_url'] ?? ($storyItems[0]['image'] ?? ''));
+    if ($storyMedia !== '' && !preg_match('#^https?://#i', $storyMedia)) {
+        $storyMedia = base_url($storyMedia);
+    }
+}
+$storyMedia = $storyMedia ?: (getMediaUrl($mediaByCategory, 'story') ?: $eventImg);
 
 $brideSocial = parseSocialLinks($couplePayload['bride']['social_links'] ?? ($couplePayload['bride']['social'] ?? []));
 $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($couplePayload['groom']['social'] ?? []));
@@ -485,18 +501,37 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
                     <div class="row">
                         <div class="col-md-5 mb-30">
                             <div class="story-img animate-box" data-animate-effect="fadeInLeft">
-                                <div class="img"> <img src="<?= esc($eventImg) ?>" class="img-fluid" alt="<?= $coupleTitle ?>"> </div>
+                                <div class="img"> <img src="<?= esc($storyMedia) ?>" class="img-fluid" alt="<?= $coupleTitle ?>"> </div>
                                 <div class="story-img-2 story-wedding" style="background-image: url('<?= $assetsBase ?>/images/wedding-logo.png');"></div>
                             </div>
                         </div>
                         <div class="col-md-7 animate-box" data-animate-effect="fadeInRight">
                             <h4 class="oliven-story-subtitle"><?= esc($storySubtitle) ?></h4>
                             <h3 class="oliven-story-title"><?= esc($storyTitle) ?></h3>
-                            <?php foreach ($storyParagraphs as $paragraph) : ?>
-                                <?php if (trim((string) $paragraph) !== '') : ?>
-                                    <p><?= esc((string) $paragraph) ?></p>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                            <?php if (!empty($storyItems)) : ?>
+                                <?php foreach ($storyItems as $item) : ?>
+                                    <?php
+                                    $itemTitle = $item['title'] ?? null;
+                                    $itemDate = $item['year'] ?? ($item['date'] ?? '');
+                                    $itemText = $item['description'] ?? ($item['text'] ?? '');
+                                    ?>
+                                    <?php if ($itemTitle) : ?>
+                                        <h4><?= esc((string) $itemTitle) ?></h4>
+                                    <?php endif; ?>
+                                    <?php if ($itemDate) : ?>
+                                        <p><strong><?= esc((string) $itemDate) ?></strong></p>
+                                    <?php endif; ?>
+                                    <?php if ($itemText) : ?>
+                                        <p><?= esc((string) $itemText) ?></p>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <?php foreach ($storyParagraphs as $paragraph) : ?>
+                                    <?php if (trim((string) $paragraph) !== '') : ?>
+                                        <p><?= esc((string) $paragraph) ?></p>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                             <?php if ($storyHighlight !== '') : ?>
                                 <h4><?= esc($storyHighlight) ?></h4>
                             <?php endif; ?>
@@ -614,8 +649,8 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
             <div id="whenwhere" class="whenwhere section-padding bg-pink">
                 <div class="container">
                     <div class="row">
-                        <div class="col-md-12 mb-30"> <span class="oliven-title-meta">Questions</span>
-                            <h2 class="oliven-title"><?= esc($eventsTitle) ?></h2>
+                        <div class="col-md-12 mb-30"> <span class="oliven-title-meta"><?= esc($whenWhereMeta) ?></span>
+                            <h2 class="oliven-title"><?= esc($whenWhereTitle) ?></h2>
                         </div>
                     </div>
                     <div class="row">
