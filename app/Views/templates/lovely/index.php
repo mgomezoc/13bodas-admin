@@ -647,7 +647,7 @@ foreach ($weddingParty as $member) {
                     <div class="col col-xs-12">
 
                         <div class="gb groom">
-                            <div class="img-holder">
+                            <div class="img-holder wow fadeInLeftSlow">
                                 <img src="<?= esc($groomPhoto) ?>" alt="<?= $groomName ?: $groomSectionTitle ?>">
                             </div>
                             <div class="details">
