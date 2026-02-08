@@ -22,7 +22,7 @@
         <a href="<?= base_url('admin/events/edit/' . $event['id']) ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Volver al Evento
         </a>
-        <a href="<?= route_to('admin.timeline.new', $event['id']) ?>" class="btn btn-primary">
+        <a href="<?= url_to('admin.timeline.new', $event['id']) ?>" class="btn btn-primary">
             <i class="bi bi-plus-lg me-2"></i>Nuevo Hito
         </a>
     </div>
@@ -63,13 +63,13 @@
                                 <td><?= esc((string) ($item['sort_order'] ?? 0)) ?></td>
                                 <td class="text-end">
                                     <div class="action-buttons">
-                                        <a href="<?= route_to('admin.timeline.edit', $event['id'], $item['id']) ?>" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <a href="<?= url_to('admin.timeline.edit', $event['id'], $item['id']) ?>" class="btn btn-sm btn-outline-primary" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button
                                             type="button"
                                             class="btn btn-sm btn-outline-danger"
-                                            data-delete-url="<?= route_to('admin.timeline.delete', $event['id'], $item['id']) ?>"
+                                            data-delete-url="<?= url_to('admin.timeline.delete', $event['id'], $item['id']) ?>"
                                             data-item-title="<?= esc($item['title'] ?? '') ?>"
                                             onclick="confirmDelete(this)"
                                             title="Eliminar">

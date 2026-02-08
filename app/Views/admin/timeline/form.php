@@ -7,7 +7,7 @@
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a href="<?= base_url('admin/dashboard') ?>">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="<?= base_url('admin/events') ?>">Eventos</a></li>
-        <li class="breadcrumb-item"><a href="<?= route_to('admin.timeline.index', $event['id']) ?>">Historia</a></li>
+        <li class="breadcrumb-item"><a href="<?= url_to('admin.timeline.index', $event['id']) ?>">Historia</a></li>
         <li class="breadcrumb-item active"><?= esc($item ? 'Editar' : 'Nuevo') ?></li>
     </ol>
 </nav>
@@ -21,7 +21,7 @@
             <?= esc($item ? 'Actualiza el hito de la historia.' : 'Agrega un nuevo hito a la historia del evento.') ?>
         </p>
     </div>
-    <a href="<?= route_to('admin.timeline.index', $event['id']) ?>" class="btn btn-outline-secondary">
+    <a href="<?= url_to('admin.timeline.index', $event['id']) ?>" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-2"></i>Volver
     </a>
 </div>
@@ -31,8 +31,8 @@
         <div class="card">
             <div class="card-body">
                 <form method="POST" action="<?= $item
-                    ? route_to('admin.timeline.update', $event['id'], $item['id'])
-                    : route_to('admin.timeline.create', $event['id']) ?>">
+                    ? url_to('admin.timeline.update', $event['id'], $item['id'])
+                    : url_to('admin.timeline.create', $event['id']) ?>">
                     <?= csrf_field() ?>
 
                     <div class="mb-3">
@@ -105,7 +105,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-lg me-2"></i><?= esc($item ? 'Actualizar' : 'Crear') ?> Hito
                         </button>
-                        <a href="<?= route_to('admin.timeline.index', $event['id']) ?>" class="btn btn-outline-secondary">
+                        <a href="<?= url_to('admin.timeline.index', $event['id']) ?>" class="btn btn-outline-secondary">
                             Cancelar
                         </a>
                     </div>

@@ -86,7 +86,7 @@ class Timeline extends BaseController
         ];
 
         if ($this->timelineModel->insert($data)) {
-            return redirect()->to(route_to('admin.timeline.index', $eventId))
+            return redirect()->to(url_to('admin.timeline.index', $eventId))
                 ->with('success', 'Hito creado correctamente.');
         }
 
@@ -105,7 +105,7 @@ class Timeline extends BaseController
         $item = $this->timelineModel->find($itemId);
 
         if (!$item || $item->event_id !== $eventId) {
-            return redirect()->to(route_to('admin.timeline.index', $eventId))
+            return redirect()->to(url_to('admin.timeline.index', $eventId))
                 ->with('error', 'Hito no encontrado.');
         }
 
@@ -127,7 +127,7 @@ class Timeline extends BaseController
         $item = $this->timelineModel->find($itemId);
 
         if (!$item || $item->event_id !== $eventId) {
-            return redirect()->to(route_to('admin.timeline.index', $eventId))
+            return redirect()->to(url_to('admin.timeline.index', $eventId))
                 ->with('error', 'Hito no encontrado.');
         }
 
@@ -152,7 +152,7 @@ class Timeline extends BaseController
         ];
 
         if ($this->timelineModel->update($itemId, $data)) {
-            return redirect()->to(route_to('admin.timeline.index', $eventId))
+            return redirect()->to(url_to('admin.timeline.index', $eventId))
                 ->with('success', 'Hito actualizado correctamente.');
         }
 
