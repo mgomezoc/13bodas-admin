@@ -258,6 +258,24 @@ function findLocationLabel(array $eventLocations, array $item): string
     return '';
 }
 
+function normalizeAssetUrl(string $url): string
+{
+    if ($url === '') {
+        return '';
+    }
+    if (!preg_match('#^https?://#i', $url)) {
+        return base_url($url);
+    }
+    return $url;
+}
+
+$storyItems = array_map(static function (array $item): array {
+    if (!empty($item['image_url'])) {
+        $item['image_url'] = normalizeAssetUrl((string) $item['image_url']);
+    }
+    return $item;
+}, $storyItems);
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -307,6 +325,54 @@ function findLocationLabel(array $eventLocations, array $item): string
 
         .wpo-section-title h2 {
             color: var(--primary-color);
+        }
+
+        .wpo-story-section .wpo-section-title {
+            margin-bottom: 40px;
+        }
+
+        .wpo-story-section .tablinks {
+            margin-top: 12px;
+        }
+
+        .wpo-registry-section .registry-item {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wpo-registry-section .registry-img {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 220px;
+            background: #fff;
+        }
+
+        .wpo-registry-section .registry-img img {
+            max-height: 220px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .wpo-registry-section .registry-content {
+            flex: 1;
+        }
+
+        .feelings-faqs .faq-card {
+            padding: 24px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            height: 100%;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .feelings-faqs .faq-card h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -504,7 +570,7 @@ function findLocationLabel(array $eventLocations, array $item): string
                                             <div class="img-holder">
                                                 <a href="<?= $fullUrl ?>"
                                                     class="fancybox"
-                                                    data-fancybox-group="gall-1">
+                                                    data-fancybox="gallery">
                                                     <img src="<?= $thumbUrl ?>"
                                                         alt="<?= $altText ?>"
                                                         class="img img-responsive">
@@ -799,7 +865,7 @@ function findLocationLabel(array $eventLocations, array $item): string
 
         <!-- FAQ SECTION -->
         <?php if (!empty($faqs)): ?>
-            <section class="wpo-story-section" id="faqs">
+            <section class="wpo-story-section feelings-faqs" id="faqs">
                 <div class="container">
                     <div class="wpo-section-title">
                         <div class="section-title-img">
@@ -811,63 +877,12 @@ function findLocationLabel(array $eventLocations, array $item): string
                     <div class="row">
                         <?php foreach ($faqs as $faq): ?>
                             <div class="col col-lg-6 col-md-6 col-12">
-                                <div class="wpo-story-item">
-                                    <div class="wpo-story-content">
-                                        <div class="wpo-story-content-inner">
-                                            <h2><?= esc((string)($faq['question'] ?? '')) ?></h2>
-                                            <p><?= esc((string)($faq['answer'] ?? '')) ?></p>
-                                        </div>
-                                    </div>
+                                <div class="faq-card">
+                                    <h3><?= esc((string)($faq['question'] ?? '')) ?></h3>
+                                    <p><?= esc((string)($faq['answer'] ?? '')) ?></p>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    </div>
-                </div>
-            </section>
-        <?php endif; ?>
-
-        <!-- GUEST SUMMARY SECTION -->
-        <?php if (!empty($guestGroups) || !empty($guests) || !empty($rsvpResponses)): ?>
-            <section class="wpo-story-section" id="guest-summary">
-                <div class="container">
-                    <div class="wpo-section-title">
-                        <div class="section-title-img">
-                            <img src="<?= $assetsBase ?>/images/section-title.png" alt="">
-                        </div>
-                        <h2><?= $guestSummaryTitle ?></h2>
-                    </div>
-
-                    <div class="row">
-                        <div class="col col-lg-4 col-md-6 col-12">
-                            <div class="wpo-story-item">
-                                <div class="wpo-story-content">
-                                    <div class="wpo-story-content-inner">
-                                        <h2><?= esc((string)count($guestGroups)) ?></h2>
-                                        <p>Grupos invitados</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col col-lg-4 col-md-6 col-12">
-                            <div class="wpo-story-item">
-                                <div class="wpo-story-content">
-                                    <div class="wpo-story-content-inner">
-                                        <h2><?= esc((string)count($guests)) ?></h2>
-                                        <p>Invitados registrados</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col col-lg-4 col-md-6 col-12">
-                            <div class="wpo-story-item">
-                                <div class="wpo-story-content">
-                                    <div class="wpo-story-content-inner">
-                                        <h2><?= esc((string)count($rsvpResponses)) ?></h2>
-                                        <p>Respuestas RSVP</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
