@@ -39,8 +39,6 @@ $RECYCLE.BIN/
 #-------------------------
 # Environment Files
 #-------------------------
-# These should never be under version control,
-# as it poses a security risk.
 .env
 .vagrant
 Vagrantfile
@@ -64,6 +62,7 @@ writable/debugbar/*
 !writable/debugbar/index.html
 
 php_errors.log
+*.tmp
 
 #-------------------------
 # User Guide Temp Files
@@ -77,8 +76,6 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 # Test Files
 #-------------------------
 tests/coverage*
-
-# Don't save phpunit under version control.
 phpunit
 
 #-------------------------
@@ -89,18 +86,10 @@ vendor/
 #-------------------------
 # IDE / Development Files
 #-------------------------
-
-# Modules Testing
 _modules/*
-
-# phpenv local config
 .php-version
-
-# Jetbrains editors (PHPStorm, etc)
 .idea/
 *.iml
-
-# NetBeans
 /nbproject/
 /build/
 /nbbuild/
@@ -109,8 +98,6 @@ _modules/*
 /nbactions.xml
 /nb-configuration.xml
 /.nb-gradle/
-
-# Sublime Text
 *.tmlanguage.cache
 *.tmPreferences.cache
 *.stTheme.cache
@@ -118,20 +105,18 @@ _modules/*
 *.sublime-project
 .phpintel
 /api/
-
-# Visual Studio Code
 .vscode/
-
 /results/
 /phpunit*.xml
+
 #-------------------------
-# Public Uploads
+# Custom Project Rules
 #-------------------------
-templates
+
+# Ignorar carpeta de imágenes subidas en public
 public/uploads/*
 !public/uploads/index.html
-#-------------------------
-# Templates y Archivos Temporales
-#-------------------------
+
+# Ignorar SOLO la carpeta templates que está en la raíz (evita basura)
+# El "/" al inicio es clave para que NO ignore app/Views/templates/
 /templates/
-*.tmp
