@@ -592,7 +592,6 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
                     <div class="about-us-desc col-lg-8 offset-lg-2" data-animation-direction="from-bottom" data-animation-delay="300">
                         <h3><small><?= $ctaHeading ?></small><?= $ctaSubheading ?></h3>
                         <p><?= $aboutSubtitle ?></p>
-                        <img src="<?= $assetsBase ?>/<?= esc($tplAssets['signature'] ?? 'images/signature-2.png') ?>" alt="<?= esc($coupleTitle) ?>">
                     </div>
                 </div>
             </div>
