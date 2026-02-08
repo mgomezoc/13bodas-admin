@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use CodeIgniter\Entity\Entity;
+use App\Entities\TimelineItem;
 use CodeIgniter\Model;
 
 class TimelineItemModel extends Model
@@ -12,7 +12,7 @@ class TimelineItemModel extends Model
     protected $table            = 'event_timeline_items';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
-    protected $returnType       = Entity::class;
+    protected $returnType       = TimelineItem::class;
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
 
@@ -33,7 +33,7 @@ class TimelineItemModel extends Model
     protected $updatedField  = '';
 
     /**
-     * @return Entity[]
+     * @return TimelineItem[]
      */
     public function getByEvent(string $eventId): array
     {
