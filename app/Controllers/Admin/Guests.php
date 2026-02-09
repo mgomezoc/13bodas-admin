@@ -301,7 +301,7 @@ class Guests extends BaseController
     /**
      * Exportar invitados a CSV
      */
-    public function export(string $eventId): ResponseInterface|void
+    public function export(string $eventId): ResponseInterface
     {
         if (!$this->canAccessEvent($eventId)) {
             return redirect()->to(base_url('admin/events'));
@@ -311,19 +311,16 @@ class Guests extends BaseController
         $guests = $this->guestModel->getByEvent($eventId);
 
         $filename = 'invitados-' . $event['slug'] . '-' . date('Y-m-d') . '.csv';
-        
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        
-        $output = fopen('php://output', 'w');
-        
-        // BOM para Excel
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        
-        // Encabezados
+
+        $output = fopen('php://temp', 'r+');
+        if ($output === false) {
+            return redirect()->to(base_url('admin/events/' . $eventId . '/guests'))
+                ->with('error', 'No se pudo exportar el CSV.');
+        }
+
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
         fputcsv($output, ['Nombre', 'Apellido', 'Email', 'Teléfono', 'Grupo', 'Estado RSVP', 'Es Niño']);
-        
-        // Datos
+
         foreach ($guests as $guest) {
             fputcsv($output, [
                 $guest['first_name'],
@@ -332,12 +329,18 @@ class Guests extends BaseController
                 $guest['phone_number'] ?? '',
                 $guest['group_name'] ?? '',
                 $guest['rsvp_status'],
-                $guest['is_child'] ? 'Sí' : 'No'
+                $guest['is_child'] ? 'Sí' : 'No',
             ]);
         }
-        
+
+        rewind($output);
+        $csvContent = stream_get_contents($output) ?: '';
         fclose($output);
-        exit;
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv; charset=utf-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($csvContent);
     }
 
     public function inviteLink(string $eventId, string $guestId): ResponseInterface
