@@ -11,6 +11,7 @@
     top: 0;
     z-index: 1020;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    overflow: visible;
 }
 
 .event-nav {
@@ -65,6 +66,7 @@
     background: #1a1520;
     border: 1px solid #d4a574;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 1055;
 }
 
 .event-nav .dropdown-item {
