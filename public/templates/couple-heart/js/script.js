@@ -887,7 +887,7 @@
     }
 
     /* ----- Google Map Settings ----- */
-    if($('#map-location').length){
+    if($('#map-location').length && typeof GMaps !== 'undefined'){
         var map;
         map = new GMaps({
             url: '../images/resource/flake.png',
