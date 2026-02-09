@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -27,15 +29,12 @@ class EventModel extends Model
         'event_date_start',
         'event_date_end',
         'rsvp_deadline',
-        'site_mode',
         'visibility',
         'access_mode',
         'venue_name',
         'venue_address',
         'venue_geo_lat',
         'venue_geo_lng',
-        'venue_config',
-        'theme_config',
         'is_demo',
         'service_status',
         'is_paid',
@@ -170,7 +169,6 @@ class EventModel extends Model
         $data['id'] = $eventId;
 
         // Valores por defecto coherentes
-        $data['site_mode']       = $data['site_mode']       ?? 'auto';
         $data['visibility']      = $data['visibility']      ?? 'private';
         $data['access_mode']     = $data['access_mode']     ?? 'open';
         $data['service_status']  = $data['service_status']  ?? 'draft';

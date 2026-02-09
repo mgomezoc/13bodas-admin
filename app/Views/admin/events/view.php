@@ -158,11 +158,6 @@
 
                 <!-- Config útil (sin romper roles; si tu layout no manda isAdmin, esto solo muestra lo básico) -->
                 <dl class="row mb-0">
-                    <dt class="col-sm-4">Modo</dt>
-                    <dd class="col-sm-8">
-                        <?= !empty($event['site_mode']) ? esc($event['site_mode']) : '<span class="text-muted">-</span>' ?>
-                    </dd>
-
                     <dt class="col-sm-4">Visibilidad</dt>
                     <dd class="col-sm-8">
                         <?= !empty($event['visibility']) ? esc($event['visibility']) : '<span class="text-muted">-</span>' ?>

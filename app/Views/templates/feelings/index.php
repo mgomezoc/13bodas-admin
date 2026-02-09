@@ -25,7 +25,6 @@ $faqs          = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
 $timelineItems = $timelineItems ?? [];
-$venueConfig   = $venueConfig ?? [];
 $selectedGuest = $selectedGuest ?? null;
 $selectedGuestName = '';
 $selectedGuestEmail = '';
@@ -808,9 +807,9 @@ $storyItems = array_map(static function (array $item): array {
                             <div class="col col-lg-6 col-md-12 col-12">
                                 <div class="wpo-event-item">
                                     <div class="wpo-event-text">
-                                        <h2><?= $venueName ?: esc((string)($venueConfig['name'] ?? '')) ?></h2>
-                                        <?php if ($venueAddr || !empty($venueConfig['address'])): ?>
-                                            <p><?= $venueAddr ?: esc((string)($venueConfig['address'] ?? '')) ?></p>
+                                        <h2><?= $venueName ?></h2>
+                                        <?php if ($venueAddr): ?>
+                                            <p><?= $venueAddr ?></p>
                                         <?php endif; ?>
                                         <?php if ($lat && $lng): ?>
                                             <a href="https://www.google.com/maps?q=<?= esc((string)$lat) ?>,<?= esc((string)$lng) ?>" target="_blank" rel="noopener">Ver mapa</a>
