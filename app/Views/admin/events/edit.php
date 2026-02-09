@@ -297,20 +297,6 @@
                                 </div>
 
 
-                                <?php if (!empty($templates)): ?>
-                                    <div class="mb-0">
-                                        <label class="form-label" for="template_id">Plantilla de Diseño</label>
-                                        <select id="template_id" name="template_id" class="form-select">
-                                            <option value="">Sin plantilla</option>
-                                            <?php foreach ($templates as $template): ?>
-                                                <option value="<?= $template['id'] ?>" <?= (string)($event['template_id'] ?? '') === (string)$template['id'] ? 'selected' : '' ?>>
-                                                    <?= esc($template['name']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <div class="form-text">Define el diseño visual de la invitación</div>
-                                    </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endif; ?>

@@ -9,7 +9,6 @@ use App\Models\EventModel;
 use App\Models\ClientModel;
 use App\Models\GuestModel;
 use App\Models\ContentModuleModel;
-use App\Models\TemplateModel;
 use App\Models\EventTemplateModel;
 
 class Events extends BaseController
@@ -92,15 +91,12 @@ class Events extends BaseController
 
         $clients          = $this->clientModel->listWithUsers();
         $selectedClientId = $this->request->getGet('client_id');
-        $templates        = (new TemplateModel())->where('is_public', 1)->findAll();
-
         return view('admin/events/create', [
             'pageTitle'        => 'Nuevo Evento',
             'clients'          => $clients,
             'selectedClientId' => $selectedClientId,
             'timezones'        => $this->getTimezones(),
             'isAdmin'          => $isAdmin,
-            'templates'        => $templates,
         ]);
     }
 
@@ -212,7 +208,6 @@ class Events extends BaseController
 
         $stats     = $this->eventModel->getEventStats($id);
         $rsvpStats = (new GuestModel())->getRsvpStatsByEvent($id);
-        $activeTemplate = (new TemplateModel())->getActiveForEvent($id);
 
         // plantilla activa
         $event['template_id'] = $this->eventTemplateModel->getActiveTemplateId($id);
@@ -226,7 +221,6 @@ class Events extends BaseController
             'event'         => $event,
             'stats'         => $stats,
             'rsvpStats'     => $rsvpStats,
-            'activeTemplate' => $activeTemplate,
             'isAdmin'       => $isAdmin,
             'invitationUrl' => base_url('i/' . $event['slug']),
         ]);
@@ -257,8 +251,6 @@ class Events extends BaseController
         $stats     = $this->eventModel->getEventStats($id);
         $rsvpStats = (new GuestModel())->getRsvpStatsByEvent($id);
 
-        $templates = (new TemplateModel())->where('is_public', 1)->findAll();
-
         // IMPORTANTÍSIMO: plantilla activa viene de event_templates
         $event['template_id'] = $this->eventTemplateModel->getActiveTemplateId($id);
 
@@ -273,7 +265,6 @@ class Events extends BaseController
             'isAdmin'       => $isAdmin,
             'invitationUrl' => base_url('i/' . $event['slug']),
             'clients'       => $isClient ? [] : $this->clientModel->listWithUsers(),
-            'templates'     => $templates,
         ]);
     }
 

@@ -144,14 +144,6 @@
                         <?= !empty($event['created_at']) ? date('d/m/Y', strtotime($event['created_at'])) : '<span class="text-muted">-</span>' ?>
                     </dd>
 
-                    <dt class="col-sm-4">Plantilla activa</dt>
-                    <dd class="col-sm-8">
-                        <?php if (!empty($activeTemplate['name'])): ?>
-                            <span class="badge bg-light text-dark"><?= esc($activeTemplate['name']) ?></span>
-                        <?php else: ?>
-                            <span class="text-muted">Sin plantilla</span>
-                        <?php endif; ?>
-                    </dd>
                 </dl>
 
                 <hr class="my-3">

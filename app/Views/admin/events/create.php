@@ -230,19 +230,6 @@
                                    class="form-control datetimepicker"
                                    value="<?= old('paid_until') ?>">
                         </div>
-                        <?php if (!empty($templates)): ?>
-                            <div class="mb-0">
-                                <label class="form-label" for="template_id">Plantilla de Diseño</label>
-                                <select id="template_id" name="template_id" class="form-select">
-                                    <option value="">Sin plantilla</option>
-                                    <?php foreach ($templates as $template): ?>
-                                        <option value="<?= $template['id'] ?>" <?= old('template_id') == $template['id'] ? 'selected' : '' ?>>
-                                            <?= esc($template['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             <?php endif; ?>
