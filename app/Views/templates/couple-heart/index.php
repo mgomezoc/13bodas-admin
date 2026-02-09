@@ -1419,6 +1419,9 @@ $contactAddress = esc($venueAddr);
     <script type="text/javascript" src="<?= $assetsBase ?>/js/timepicker.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/tweetie.js"></script>
     <!-- Custom script for all pages -->
+    <script>
+        window.COUPLE_HEART_ASSETS = <?= json_encode($assetsBase, JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/color-switcher.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/script.js"></script>
 

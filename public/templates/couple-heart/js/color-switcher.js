@@ -9,64 +9,67 @@ window.console = window.console || (function(){
 })();
 
 
+var colorSwitcherBase = (window.COUPLE_HEART_ASSETS || '').replace(/\/+$/, '');
+var colorSwitcherPrefix = colorSwitcherBase ? colorSwitcherBase + '/' : '';
+
 jQuery(document).ready(function($) {
 	"use strict"
 	
 	$("ul.colors .color1" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/default.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/default.css" );
 		return false;
 	});
 
 	$("ul.colors .color2" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-2.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-2.css" );
 		return false;
 	});
 
 	$("ul.colors .color3" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-3.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-3.css" );
 		return false;
 	});
 
 	$("ul.colors .color4" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-4.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-4.css" );
 		return false;
 	});
 
 	$("ul.colors .color5" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-5.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-5.css" );
 		return false;
 	});
 
 	$("ul.colors .color6" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-6.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-6.css" );
 		return false;
 	});
 
 	$("ul.colors .color7" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-7.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-7.css" );
 		return false;
 	});
 	$("ul.colors .color8" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-8.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-8.css" );
 		return false;
 	});
 
 	$("ul.colors .color9" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-9.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-9.css" );
 		return false;
 	});
 
 	$("ul.colors .color10" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-10.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-10.css" );
 		return false;
 	});
 
 	$("ul.colors .color11" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-11.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-11.css" );
 		return false;
 	});
 	$("ul.colors .color12" ).on('click', function(){
-		$("#colors" ).attr("href", "css/colors/color-12.css" );
+		$("#colors" ).attr("href", colorSwitcherPrefix + "css/colors/color-12.css" );
 		return false;
 	});
 
@@ -96,8 +99,8 @@ jQuery(document).ready(function($) {
 
 
 //Inject Necessary Styles and HTML
-jQuery('head').append('<link rel="stylesheet" id="colors" href="css/colors/default.css" type="text/css" />');
-jQuery('head').append('<link rel="stylesheet" href="css/color-switcher.css" type="text/css" />'); 
+jQuery('head').append('<link rel="stylesheet" id="colors" href="' + colorSwitcherPrefix + 'css/colors/default.css" type="text/css" />');
+jQuery('head').append('<link rel="stylesheet" href="' + colorSwitcherPrefix + 'css/color-switcher.css" type="text/css" />'); 
 
 jQuery('body').append('' + 
 	'<div id="color-style-switcher">' +
