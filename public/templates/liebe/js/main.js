@@ -11,8 +11,11 @@ $(document).ready(function() {
   //Countdown
   
     $(function(){
+			var countdownDate = (typeof window.countdown_date !== 'undefined' && window.countdown_date)
+				? window.countdown_date
+				: "2024/06/19 19:00:00";
 			$('#countdown').countdowntimer({
-			dateAndTime : "2024/06/19 19:00:00",  // <-- edit yyyy / mm / dd / time
+			dateAndTime : countdownDate,  // <-- edit yyyy / mm / dd / time
 			size : "lg",
 			// if the date has over 4 digits in days then add an extra [0-9] in the first field bellow
 			regexpMatchFormat: "([0-9][0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})",
