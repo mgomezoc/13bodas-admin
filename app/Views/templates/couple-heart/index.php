@@ -469,77 +469,6 @@ $contactAddress = esc($venueAddr);
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <style>
-        :root {
-            --t-primary: <?= esc($colorPrimary) ?>;
-            --t-accent: <?= esc($colorAccent) ?>;
-            --t-heading-font: "<?= esc($fontHeading) ?>", cursive;
-            --t-body-font: "<?= esc($fontBody) ?>", sans-serif;
-        }
-
-        body {
-            font-family: var(--t-body-font);
-        }
-
-        h1,
-        h2,
-        h3,
-        .text-thm2 {
-            font-family: var(--t-heading-font);
-        }
-
-        .text-thm2,
-        .ulockd-btn-thm2,
-        .ulockd-bgthm {
-            color: #fff;
-            background-color: var(--t-primary);
-        }
-
-        .ulockd-main-title .text-thm2 {
-            color: var(--t-primary);
-        }
-
-        .ulockd-btn-thm2 {
-            border-color: var(--t-primary);
-        }
-
-        .badge.ulockd-bgthm {
-            background-color: var(--t-accent);
-            color: #111;
-        }
-
-        .timeline-panel {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: stretch;
-        }
-
-        .timeline-panel .timeline-body {
-            word-break: break-word;
-            overflow-wrap: anywhere;
-        }
-
-        .event-box {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .event-box .details {
-            flex: 1;
-        }
-
-        #faq .blog-post {
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-            padding: 24px 20px;
-        }
-
-        #faq .eventdate {
-            margin-bottom: 12px;
-        }
-    </style>
 </head>
 
 <body>
@@ -1454,10 +1383,6 @@ $contactAddress = esc($venueAddr);
     <script type="text/javascript" src="<?= $assetsBase ?>/js/timepicker.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/tweetie.js"></script>
     <!-- Custom script for all pages -->
-    <script>
-        window.COUPLE_HEART_ASSETS = <?= json_encode($assetsBase, JSON_UNESCAPED_SLASHES) ?>;
-    </script>
-    <script type="text/javascript" src="<?= $assetsBase ?>/js/color-switcher.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/script.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
