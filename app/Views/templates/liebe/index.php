@@ -1148,7 +1148,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
             </div>
             <!-- well -->
             <div class="col-lg-7 well">
-                <form id="rsvp_form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                <form id="rsvp_form" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>">
                     <?= csrf_field() ?>
                     <?php if (!empty($selectedGuest['id'])): ?>
                         <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">

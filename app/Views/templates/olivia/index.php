@@ -702,7 +702,7 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
                         <div class="col-md-6 offset-md-3 bg-white p-40"> <span class="oliven-title-meta text-center"><?= esc($rsvpHeading) ?></span>
                             <h2 class="oliven-title text-center"><?= esc($rsvpHeading) ?></h2>
                             <br>
-                            <form class="contact__form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                            <form class="contact__form" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>">
                                 <!-- form message -->
                                 <?= csrf_field() ?>
                                 <?php if (!empty($selectedGuest['id'])): ?>

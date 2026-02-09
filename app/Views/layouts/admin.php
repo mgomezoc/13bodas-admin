@@ -218,6 +218,7 @@
         // Configuración global
         const BASE_URL = '<?= base_url() ?>';
         const CSRF_TOKEN = '<?= csrf_hash() ?>';
+        const CSRF_NAME = '<?= csrf_token() ?>';
 
         // Configuración de SweetAlert2
         const Toast = Swal.mixin({

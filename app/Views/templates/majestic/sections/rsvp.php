@@ -23,7 +23,7 @@ if (!empty($selectedGuest)) {
         </p>
         
         <div class="rsvp-form-container" data-aos="fade-up" data-aos-delay="200">
-            <form id="rsvpForm" class="rsvp-form" method="POST" action="<?= esc(route_to('rsvp.submit', $event['slug'])) ?>">
+            <form id="rsvpForm" class="rsvp-form" method="POST" action="<?= esc(base_url(route_to('rsvp.submit', $event['slug']))) ?>">
                 <?= csrf_field() ?>
                 <?php if (!empty($selectedGuest['id'])): ?>
                     <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">

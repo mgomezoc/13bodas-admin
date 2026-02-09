@@ -630,7 +630,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
                 </div>
 
                 <div class="w-rsvp" data-reveal>
-                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>">
                         <?= csrf_field() ?>
                         <?php if (!empty($selectedGuest['id'])): ?>
                             <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
@@ -692,7 +692,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
             eventId: <?= json_encode($eventId) ?>,
             slug: <?= json_encode($slug) ?>,
             eventDateISO: <?= json_encode($eventDateISO) ?>,
-            rsvpUrl: <?= json_encode(route_to('rsvp.submit', $slug)) ?>,
+            rsvpUrl: <?= json_encode(base_url(route_to('rsvp.submit', $slug))) ?>,
         };
     </script>
     <script src="<?= $assetsBase ?>/js/weddingo.js"></script>

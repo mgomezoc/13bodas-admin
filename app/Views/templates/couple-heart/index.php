@@ -1088,7 +1088,7 @@ $contactAddress = esc($venueAddr);
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <form id="rsvp_form3" name="rsvp_form3" class="rsvp_form3 bgc-overlay-white7" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>" novalidate="novalidate">
+                        <form id="rsvp_form3" name="rsvp_form3" class="rsvp_form3 bgc-overlay-white7" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>" novalidate="novalidate">
                             <?= csrf_field() ?>
                             <?php if (!empty($selectedGuest['id'])): ?>
                                 <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">

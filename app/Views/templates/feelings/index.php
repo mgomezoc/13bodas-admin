@@ -621,7 +621,7 @@ $storyItems = array_map(static function (array $item): array {
                             </div>
 
                             <div class="form-area">
-                                <form action="<?= esc(route_to('rsvp.submit', $slug)) ?>" method="POST" class="contact-validation-active" id="rsvp-form">
+                                <form action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>" method="POST" class="contact-validation-active" id="rsvp-form">
                                     <?= csrf_field() ?>
                                     <?php if (!empty($selectedGuest['id'])): ?>
                                         <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">

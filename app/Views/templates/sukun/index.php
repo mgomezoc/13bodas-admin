@@ -184,7 +184,7 @@ $parallaxBg = skMediaUrl($mediaByCategory, 'cta_bg') ?: skMediaUrl($mediaByCateg
 
 $eventDateIso = skDateIso($event['event_date_start'] ?? null, $tz);
 $eventDateHuman = skDateEs($event['event_date_start'] ?? null, $tz);
-$rsvpUrl = route_to('rsvp.submit', $slug);
+$rsvpUrl = base_url(route_to('rsvp.submit', $slug));
 
 $hasGallery = !empty($galleryList);
 $hasStory = !empty($storyItems);

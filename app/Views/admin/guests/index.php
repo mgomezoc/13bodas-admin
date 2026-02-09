@@ -201,7 +201,9 @@ function deleteGuest(guestId) {
         cancelButtonText: 'Cancelar'
     }).then((result) => {
         if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/guests/delete/${guestId}`)
+            $.post(`${BASE_URL}admin/events/${eventId}/guests/delete/${guestId}`, {
+                [CSRF_NAME]: CSRF_TOKEN
+            })
                 .done(function(response) {
                     if (response.success) {
                         Toast.fire({ icon: 'success', title: response.message });
@@ -251,7 +253,9 @@ function copyInviteLink(guestId) {
 }
 
 function sendInvite(guestId) {
-    $.post(`${BASE_URL}admin/events/${eventId}/guests/${guestId}/send-invite`)
+    $.post(`${BASE_URL}admin/events/${eventId}/guests/${guestId}/send-invite`, {
+        [CSRF_NAME]: CSRF_TOKEN
+    })
         .done(function(response) {
             if (!response.success) {
                 Toast.fire({ icon: 'error', title: response.message });
