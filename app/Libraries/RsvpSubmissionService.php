@@ -151,7 +151,7 @@ class RsvpSubmissionService
         $now = date('Y-m-d H:i:s');
 
         $guestRow = $db->table('guests')
-            ->select('guests.id, guests.group_id, guest_groups.event_id, guest_groups.access_code')
+            ->select('guests.id, guests.group_id, guests.first_name, guests.last_name, guests.email, guest_groups.event_id, guest_groups.access_code')
             ->join('guest_groups', 'guest_groups.id = guests.group_id')
             ->where('guests.id', $guestId)
             ->get()
@@ -210,6 +210,21 @@ class RsvpSubmissionService
 
             if ($db->transStatus() === false) {
                 throw new \RuntimeException('No se pudo guardar la confirmación.');
+            }
+
+            $emailPayload = [
+                'name' => trim((string) ($guestRow['first_name'] ?? '') . ' ' . (string) ($guestRow['last_name'] ?? '')),
+                'email' => (string) ($guestRow['email'] ?? ''),
+                'attending' => $attendingValue,
+                'message' => $payload['message'] ?? null,
+                'song_request' => $payload['song_request'] ?? null,
+            ];
+
+            if ($emailPayload['email'] !== '') {
+                $emailResult = $this->mailer->sendConfirmation($event, $emailPayload);
+                if (!$emailResult['success']) {
+                    return ['success' => false, 'message' => $emailResult['message']];
+                }
             }
 
             return [
