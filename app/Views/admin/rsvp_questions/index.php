@@ -19,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'preguntas-rsvp', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Preguntas RSVP</h1>
@@ -29,7 +30,6 @@
     </button>
 </div>
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'preguntas-rsvp', 'event_id' => $event['id']]) ?>
 
 <div id="rsvpQuestionsList" class="card">
     <div class="card-body">

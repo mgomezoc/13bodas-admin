@@ -18,6 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'regalos', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Lista de Regalos</h1>
@@ -68,7 +69,6 @@
     </div>
 </div>
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'regalos', 'event_id' => $event['id']]) ?>
 
 <!-- Lista de Regalos -->
 <div id="registrySection">

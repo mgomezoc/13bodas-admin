@@ -21,6 +21,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'informacion', 'event_id' => $event['id']]) ?>
 <!-- Header del Evento -->
 <div class="page-header">
     <div>
@@ -86,7 +87,6 @@
 </div>
 
 <!-- Tabs de navegación -->
-<?= view('admin/events/partials/_event_navigation', ['active' => 'informacion', 'event_id' => $event['id']]) ?>
 
 <!-- Contenido del Tab -->
 <div class="tab-content" id="eventTabsContent">

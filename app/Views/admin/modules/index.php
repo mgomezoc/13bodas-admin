@@ -19,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'modulos', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Módulos de Contenido</h1>
@@ -26,7 +27,6 @@
     </div>
 </div>
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'modulos', 'event_id' => $event['id']]) ?>
 
 <div id="modulesList" class="card">
     <div class="card-body">

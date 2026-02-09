@@ -18,6 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'timeline', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title"><?= esc($pageTitle) ?></h1>
@@ -33,7 +34,6 @@
     </div>
 </div>
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'timeline', 'event_id' => $event['id']]) ?>
 
 <div class="card">
     <div class="card-body">

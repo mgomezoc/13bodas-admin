@@ -18,6 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'confirmaciones', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Confirmaciones de Asistencia</h1>
@@ -109,7 +110,6 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
     </div>
 </div>
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'confirmaciones', 'event_id' => $event['id']]) ?>
 
 <!-- Lista de respuestas -->
 <div class="card">

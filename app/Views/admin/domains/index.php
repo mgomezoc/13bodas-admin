@@ -19,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'dominios', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Dominios Personalizados</h1>
@@ -29,7 +30,6 @@
     </button>
 </div>
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'dominios', 'event_id' => $event['id']]) ?>
 
 <div id="domainsList" class="card">
     <div class="card-body">

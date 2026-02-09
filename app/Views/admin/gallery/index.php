@@ -18,6 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'galeria', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Galería de Fotos</h1>
@@ -32,7 +33,6 @@
 <!-- Input oculto para subir -->
 <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
-<?= view('admin/events/partials/_event_navigation', ['active' => 'galeria', 'event_id' => $event['id']]) ?>
 
 <!-- Category Nav -->
 <div class="card mb-3">
