@@ -208,8 +208,8 @@ $eventIntroTitle = getText($copyPayload, $defaults, 'event_intro_title', 'Celebr
 $eventIntroText = getText(
     $copyPayload,
     $defaults,
-    'event_intro_text',
-    'Será un honor compartir este momento contigo.'
+    'event_description',
+    'Nos encantará verte ahí para compartir este momento con nosotros.'
 );
 $eventDetailsTitle = getText($copyPayload, $defaults, 'event_details_title', 'Un día muy especial...');
 $eventDetailsText = getText(
@@ -309,29 +309,6 @@ $rsvpBg = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/img/rsvp.
 $eventImagePrimary = getMediaUrl($mediaByCategory, 'event', 0) ?: ($assetsBase . '/img/party2.jpg');
 $eventImageSecondary = getMediaUrl($mediaByCategory, 'event', 1) ?: ($assetsBase . '/img/party1.jpg');
 
-$eventMediaItems = $mediaByCategory['event'] ?? [];
-$eventMediaTextPrimary = '';
-$eventMediaTextSecondary = '';
-$eventMediaTextAlert = '';
-if (!empty($eventMediaItems[0])) {
-    $eventMediaTextPrimary = (string)($eventMediaItems[0]['caption'] ?? ($eventMediaItems[0]['alt_text'] ?? ''));
-}
-if (!empty($eventMediaItems[1])) {
-    $eventMediaTextSecondary = (string)($eventMediaItems[1]['caption'] ?? ($eventMediaItems[1]['alt_text'] ?? ''));
-}
-if (!empty($eventMediaItems[2])) {
-    $eventMediaTextAlert = (string)($eventMediaItems[2]['caption'] ?? ($eventMediaItems[2]['alt_text'] ?? ''));
-}
-
-if ($eventMediaTextPrimary !== '') {
-    $eventIntroText = esc($eventMediaTextPrimary);
-}
-if ($eventMediaTextSecondary !== '') {
-    $eventDetailsText = esc($eventMediaTextSecondary);
-}
-if ($eventMediaTextAlert !== '') {
-    $eventAlertText = esc($eventMediaTextAlert);
-}
 
 // --- Small helpers ---
 function moneyFmt($val, string $currency = 'MXN'): string
@@ -896,6 +873,12 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <!-- paper well -->
                 <div class="well col-md-6">
                     <h3><?= $eventIntroTitle ?></h3>
+                    <?php if ($venueName !== '' || $venueAddr !== ''): ?>
+                        <p><strong><?= esc($venueName) ?></strong></p>
+                        <?php if ($venueAddr !== ''): ?>
+                            <p><?= esc($venueAddr) ?></p>
+                        <?php endif; ?>
+                    <?php endif; ?>
                     <p><?= $eventIntroText ?></p>
                 </div>
                 <!-- /well -->
