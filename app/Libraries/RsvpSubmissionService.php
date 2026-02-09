@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Enums\RsvpStatus;
 use Config\Database;
 
 class RsvpSubmissionService
@@ -16,6 +17,11 @@ class RsvpSubmissionService
     {
         if (($event['service_status'] ?? '') !== 'active') {
             return ['success' => false, 'message' => 'Evento no disponible.'];
+        }
+
+        $guestId = trim((string) ($payload['guest_id'] ?? ''));
+        if ($guestId !== '') {
+            return $this->submitForGuest($event, $payload, $guestId);
         }
 
         if (($event['access_mode'] ?? 'open') !== 'open') {
@@ -76,9 +82,13 @@ class RsvpSubmissionService
             $first = $parts[0] ?? $guestName;
             $last = $parts[1] ?? '';
 
-            $attending = (string) ($payload['attending'] ?? 'pending');
-            $attendingValue = $attending === 'maybe' ? 'pending' : $attending;
-            $guestStatus = $attendingValue === 'accepted' ? 'accepted' : ($attendingValue === 'declined' ? 'declined' : 'pending');
+            $attending = (string) ($payload['attending'] ?? RsvpStatus::Pending->value);
+            $attendingValue = $attending === 'maybe' ? RsvpStatus::Pending->value : $attending;
+            $guestStatus = match ($attendingValue) {
+                RsvpStatus::Accepted->value => RsvpStatus::Accepted->value,
+                RsvpStatus::Declined->value => RsvpStatus::Declined->value,
+                default => RsvpStatus::Pending->value,
+            };
 
             $db->table('guests')->insert([
                 'group_id'           => $groupId,
@@ -127,6 +137,87 @@ class RsvpSubmissionService
                 'data' => [
                     'group_id' => $groupId,
                     'guest_id' => $guestId,
+                ],
+            ];
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            return ['success' => false, 'message' => 'No se pudo registrar la confirmación.'];
+        }
+    }
+
+    private function submitForGuest(array $event, array $payload, string $guestId): array
+    {
+        $db = Database::connect();
+        $now = date('Y-m-d H:i:s');
+
+        $guestRow = $db->table('guests')
+            ->select('guests.id, guests.group_id, guest_groups.event_id, guest_groups.access_code')
+            ->join('guest_groups', 'guest_groups.id = guests.group_id')
+            ->where('guests.id', $guestId)
+            ->get()
+            ->getRowArray();
+
+        if (!$guestRow || ($guestRow['event_id'] ?? '') !== ($event['id'] ?? '')) {
+            return ['success' => false, 'message' => 'Invitado no válido para este evento.'];
+        }
+
+        if (($event['access_mode'] ?? 'open') === 'invite_code') {
+            $providedCode = trim((string) ($payload['guest_code'] ?? ''));
+            if ($providedCode === '' || $providedCode !== ($guestRow['access_code'] ?? '')) {
+                return ['success' => false, 'message' => 'Código de invitación inválido.'];
+            }
+        }
+
+        $attending = (string) ($payload['attending'] ?? RsvpStatus::Pending->value);
+        $attendingValue = $attending === 'maybe' ? RsvpStatus::Pending->value : $attending;
+        $guestStatus = match ($attendingValue) {
+            RsvpStatus::Accepted->value => RsvpStatus::Accepted->value,
+            RsvpStatus::Declined->value => RsvpStatus::Declined->value,
+            default => RsvpStatus::Pending->value,
+        };
+
+        $db->transStart();
+
+        try {
+            $db->table('guests')
+                ->where('id', $guestId)
+                ->update([
+                    'rsvp_status' => $guestStatus,
+                    'updated_at' => $now,
+                ]);
+
+            $responseTable = $db->table('rsvp_responses');
+            $existing = $responseTable->where('guest_id', $guestId)->get()->getRowArray();
+
+            $payloadData = [
+                'guest_id' => $guestId,
+                'event_id' => $event['id'],
+                'group_id' => $guestRow['group_id'],
+                'attending' => $attendingValue,
+                'message' => $payload['message'] ?? null,
+                'song_request' => $payload['song_request'] ?? null,
+                'responded_at' => $now,
+                'response_method' => 'public_guest_link',
+            ];
+
+            if ($existing) {
+                $responseTable->where('id', $existing['id'])->update($payloadData);
+            } else {
+                $responseTable->insert($payloadData);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                throw new \RuntimeException('No se pudo guardar la confirmación.');
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Confirmación registrada.',
+                'data' => [
+                    'guest_id' => $guestId,
+                    'group_id' => $guestRow['group_id'],
                 ],
             ];
         } catch (\Throwable $e) {

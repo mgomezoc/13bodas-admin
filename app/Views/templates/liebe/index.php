@@ -23,6 +23,18 @@ $faqs = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
 $blogPosts = $blogPosts ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -1138,14 +1150,20 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
             <div class="col-lg-7 well">
                 <form id="rsvp_form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
                     <?= csrf_field() ?>
+                    <?php if (!empty($selectedGuest['id'])): ?>
+                        <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                        <?php if ($selectedGuestCode !== ''): ?>
+                            <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                        <?php endif; ?>
+                    <?php endif; ?>
                     <div class="form-group text-center">
                         <!-- name field-->
                         <h5>Nombre completo<span class="required">*</span></h5>
-                        <input type="text" name="name" class="form-control input-field" required="">
+                        <input type="text" name="name" class="form-control input-field" required="" value="<?= esc($selectedGuestName) ?>">
                         <h5>Correo electrónico<span class="required">*</span></h5>
-                        <input type="email" name="email" class="form-control input-field" required="">
+                        <input type="email" name="email" class="form-control input-field" required="" value="<?= esc($selectedGuestEmail) ?>">
                         <h5>Teléfono<span class="required">*</span></h5>
-                        <input type="text" name="phone" class="form-control input-field" required="">
+                        <input type="text" name="phone" class="form-control input-field" required="" value="<?= esc($selectedGuestPhone) ?>">
                         <!-- checkbox attending-->
                         <input id="yes" type="radio" value="yes" name="attending" required="" />
                         <label for="yes" class="side-label">Acepta con gusto</label>

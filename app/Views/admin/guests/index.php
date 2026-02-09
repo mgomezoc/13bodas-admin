@@ -1,3 +1,4 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Invitados<?= $this->endSection() ?>
@@ -99,10 +100,30 @@
                     <th data-field="phone_number">Teléfono</th>
                     <th data-field="rsvp_status" data-formatter="rsvpFormatter" data-align="center">RSVP</th>
                     <th data-field="is_child" data-formatter="childFormatter" data-align="center">Tipo</th>
+                    <th data-field="invitation" data-formatter="invitationFormatter" data-align="center">Invitación</th>
                     <th data-field="id" data-formatter="actionsFormatter" data-align="right">Acciones</th>
                 </tr>
             </thead>
         </table>
+    </div>
+</div>
+
+<div class="modal fade" id="inviteLinkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Copiar enlace de invitación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <label for="inviteLinkInput" class="form-label">Enlace</label>
+                <input type="text" class="form-control" id="inviteLinkInput" readonly>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="copyInviteLinkBtn">Copiar</button>
+            </div>
+        </div>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -110,6 +131,9 @@
 <?= $this->section('scripts') ?>
 <script>
 const eventId = '<?= $event['id'] ?>';
+const inviteLinkModal = document.getElementById('inviteLinkModal');
+const inviteLinkInput = document.getElementById('inviteLinkInput');
+const copyInviteLinkBtn = document.getElementById('copyInviteLinkBtn');
 
 function nameFormatter(value, row) {
     let name = `${row.first_name} ${row.last_name}`;
@@ -131,6 +155,26 @@ function rsvpFormatter(value, row) {
 
 function childFormatter(value, row) {
     return value == 1 ? '<span class="badge bg-info">Niño</span>' : '<span class="badge bg-light text-dark">Adulto</span>';
+}
+
+function invitationFormatter(value, row) {
+    const hasEmail = row.email && row.email.trim() !== '';
+    const emailTitle = hasEmail ? 'Enviar invitación' : 'Este invitado no tiene email';
+    const emailDisabled = hasEmail ? '' : 'disabled';
+
+    return `
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-primary" ${emailDisabled} title="${emailTitle}" onclick="sendInvite('${row.id}')">
+                <i class="bi bi-envelope"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" title="Copiar enlace" onclick="copyInviteLink('${row.id}')">
+                <i class="bi bi-clipboard"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-success" title="WhatsApp" onclick="openWhatsAppInvite('${row.id}')">
+                <i class="bi bi-whatsapp"></i>
+            </button>
+        </div>
+    `;
 }
 
 function actionsFormatter(value, row) {
@@ -166,6 +210,150 @@ function deleteGuest(guestId) {
                         Toast.fire({ icon: 'error', title: response.message });
                     }
                 });
+        }
+    });
+}
+
+function fetchInviteLink(guestId) {
+    return $.get(`${BASE_URL}admin/events/${eventId}/guests/${guestId}/invite-link`);
+}
+
+function handleClipboardSuccess(message) {
+    Toast.fire({ icon: 'success', title: message });
+}
+
+function showCopyFallback(inviteUrl) {
+    inviteLinkInput.value = inviteUrl;
+    const modal = bootstrap.Modal.getOrCreateInstance(inviteLinkModal);
+    modal.show();
+}
+
+function copyInviteLink(guestId) {
+    fetchInviteLink(guestId)
+        .done(function(response) {
+            if (!response.success) {
+                Toast.fire({ icon: 'error', title: response.message });
+                return;
+            }
+
+            const inviteUrl = response.invite_url;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(inviteUrl)
+                    .then(() => handleClipboardSuccess('Enlace copiado'))
+                    .catch(() => showCopyFallback(inviteUrl));
+            } else {
+                showCopyFallback(inviteUrl);
+            }
+        })
+        .fail(function() {
+            Toast.fire({ icon: 'error', title: 'No se pudo obtener el enlace.' });
+        });
+}
+
+function sendInvite(guestId) {
+    $.post(`${BASE_URL}admin/events/${eventId}/guests/${guestId}/send-invite`)
+        .done(function(response) {
+            if (!response.success) {
+                Toast.fire({ icon: 'error', title: response.message });
+                return;
+            }
+
+            Toast.fire({ icon: 'success', title: response.message });
+            showInviteActions(response);
+        })
+        .fail(function() {
+            Toast.fire({ icon: 'error', title: 'No se pudo enviar la invitación.' });
+        });
+}
+
+function showInviteActions(response) {
+    const inviteUrl = response.invite_url;
+    Swal.fire({
+        title: 'Invitación enviada',
+        text: '¿Quieres compartir el enlace?',
+        icon: 'success',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Copiar enlace',
+        denyButtonText: 'WhatsApp',
+        cancelButtonText: 'Cerrar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(inviteUrl)
+                    .then(() => handleClipboardSuccess('Enlace copiado'))
+                    .catch(() => showCopyFallback(inviteUrl));
+            } else {
+                showCopyFallback(inviteUrl);
+            }
+        } else if (result.isDenied) {
+            openWhatsAppFromPayload(response);
+        }
+    });
+}
+
+function buildInviteMessage(guest, eventData, inviteUrl) {
+    const guestName = [guest.first_name, guest.last_name].filter(Boolean).join(' ');
+    const greeting = guestName ? `Hola ${guestName},` : 'Hola,';
+    const coupleTitle = eventData.couple_title ? ` de ${eventData.couple_title}` : '';
+    return `${greeting} te compartimos la invitación${coupleTitle} 💍✨\nConfirma tu asistencia aquí: ${inviteUrl}`;
+}
+
+function normalizeWhatsAppPhone(phoneNumber) {
+    if (!phoneNumber) {
+        return null;
+    }
+
+    const cleaned = phoneNumber.replace(/[\s().-]/g, '');
+    if (/^\+\d{10,15}$/.test(cleaned)) {
+        return cleaned.substring(1);
+    }
+
+    return null;
+}
+
+function openWhatsAppFromPayload(payload) {
+    const inviteUrl = payload.invite_url;
+    const guest = payload.guest || {};
+    const eventData = payload.event || {};
+    const message = buildInviteMessage(guest, eventData, inviteUrl);
+    const encodedMessage = encodeURIComponent(message);
+    const phone = normalizeWhatsAppPhone(guest.phone_number || '');
+    const url = phone
+        ? `https://wa.me/${phone}?text=${encodedMessage}`
+        : `https://wa.me/?text=${encodedMessage}`;
+
+    window.open(url, '_blank');
+}
+
+function openWhatsAppInvite(guestId) {
+    fetchInviteLink(guestId)
+        .done(function(response) {
+            if (!response.success) {
+                Toast.fire({ icon: 'error', title: response.message });
+                return;
+            }
+
+            openWhatsAppFromPayload(response);
+        })
+        .fail(function() {
+            Toast.fire({ icon: 'error', title: 'No se pudo obtener el enlace.' });
+        });
+}
+
+if (copyInviteLinkBtn) {
+    copyInviteLinkBtn.addEventListener('click', function() {
+        const inviteUrl = inviteLinkInput.value;
+        if (!inviteUrl) {
+            return;
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(inviteUrl)
+                .then(() => handleClipboardSuccess('Enlace copiado'))
+                .catch(() => inviteLinkInput.select());
+        } else {
+            inviteLinkInput.select();
         }
     });
 }

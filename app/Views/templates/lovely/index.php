@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // ================================================================
 // TEMPLATE: LOVELY — app/Views/templates/lovely/index.php
 // Versión: 2.0 — Con soporte completo de datos dinámicos + fallbacks
@@ -19,6 +20,18 @@ $weddingParty  = $weddingParty ?? [];
 $faqs          = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -1152,15 +1165,21 @@ foreach ($weddingParty as $member) {
 
                         <form id="rsvp-form" class="form row" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
                             <?= csrf_field() ?>
+                            <?php if (!empty($selectedGuest['id'])): ?>
+                                <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                                <?php if ($selectedGuestCode !== ''): ?>
+                                    <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                                <?php endif; ?>
+                            <?php endif; ?>
 
                             <div class="col-md-6 mb-4">
-                                <input type="text" name="name" class="form-control" placeholder="Tu nombre*" required>
+                                <input type="text" name="name" class="form-control" placeholder="Tu nombre*" required value="<?= esc($selectedGuestName) ?>">
                             </div>
                             <div class="col-md-6 mb-4">
-                                <input type="email" name="email" class="form-control" placeholder="Tu email*" required>
+                                <input type="email" name="email" class="form-control" placeholder="Tu email*" required value="<?= esc($selectedGuestEmail) ?>">
                             </div>
                             <div class="col-md-6 mb-4">
-                                <input type="text" name="phone" class="form-control" placeholder="Teléfono (opcional)">
+                                <input type="text" name="phone" class="form-control" placeholder="Teléfono (opcional)" value="<?= esc($selectedGuestPhone) ?>">
                             </div>
                             <div class="col-md-6 mb-4">
                                 <select class="form-control" name="attending" required>

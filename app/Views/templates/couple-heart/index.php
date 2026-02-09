@@ -24,6 +24,18 @@ $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
 $blogPosts = $blogPosts ?? [];
 $timelineItems = $timelineItems ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -1078,6 +1090,12 @@ $contactAddress = esc($venueAddr);
                     <div class="col-md-8 col-md-offset-2">
                         <form id="rsvp_form3" name="rsvp_form3" class="rsvp_form3 bgc-overlay-white7" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>" novalidate="novalidate">
                             <?= csrf_field() ?>
+                            <?php if (!empty($selectedGuest['id'])): ?>
+                                <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                                <?php if ($selectedGuestCode !== ''): ?>
+                                    <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                                <?php endif; ?>
+                            <?php endif; ?>
                             <div class="messages"></div>
                             <div class="row">
                                 <div class="col-xs-12 col-sm-12 col-md-12 text-center clearfix">
@@ -1091,19 +1109,19 @@ $contactAddress = esc($venueAddr);
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
                                         <label for="rsvp_name">Nombre completo <small>*</small></label>
-                                        <input id="rsvp_name" name="name" class="form-control" placeholder="Ingresa tu nombre" required>
+                                        <input id="rsvp_name" name="name" class="form-control" placeholder="Ingresa tu nombre" required value="<?= esc($selectedGuestName) ?>">
                                     </div>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
                                         <label for="rsvp_email">Email <small>*</small></label>
-                                        <input id="rsvp_email" name="email" type="email" class="form-control" placeholder="tu@email.com" required>
+                                        <input id="rsvp_email" name="email" type="email" class="form-control" placeholder="tu@email.com" required value="<?= esc($selectedGuestEmail) ?>">
                                     </div>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
                                         <label for="rsvp_phone">Teléfono</label>
-                                        <input id="rsvp_phone" name="phone" class="form-control" placeholder="Tu teléfono">
+                                        <input id="rsvp_phone" name="phone" class="form-control" placeholder="Tu teléfono" value="<?= esc($selectedGuestPhone) ?>">
                                     </div>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">

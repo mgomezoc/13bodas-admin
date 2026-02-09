@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Template: Solene (Announcement Home)
  * Regla: no consultar DB aquí. Consumir $event, $modules, $theme, $template.
@@ -15,6 +16,18 @@ $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
 $venueConfig = $venueConfig ?? [];
 $eventLocations = $eventLocations ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 $tz = $event['time_zone'] ?? 'America/Mexico_City';
 
@@ -317,11 +330,17 @@ $slug = $event['slug'] ?? '';
             <div class="solene-container solene-rsvp">
                 <form class="solene-rsvp-form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>" data-rsvp-form>
                     <?= csrf_field() ?>
+                    <?php if (!empty($selectedGuest['id'])): ?>
+                        <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                        <?php if ($selectedGuestCode !== ''): ?>
+                            <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                        <?php endif; ?>
+                    <?php endif; ?>
                     <h3><?= esc($rsvpTitle) ?></h3>
                     <?php if ($rsvpSubtitle): ?><p><?= esc($rsvpSubtitle) ?></p><?php endif; ?>
-                    <input type="text" name="name" placeholder="Nombre*" required>
-                    <input type="email" name="email" placeholder="Email*" required>
-                    <input type="text" name="phone" placeholder="Teléfono">
+                    <input type="text" name="name" placeholder="Nombre*" required value="<?= esc($selectedGuestName) ?>">
+                    <input type="email" name="email" placeholder="Email*" required value="<?= esc($selectedGuestEmail) ?>">
+                    <input type="text" name="phone" placeholder="Teléfono" value="<?= esc($selectedGuestPhone) ?>">
                     <select name="attending" required>
                         <option value="" disabled selected>¿Asistirás?</option>
                         <option value="accepted">Sí, asistiré</option>

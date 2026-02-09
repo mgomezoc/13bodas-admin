@@ -1,29 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\GuestInvitationService;
 use App\Models\EventModel;
 use App\Models\GuestModel;
 use App\Models\GuestGroupModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Guests extends BaseController
 {
-    protected $eventModel;
-    protected $guestModel;
-    protected $groupModel;
-
-    public function __construct()
-    {
-        $this->eventModel = new EventModel();
-        $this->guestModel = new GuestModel();
-        $this->groupModel = new GuestGroupModel();
+    public function __construct(
+        protected EventModel $eventModel = new EventModel(),
+        protected GuestModel $guestModel = new GuestModel(),
+        protected GuestGroupModel $groupModel = new GuestGroupModel(),
+        protected GuestInvitationService $invitationService = new GuestInvitationService()
+    ) {
     }
 
     /**
      * Lista de invitados de un evento
      */
-    public function index(string $eventId)
+    public function index(string $eventId): ResponseInterface|string
     {
         $event = $this->eventModel->find($eventId);
         
@@ -48,7 +49,7 @@ class Guests extends BaseController
     /**
      * API: Lista de invitados para Bootstrap Table
      */
-    public function list(string $eventId)
+    public function list(string $eventId): ResponseInterface
     {
         if (!$this->canAccessEvent($eventId)) {
             return $this->response->setJSON(['total' => 0, 'rows' => []]);
@@ -65,7 +66,7 @@ class Guests extends BaseController
     /**
      * Formulario para crear invitado
      */
-    public function create(string $eventId)
+    public function create(string $eventId): ResponseInterface|string
     {
         $event = $this->eventModel->find($eventId);
         
@@ -87,7 +88,7 @@ class Guests extends BaseController
     /**
      * Guardar nuevo invitado
      */
-    public function store(string $eventId)
+    public function store(string $eventId): ResponseInterface
     {
         if (!$this->canAccessEvent($eventId)) {
             return redirect()->to(base_url('admin/events'));
@@ -143,7 +144,7 @@ class Guests extends BaseController
     /**
      * Formulario para editar invitado
      */
-    public function edit(string $eventId, string $guestId)
+    public function edit(string $eventId, string $guestId): ResponseInterface|string
     {
         $event = $this->eventModel->find($eventId);
         $guest = $this->guestModel->find($guestId);
@@ -167,7 +168,7 @@ class Guests extends BaseController
     /**
      * Actualizar invitado
      */
-    public function update(string $eventId, string $guestId)
+    public function update(string $eventId, string $guestId): ResponseInterface
     {
         if (!$this->canAccessEvent($eventId)) {
             return redirect()->to(base_url('admin/events'));
@@ -208,7 +209,7 @@ class Guests extends BaseController
     /**
      * Eliminar invitado
      */
-    public function delete(string $eventId, string $guestId)
+    public function delete(string $eventId, string $guestId): ResponseInterface
     {
         if (!$this->canAccessEvent($eventId)) {
             return $this->response->setJSON(['success' => false, 'message' => 'Sin acceso.']);
@@ -230,7 +231,7 @@ class Guests extends BaseController
     /**
      * Formulario de importación
      */
-    public function import(string $eventId)
+    public function import(string $eventId): ResponseInterface|string
     {
         $event = $this->eventModel->find($eventId);
         
@@ -249,7 +250,7 @@ class Guests extends BaseController
     /**
      * Procesar importación de CSV
      */
-    public function processImport(string $eventId)
+    public function processImport(string $eventId): ResponseInterface
     {
         if (!$this->canAccessEvent($eventId)) {
             return redirect()->to(base_url('admin/events'));
@@ -300,7 +301,7 @@ class Guests extends BaseController
     /**
      * Exportar invitados a CSV
      */
-    public function export(string $eventId)
+    public function export(string $eventId): ResponseInterface|void
     {
         if (!$this->canAccessEvent($eventId)) {
             return redirect()->to(base_url('admin/events'));
@@ -337,6 +338,59 @@ class Guests extends BaseController
         
         fclose($output);
         exit;
+    }
+
+    public function inviteLink(string $eventId, string $guestId): ResponseInterface
+    {
+        if (!$this->canAccessEvent($eventId)) {
+            return $this->response->setStatusCode(403)
+                ->setJSON(['success' => false, 'message' => 'Sin acceso.']);
+        }
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            return $this->response->setStatusCode(404)
+                ->setJSON(['success' => false, 'message' => 'Evento no encontrado.']);
+        }
+
+        $context = $this->invitationService->resolveContextForEvent($event, $guestId);
+        if (!($context['success'] ?? false)) {
+            return $this->response->setStatusCode(404)
+                ->setJSON(['success' => false, 'message' => $context['message'] ?? 'Invitado no encontrado.']);
+        }
+
+        $guest = $context['guest'] ?? [];
+
+        return $this->response->setJSON([
+            'success' => true,
+            'invite_url' => $context['invite_url'],
+            'guest' => [
+                'id' => $guest['id'] ?? null,
+                'first_name' => $guest['first_name'] ?? null,
+                'last_name' => $guest['last_name'] ?? null,
+                'email' => $guest['email'] ?? null,
+                'phone_number' => $guest['phone_number'] ?? null,
+            ],
+            'event' => [
+                'id' => $event['id'] ?? null,
+                'couple_title' => $event['couple_title'] ?? null,
+                'slug' => $event['slug'] ?? null,
+                'access_mode' => $event['access_mode'] ?? null,
+            ],
+        ]);
+    }
+
+    public function sendInvite(string $eventId, string $guestId): ResponseInterface
+    {
+        if (!$this->canAccessEvent($eventId)) {
+            return $this->response->setStatusCode(403)
+                ->setJSON(['success' => false, 'message' => 'Sin acceso.']);
+        }
+
+        $result = $this->invitationService->sendInvitation($eventId, $guestId);
+        $status = ($result['success'] ?? false) ? 200 : 400;
+
+        return $this->response->setStatusCode($status)->setJSON($result);
     }
 
     /**

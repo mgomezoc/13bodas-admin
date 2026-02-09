@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Template: Sukun (Estilo Feelings)
  * NO consulta BD. Consume: $event, $modules, $theme, $template,
@@ -17,6 +18,18 @@ $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
 $venueConfig = $venueConfig ?? [];
 $eventLocations = $eventLocations ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 $tz = $event['time_zone'] ?? 'America/Mexico_City';
 $slug = $event['slug'] ?? '';
@@ -457,9 +470,15 @@ $sectionLinks = [
                 <div class="sk-rsvp-flower sk-rsvp-flower--br"></div>
                 <form id="rsvp-form" class="sk-rsvp-form" method="post" action="<?= esc($rsvpUrl) ?>">
                     <?= csrf_field() ?>
+                    <?php if (!empty($selectedGuest['id'])): ?>
+                        <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                        <?php if ($selectedGuestCode !== ''): ?>
+                            <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                        <?php endif; ?>
+                    <?php endif; ?>
                     <div class="sk-form-grid">
-                        <input type="text" name="name" placeholder="Nombre*" required>
-                        <input type="email" name="email" placeholder="Email*" required>
+                        <input type="text" name="name" placeholder="Nombre*" required value="<?= esc($selectedGuestName) ?>">
+                        <input type="email" name="email" placeholder="Email*" required value="<?= esc($selectedGuestEmail) ?>">
                         <select name="attending" required>
                             <option value="" disabled selected>¿Asistirás?</option>
                             <option value="accepted">Sí, asistiré</option>
