@@ -622,7 +622,6 @@ $contactAddress = esc($venueAddr);
                                             <h5><?= esc($brideSubtitle) ?></h5>
                                         <?php endif; ?>
                                         <p class="fz16"><?= $brideBio ?></p>
-                                        <img alt="signature" src="<?= $assetsBase ?>/images/about/bride-signeture.png">
                                         <?php if (!empty($brideSocial)): ?>
                                             <ul class="icon-font-thm list-inline ulockd-mrgn1225">
                                                 <?php foreach ($brideSocial as $link): ?>
@@ -682,7 +681,6 @@ $contactAddress = esc($venueAddr);
                                             <h5><?= esc($groomSubtitle) ?></h5>
                                         <?php endif; ?>
                                         <p class="fz16"><?= $groomBio ?></p>
-                                        <img alt="signature" src="<?= $assetsBase ?>/images/about/groom-signeture.png">
                                         <?php if (!empty($groomSocial)): ?>
                                             <ul class="icon-font-thm list-inline ulockd-mrgn1225">
                                                 <?php foreach ($groomSocial as $link): ?>
@@ -713,7 +711,7 @@ $contactAddress = esc($venueAddr);
         </section>
 
         <!-- Our First Divider -->
-        <section class="testimonial parallax ulockd_bgi1 overlay-tc8" data-stellar-background-ratio="0.3" style="background-image: url('<?= esc($countdownBg) ?>');">
+        <section class="testimonial parallax ulockd_bgi1 overlay-tc8" data-stellar-background-ratio="0.3" style="background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('<?= esc($countdownBg) ?>');">
             <div class="container">
                 <div class="row ulockd-mrgn1240">
                     <div class="col-md-4 p0-mdd">
@@ -909,13 +907,11 @@ $contactAddress = esc($venueAddr);
         <?php endif; ?>
 
         <!-- Our Divider -->
-        <section class="ulockd-video parallax ulockd_bgi2 overlay-tc75" data-stellar-background-ratio="0.3">
+        <section class="ulockd-video parallax ulockd_bgi2 overlay-tc75" data-stellar-background-ratio="0.3" style="background-image: url('<?= esc($heroWallLeft) ?>');">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <div class="video-button text-center">
-                            <a class="mfp-iframe mfp-youtube color-white fz60" href="https://www.youtube.com/watch?time_continue=18&amp;v=teLhLLlhfzc" title="Video"><span class="flaticon-play-button"></span></a>
-                        </div>
+                    <div class="col-md-12">
+                        &nbsp;
                     </div>
                 </div>
             </div>
@@ -1037,7 +1033,7 @@ $contactAddress = esc($venueAddr);
                             <div class="col-xxs-12 col-xs-12 col-sm-6 col-md-4">
                                 <div class="blog-post text-center wow fadeInUp" data-wow-duration="1s">
                                     <div class="details">
-                                        <h4 class="eventdate text-center ulockd-bgthm"><?= $question ?></h4>
+                                        <h4 class="eventdate text-center ulockd-bgthm" style="display: inline-block; padding: 10px 18px; border-radius: 999px; font-weight: 600; line-height: 1.4; background-color: <?= esc($colorPrimary) ?>; color: #fff;"><?= $question ?></h4>
                                         <?php if ($answer): ?>
                                             <p><?= $answer ?></p>
                                         <?php endif; ?>
@@ -1185,7 +1181,7 @@ $contactAddress = esc($venueAddr);
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="ulockd-google-map">
+                            <div class="ulockd-google-map" style="position: relative; z-index: 1; margin-bottom: 40px;">
                                 <div id="map-location" style="width: 100%; height: 550px;"></div>
                             </div>
                         </div>
