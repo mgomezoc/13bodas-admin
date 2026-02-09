@@ -116,13 +116,12 @@ class RsvpSubmissionService
             $guestId = $guest['id'];
 
             $db->table('rsvp_responses')->insert([
-                'event_id'      => $event['id'],
-                'group_id'      => $groupId,
-                'guest_id'      => $guestId,
-                'attending'     => $attendingValue,
-                'message'       => $payload['message'] ?? null,
-                'song_request'  => $payload['song_request'] ?? null,
-                'responded_at'  => $now,
+                'guest_id' => $guestId,
+                'attending_status' => $attendingValue,
+                'song_request' => $payload['song_request'] ?? null,
+                'message_to_couple' => $payload['message'] ?? null,
+                'responded_at' => $now,
+                'response_method' => 'public',
             ]);
 
             $db->transComplete();
@@ -191,11 +190,9 @@ class RsvpSubmissionService
 
             $payloadData = [
                 'guest_id' => $guestId,
-                'event_id' => $event['id'],
-                'group_id' => $guestRow['group_id'],
-                'attending' => $attendingValue,
-                'message' => $payload['message'] ?? null,
+                'attending_status' => $attendingValue,
                 'song_request' => $payload['song_request'] ?? null,
+                'message_to_couple' => $payload['message'] ?? null,
                 'responded_at' => $now,
                 'response_method' => 'public_guest_link',
             ];
@@ -211,6 +208,8 @@ class RsvpSubmissionService
             if ($db->transStatus() === false) {
                 throw new \RuntimeException('No se pudo guardar la confirmación.');
             }
+
+            $this->updateGroupStatus((string) $guestRow['group_id']);
 
             $emailPayload = [
                 'name' => trim((string) ($guestRow['first_name'] ?? '') . ' ' . (string) ($guestRow['last_name'] ?? '')),
@@ -239,5 +238,45 @@ class RsvpSubmissionService
             $db->transRollback();
             return ['success' => false, 'message' => 'No se pudo registrar la confirmación.'];
         }
+    }
+
+    private function updateGroupStatus(string $groupId): void
+    {
+        if ($groupId === '') {
+            return;
+        }
+
+        $db = Database::connect();
+        $guests = $db->table('guests')
+            ->select('rsvp_status')
+            ->where('group_id', $groupId)
+            ->get()
+            ->getResultArray();
+
+        if (empty($guests)) {
+            return;
+        }
+
+        $totalGuests = count($guests);
+        $respondedGuests = 0;
+
+        foreach ($guests as $guest) {
+            if (($guest['rsvp_status'] ?? '') !== RsvpStatus::Pending->value) {
+                $respondedGuests++;
+            }
+        }
+
+        $status = match (true) {
+            $respondedGuests === 0 => 'viewed',
+            $respondedGuests < $totalGuests => 'partial',
+            default => 'responded',
+        };
+
+        $db->table('guest_groups')
+            ->where('id', $groupId)
+            ->update([
+                'current_status' => $status,
+                'responded_at' => $status === 'responded' ? date('Y-m-d H:i:s') : null,
+            ]);
     }
 }
