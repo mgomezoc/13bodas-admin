@@ -1,12 +1,20 @@
 <?php
+
+declare(strict_types=1);
+
 $event = $event ?? [];
 $modules = $modules ?? [];
+$templateMeta = $templateMeta ?? [];
+$theme = $theme ?? [];
 $mediaByCategory = $mediaByCategory ?? [];
 $eventLocations = $eventLocations ?? [];
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $galleryAssets = $galleryAssets ?? ($event['gallery_items'] ?? []);
 $registryItems = $registryItems ?? ($event['registry_items'] ?? []);
 $weddingParty = $weddingParty ?? ($event['party_members'] ?? []);
+$sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
+$showEventSection = $sectionVisibility['event'] ?? ($sectionVisibility['events'] ?? true);
+$showGiftsSection = $sectionVisibility['gifts'] ?? ($sectionVisibility['registry'] ?? true);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -43,7 +51,6 @@ $weddingParty = $weddingParty ?? ($event['party_members'] ?? []);
     <style>
         :root {
             <?php 
-            $theme = json_decode($event['theme_config'] ?? '{}', true);
             $colors = $theme['colors'] ?? [];
             $fonts = $theme['fonts'] ?? [];
             ?>
@@ -59,48 +66,56 @@ $weddingParty = $weddingParty ?? ($event['party_members'] ?? []);
             --font-body: '<?= $fonts['body'] ?? 'Montserrat' ?>', sans-serif;
             --font-accent: '<?= $fonts['accent'] ?? 'Great Vibes' ?>', cursive;
         }
-    </style>
+</style>
 </head>
 <body>
     <!-- Hero Section -->
-    <?= $this->include('templates/majestic/sections/hero') ?>
+    <?php if ($sectionVisibility['hero'] ?? true): ?>
+        <?= $this->include('templates/majestic/sections/hero') ?>
+    <?php endif; ?>
     
     <!-- Countdown Section -->
-    <?= $this->include('templates/majestic/sections/countdown') ?>
+    <?php if ($sectionVisibility['countdown'] ?? true): ?>
+        <?= $this->include('templates/majestic/sections/countdown') ?>
+    <?php endif; ?>
     
     <!-- Story Section -->
-    <?php if (!empty($modules)): ?>
+    <?php if (($sectionVisibility['story'] ?? true) && !empty($modules)): ?>
         <?= $this->include('templates/majestic/sections/story') ?>
     <?php endif; ?>
     
     <!-- Schedule Section -->
-    <?php if (!empty($scheduleItems)): ?>
+    <?php if ($showEventSection && !empty($scheduleItems)): ?>
         <?= $this->include('templates/majestic/sections/schedule') ?>
     <?php endif; ?>
     
     <!-- Location Section -->
-    <?= $this->include('templates/majestic/sections/location') ?>
+    <?php if ($sectionVisibility['location'] ?? true): ?>
+        <?= $this->include('templates/majestic/sections/location') ?>
+    <?php endif; ?>
     
     <!-- Gallery Section -->
-    <?php if (!empty($galleryAssets)): ?>
+    <?php if (($sectionVisibility['gallery'] ?? true) && !empty($galleryAssets)): ?>
         <?= $this->include('templates/majestic/sections/gallery') ?>
     <?php endif; ?>
     
     <!-- Registry Section -->
-    <?php if (!empty($registryItems)): ?>
+    <?php if ($showGiftsSection && !empty($registryItems)): ?>
         <?= $this->include('templates/majestic/sections/registry') ?>
     <?php endif; ?>
     
     <!-- Party Section -->
-    <?php if (!empty($weddingParty)): ?>
+    <?php if (($sectionVisibility['party'] ?? true) && !empty($weddingParty)): ?>
         <?= $this->include('templates/majestic/sections/party') ?>
     <?php endif; ?>
     
     <!-- RSVP Section -->
-    <?= $this->include('templates/majestic/sections/rsvp') ?>
+    <?php if ($sectionVisibility['rsvp'] ?? true): ?>
+        <?= $this->include('templates/majestic/sections/rsvp') ?>
+    <?php endif; ?>
     
     <!-- FAQ Section -->
-    <?php if (!empty($event['faqs'])): ?>
+    <?php if (($sectionVisibility['faq'] ?? true) && !empty($event['faqs'])): ?>
         <?= $this->include('templates/majestic/sections/faq') ?>
     <?php endif; ?>
     

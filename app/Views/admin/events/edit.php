@@ -257,15 +257,6 @@
                                     </select>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label" for="site_mode">Modo del Sitio</label>
-                                    <select id="site_mode" name="site_mode" class="form-select">
-                                        <option value="auto" <?= ($event['site_mode'] ?? '') === 'auto' ? 'selected' : '' ?>>Automático</option>
-                                        <option value="pre" <?= ($event['site_mode'] ?? '') === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
-                                        <option value="live" <?= ($event['site_mode'] ?? '') === 'live' ? 'selected' : '' ?>>En vivo</option>
-                                        <option value="post" <?= ($event['site_mode'] ?? '') === 'post' ? 'selected' : '' ?>>Post-evento</option>
-                                    </select>
-                                </div>
 
                                 <div class="mb-3">
                                     <label class="form-label" for="visibility">Visibilidad</label>
@@ -305,17 +296,6 @@
                                     <div class="form-text">Si “Pagado” está desactivado, este campo se guarda como NULL.</div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label" for="venue_config">Venue config (JSON)</label>
-                                    <textarea id="venue_config" name="venue_config" class="form-control" rows="4"
-                                        placeholder='{"example":true}'><?= esc($event['venue_config'] ?? '') ?></textarea>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label" for="theme_config">Theme config (JSON)</label>
-                                    <textarea id="theme_config" name="theme_config" class="form-control" rows="4"
-                                        placeholder='{"colors":{"primary":"#000"}}'><?= esc($event['theme_config'] ?? '') ?></textarea>
-                                </div>
 
                                 <?php if (!empty($templates)): ?>
                                     <div class="mb-0">

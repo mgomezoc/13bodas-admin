@@ -14,7 +14,6 @@ $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
 $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
-$venueConfig = $venueConfig ?? [];
 $eventLocations = $eventLocations ?? [];
 $selectedGuest = $selectedGuest ?? null;
 $selectedGuestName = '';
@@ -106,6 +105,7 @@ if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
     $defaults = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
+$sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $theme = $theme ?? [];
 $themeColors = $theme['colors'] ?? $theme;
@@ -170,19 +170,23 @@ $storyItems = !empty($timelineItems)
     : ($timelinePayload['items'] ?? ($storyPayload['items'] ?? []));
 $galleryList = $galleryAssets;
 
-$venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
+$venueLocations = $eventLocations;
 $venueName = $event['venue_name'] ?? ($venueLocations[0]['name'] ?? ($venuePayload['title'] ?? ''));
 $venueAddress = $event['venue_address'] ?? ($venueLocations[0]['address'] ?? '');
 
 $rsvpTitle = $rsvpPayload['title'] ?? soleneGetText($copyPayload, $defaults, 'rsvp_heading', '¿Confirmas asistencia?');
 $rsvpSubtitle = $rsvpPayload['subtitle'] ?? '';
 
-$hasGallery = !empty($galleryList);
-$hasStory = !empty($storyItems);
-$hasVenue = !empty($venueName) || !empty($venueAddress) || !empty($venueLocations);
-$hasRegistry = !empty($registryItems);
-$hasMenu = !empty($menuOptions);
-$hasWeddingParty = !empty($weddingParty);
+$hasGallery = ($sectionVisibility['gallery'] ?? true) && !empty($galleryList);
+$hasStory = ($sectionVisibility['story'] ?? true) && !empty($storyItems);
+$hasVenue = ($sectionVisibility['location'] ?? true) && (!empty($venueName) || !empty($venueAddress) || !empty($venueLocations));
+$hasRegistry = ($sectionVisibility['gifts'] ?? ($sectionVisibility['registry'] ?? true)) && !empty($registryItems);
+$hasMenu = ($sectionVisibility['menu'] ?? true) && !empty($menuOptions);
+$hasWeddingParty = ($sectionVisibility['party'] ?? true) && !empty($weddingParty);
+$showHero = $sectionVisibility['hero'] ?? true;
+$showCouple = $sectionVisibility['couple'] ?? true;
+$showRsvp = $sectionVisibility['rsvp'] ?? true;
+$showSaveDate = $sectionVisibility['savedate'] ?? true;
 
 $saveDateBg = soleneGetMediaUrl($mediaByCategory, 'cta_bg') ?: soleneGetMediaUrl($mediaByCategory, 'countdown_bg');
 $saveDateBg = $saveDateBg ?: base_url('templates/solene/images/save-date.jpg');
@@ -219,17 +223,17 @@ $slug = $event['slug'] ?? '';
 <body class="solene">
     <header class="solene-header" data-header>
         <nav class="solene-nav" aria-label="Navegación principal">
-            <a class="solene-brand" href="#hero">13Bodas</a>
+                <a class="solene-brand" href="#hero">13Bodas</a>
             <button class="solene-nav-toggle" type="button" data-nav-toggle aria-label="Abrir menú" aria-expanded="false">
                 <span></span><span></span><span></span>
             </button>
             <div class="solene-nav-links" data-nav>
-                <a href="#hero">Inicio</a>
-                <a href="#pareja">Novios</a>
+                <?php if ($showHero): ?><a href="#hero">Inicio</a><?php endif; ?>
+                <?php if ($showCouple): ?><a href="#pareja">Novios</a><?php endif; ?>
                 <?php if ($hasGallery): ?><a href="#galeria">Galería</a><?php endif; ?>
-                <a href="#rsvp">RSVP</a>
+                <?php if ($showRsvp): ?><a href="#rsvp">RSVP</a><?php endif; ?>
                 <?php if ($hasWeddingParty): ?><a href="#cortejo">Partners</a><?php endif; ?>
-                <a href="#savedate">Save the Date</a>
+                <?php if ($showSaveDate): ?><a href="#savedate">Save the Date</a><?php endif; ?>
                 <?php if ($hasVenue): ?><a href="#lugar">Cuándo y dónde</a><?php endif; ?>
                 <?php if ($hasStory): ?><a href="#historia">Artículos</a><?php endif; ?>
                 <?php if ($hasRegistry): ?><a href="#regalos">Regalos</a><?php endif; ?>
@@ -239,64 +243,70 @@ $slug = $event['slug'] ?? '';
     </header>
 
     <main>
-        <section id="hero" class="solene-hero" data-parallax style="background-image:url('<?= esc($heroImage) ?>')">
-            <div class="solene-hero-overlay"></div>
-            <div class="solene-hero-content">
-                <h1 class="solene-hero-title"><?= esc($heroTitle) ?></h1>
-                <p class="solene-hero-subtitle"><?= esc($heroTagline) ?></p>
-                <p class="solene-hero-note"><?= esc($heroSubtitle) ?></p>
-                <div class="solene-countdown" data-countdown="<?= esc($eventDateISO) ?>">
-                    <div><span data-count="months">00</span><small>Meses</small></div>
-                    <div><span data-count="days">00</span><small>Días</small></div>
-                    <div><span data-count="hours">00</span><small>Horas</small></div>
-                    <div><span data-count="minutes">00</span><small>Min</small></div>
-                    <div><span data-count="seconds">00</span><small>Seg</small></div>
+        <?php if ($showHero): ?>
+            <section id="hero" class="solene-hero" data-parallax style="background-image:url('<?= esc($heroImage) ?>')">
+                <div class="solene-hero-overlay"></div>
+                <div class="solene-hero-content">
+                    <h1 class="solene-hero-title"><?= esc($heroTitle) ?></h1>
+                    <p class="solene-hero-subtitle"><?= esc($heroTagline) ?></p>
+                    <p class="solene-hero-note"><?= esc($heroSubtitle) ?></p>
+                    <?php if ($sectionVisibility['countdown'] ?? true): ?>
+                        <div class="solene-countdown" data-countdown="<?= esc($eventDateISO) ?>">
+                            <div><span data-count="months">00</span><small>Meses</small></div>
+                            <div><span data-count="days">00</span><small>Días</small></div>
+                            <div><span data-count="hours">00</span><small>Horas</small></div>
+                            <div><span data-count="minutes">00</span><small>Min</small></div>
+                            <div><span data-count="seconds">00</span><small>Seg</small></div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            </div>
-        </section>
+            </section>
+        <?php endif; ?>
 
-        <section id="pareja" class="solene-section solene-section--alt">
-            <div class="solene-container">
-                <header class="solene-section-head">
-                    <span class="solene-kicker">BRIDE · & · GROOM</span>
-                    <h2>Novios</h2>
-                    <p class="solene-script">Nuestro gran día</p>
-                </header>
+        <?php if ($showCouple): ?>
+            <section id="pareja" class="solene-section solene-section--alt">
+                <div class="solene-container">
+                    <header class="solene-section-head">
+                        <span class="solene-kicker">BRIDE · & · GROOM</span>
+                        <h2>Novios</h2>
+                        <p class="solene-script">Nuestro gran día</p>
+                    </header>
 
-                <div class="solene-couple-grid">
-                    <article class="solene-couple-card">
-                        <div class="solene-couple-photo" style="background-image:url('<?= esc($bridePhoto) ?>')"></div>
-                        <h3 class="solene-script"><?= esc($brideName) ?></h3>
-                        <p><?= esc($brideBio) ?></p>
-                        <?php if (!empty($brideSocial)): ?>
-                            <div class="solene-social">
-                                <?php foreach ((array)$brideSocial as $link): ?>
-                                    <?php $url = is_array($link) ? ($link['url'] ?? '') : $link; ?>
-                                    <?php if ($url): ?><a href="<?= esc($url) ?>" target="_blank" rel="noopener">•</a><?php endif; ?>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </article>
-                    <div class="solene-couple-center">
-                        <p><?= esc($heroSubtitle) ?></p>
-                        <span class="solene-script">The wedding day</span>
+                    <div class="solene-couple-grid">
+                        <article class="solene-couple-card">
+                            <div class="solene-couple-photo" style="background-image:url('<?= esc($bridePhoto) ?>')"></div>
+                            <h3 class="solene-script"><?= esc($brideName) ?></h3>
+                            <p><?= esc($brideBio) ?></p>
+                            <?php if (!empty($brideSocial)): ?>
+                                <div class="solene-social">
+                                    <?php foreach ((array)$brideSocial as $link): ?>
+                                        <?php $url = is_array($link) ? ($link['url'] ?? '') : $link; ?>
+                                        <?php if ($url): ?><a href="<?= esc($url) ?>" target="_blank" rel="noopener">•</a><?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </article>
+                        <div class="solene-couple-center">
+                            <p><?= esc($heroSubtitle) ?></p>
+                            <span class="solene-script">The wedding day</span>
+                        </div>
+                        <article class="solene-couple-card">
+                            <div class="solene-couple-photo" style="background-image:url('<?= esc($groomPhoto) ?>')"></div>
+                            <h3 class="solene-script"><?= esc($groomName) ?></h3>
+                            <p><?= esc($groomBio) ?></p>
+                            <?php if (!empty($groomSocial)): ?>
+                                <div class="solene-social">
+                                    <?php foreach ((array)$groomSocial as $link): ?>
+                                        <?php $url = is_array($link) ? ($link['url'] ?? '') : $link; ?>
+                                        <?php if ($url): ?><a href="<?= esc($url) ?>" target="_blank" rel="noopener">•</a><?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </article>
                     </div>
-                    <article class="solene-couple-card">
-                        <div class="solene-couple-photo" style="background-image:url('<?= esc($groomPhoto) ?>')"></div>
-                        <h3 class="solene-script"><?= esc($groomName) ?></h3>
-                        <p><?= esc($groomBio) ?></p>
-                        <?php if (!empty($groomSocial)): ?>
-                            <div class="solene-social">
-                                <?php foreach ((array)$groomSocial as $link): ?>
-                                    <?php $url = is_array($link) ? ($link['url'] ?? '') : $link; ?>
-                                    <?php if ($url): ?><a href="<?= esc($url) ?>" target="_blank" rel="noopener">•</a><?php endif; ?>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </article>
                 </div>
-            </div>
-        </section>
+            </section>
+        <?php endif; ?>
 
         <?php if ($hasGallery): ?>
         <section id="galeria" class="solene-section">
@@ -326,48 +336,50 @@ $slug = $event['slug'] ?? '';
         </section>
         <?php endif; ?>
 
-        <section id="rsvp" class="solene-section solene-section--alt">
-            <div class="solene-container solene-rsvp">
-                <form class="solene-rsvp-form" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>" data-rsvp-form>
-                    <?= csrf_field() ?>
-                    <?php if (!empty($selectedGuest['id'])): ?>
-                        <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
-                        <?php if ($selectedGuestCode !== ''): ?>
-                            <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+        <?php if ($showRsvp): ?>
+            <section id="rsvp" class="solene-section solene-section--alt">
+                <div class="solene-container solene-rsvp">
+                    <form class="solene-rsvp-form" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>" data-rsvp-form>
+                        <?= csrf_field() ?>
+                        <?php if (!empty($selectedGuest['id'])): ?>
+                            <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                            <?php if ($selectedGuestCode !== ''): ?>
+                                <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                            <?php endif; ?>
                         <?php endif; ?>
-                    <?php endif; ?>
-                    <h3><?= esc($rsvpTitle) ?></h3>
-                    <?php if ($rsvpSubtitle): ?><p><?= esc($rsvpSubtitle) ?></p><?php endif; ?>
-                    <input type="text" name="name" placeholder="Nombre*" required value="<?= esc($selectedGuestName) ?>">
-                    <input type="email" name="email" placeholder="Email*" required value="<?= esc($selectedGuestEmail) ?>">
-                    <input type="text" name="phone" placeholder="Teléfono" value="<?= esc($selectedGuestPhone) ?>">
-                    <select name="attending" required>
-                        <option value="" disabled selected>¿Asistirás?</option>
-                        <option value="accepted">Sí, asistiré</option>
-                        <option value="declined">No podré asistir</option>
-                    </select>
-                    <input type="number" name="guests" min="1" max="10" placeholder="Número de invitados">
-                    <?php if (!empty($menuOptions)): ?>
-                        <select name="meal_option">
-                            <option value="" disabled selected>Preferencia de menú</option>
-                            <?php foreach ($menuOptions as $option): ?>
-                                <option value="<?= esc($option['id'] ?? $option['name'] ?? '') ?>"><?= esc($option['name'] ?? 'Opción') ?></option>
-                            <?php endforeach; ?>
+                        <h3><?= esc($rsvpTitle) ?></h3>
+                        <?php if ($rsvpSubtitle): ?><p><?= esc($rsvpSubtitle) ?></p><?php endif; ?>
+                        <input type="text" name="name" placeholder="Nombre*" required value="<?= esc($selectedGuestName) ?>">
+                        <input type="email" name="email" placeholder="Email*" required value="<?= esc($selectedGuestEmail) ?>">
+                        <input type="text" name="phone" placeholder="Teléfono" value="<?= esc($selectedGuestPhone) ?>">
+                        <select name="attending" required>
+                            <option value="" disabled selected>¿Asistirás?</option>
+                            <option value="accepted">Sí, asistiré</option>
+                            <option value="declined">No podré asistir</option>
                         </select>
-                    <?php endif; ?>
-                    <textarea name="message" rows="3" placeholder="Mensaje para los novios"></textarea>
-                    <textarea name="song_request" rows="2" placeholder="¿Qué canción no puede faltar?"></textarea>
-                    <button type="submit">Enviar</button>
-                    <div class="solene-rsvp-status" data-rsvp-status></div>
-                </form>
-                <div class="solene-rsvp-copy">
-                    <h3 class="solene-script">¡Nos casamos!</h3>
-                    <p><?= esc($heroSubtitle) ?></p>
-                    <?php if ($rsvpSubtitle): ?><p class="solene-muted"><?= esc($rsvpSubtitle) ?></p><?php endif; ?>
-                    <a class="solene-btn" href="#rsvp">RSVP</a>
+                        <input type="number" name="guests" min="1" max="10" placeholder="Número de invitados">
+                        <?php if (!empty($menuOptions)): ?>
+                            <select name="meal_option">
+                                <option value="" disabled selected>Preferencia de menú</option>
+                                <?php foreach ($menuOptions as $option): ?>
+                                    <option value="<?= esc($option['id'] ?? $option['name'] ?? '') ?>"><?= esc($option['name'] ?? 'Opción') ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        <?php endif; ?>
+                        <textarea name="message" rows="3" placeholder="Mensaje para los novios"></textarea>
+                        <textarea name="song_request" rows="2" placeholder="¿Qué canción no puede faltar?"></textarea>
+                        <button type="submit">Enviar</button>
+                        <div class="solene-rsvp-status" data-rsvp-status></div>
+                    </form>
+                    <div class="solene-rsvp-copy">
+                        <h3 class="solene-script">¡Nos casamos!</h3>
+                        <p><?= esc($heroSubtitle) ?></p>
+                        <?php if ($rsvpSubtitle): ?><p class="solene-muted"><?= esc($rsvpSubtitle) ?></p><?php endif; ?>
+                        <a class="solene-btn" href="#rsvp">RSVP</a>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        <?php endif; ?>
 
         <?php if ($hasWeddingParty): ?>
         <section id="cortejo" class="solene-section solene-section--light">
@@ -391,13 +403,15 @@ $slug = $event['slug'] ?? '';
         </section>
         <?php endif; ?>
 
-        <section id="savedate" class="solene-save-date" data-parallax style="background-image:url('<?= esc($saveDateBg) ?>')">
-            <div class="solene-save-date-overlay"></div>
-            <div class="solene-save-date-content">
-                <h2 class="solene-script"><?= esc($eventDateHuman) ?></h2>
-                <a class="solene-btn" href="#lugar">VER MAPA</a>
-            </div>
-        </section>
+        <?php if ($showSaveDate): ?>
+            <section id="savedate" class="solene-save-date" data-parallax style="background-image:url('<?= esc($saveDateBg) ?>')">
+                <div class="solene-save-date-overlay"></div>
+                <div class="solene-save-date-content">
+                    <h2 class="solene-script"><?= esc($eventDateHuman) ?></h2>
+                    <a class="solene-btn" href="#lugar">VER MAPA</a>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <?php if ($hasVenue): ?>
         <section id="lugar" class="solene-section">

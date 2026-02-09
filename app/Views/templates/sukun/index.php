@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Template: Sukun (Estilo Feelings)
  * NO consulta BD. Consume: $event, $modules, $theme, $template,
- * $templateMeta, $venueConfig, $mediaByCategory, $galleryAssets,
+ * $templateMeta, $mediaByCategory, $galleryAssets,
  * $registryItems, $registryStats, $weddingParty, $menuOptions
  */
 
@@ -16,7 +16,6 @@ $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
 $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
-$venueConfig = $venueConfig ?? [];
 $eventLocations = $eventLocations ?? [];
 $selectedGuest = $selectedGuest ?? null;
 $selectedGuestName = '';
@@ -103,6 +102,7 @@ $themeArr = $theme ?? [];
 if (is_string($themeArr)) {
     $themeArr = json_decode($themeArr, true) ?: [];
 }
+$sectionVisibility = $themeArr['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $primary = $themeArr['colors']['primary'] ?? ($themeArr['primary'] ?? '#C9A98C');
 $accent = $themeArr['colors']['accent'] ?? ($themeArr['secondary'] ?? '#8BA888');
@@ -169,7 +169,7 @@ if (empty($galleryList)) {
     }
 }
 
-$venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
+$venueLocations = $eventLocations;
 if (empty($venueLocations) && (!empty($event['venue_name']) || !empty($event['venue_address']))) {
     $venueLocations = [[
         'name' => $event['venue_name'] ?? '',
@@ -186,25 +186,46 @@ $eventDateIso = skDateIso($event['event_date_start'] ?? null, $tz);
 $eventDateHuman = skDateEs($event['event_date_start'] ?? null, $tz);
 $rsvpUrl = base_url(route_to('rsvp.submit', $slug));
 
-$hasGallery = !empty($galleryList);
-$hasStory = !empty($storyItems);
-$hasParty = !empty($weddingParty);
-$hasRegistry = !empty($registryItems);
-$hasMenu = !empty($menuOptions);
-$hasVenues = !empty($venueLocations);
-$hasNews = count($storyItems) >= 3;
+$hasGallery = ($sectionVisibility['gallery'] ?? true) && !empty($galleryList);
+$hasStory = ($sectionVisibility['story'] ?? true) && !empty($storyItems);
+$hasParty = ($sectionVisibility['party'] ?? true) && !empty($weddingParty);
+$hasRegistry = ($sectionVisibility['gifts'] ?? ($sectionVisibility['registry'] ?? true)) && !empty($registryItems);
+$hasMenu = ($sectionVisibility['menu'] ?? true) && !empty($menuOptions);
+$hasVenues = ($sectionVisibility['event'] ?? ($sectionVisibility['events'] ?? true)) && !empty($venueLocations);
+$hasNews = ($sectionVisibility['news'] ?? true) && count($storyItems) >= 3;
+$showHero = $sectionVisibility['hero'] ?? true;
+$showCouple = $sectionVisibility['couple'] ?? true;
+$showRsvp = $sectionVisibility['rsvp'] ?? true;
+$showCountdown = $sectionVisibility['countdown'] ?? true;
 
-$sectionLinks = [
-    'hero' => 'Inicio',
-    'pareja' => 'Pareja',
-    'historia' => 'Historia',
-    'galeria' => 'Galería',
-    'rsvp' => 'RSVP',
-    'eventos' => 'Eventos',
-    'cortejo' => 'Cortejo',
-    'regalos' => 'Regalos',
-    'noticias' => 'Noticias'
-];
+$sectionLinks = [];
+if ($showHero) {
+    $sectionLinks['hero'] = 'Inicio';
+}
+if ($showCouple) {
+    $sectionLinks['pareja'] = 'Pareja';
+}
+if ($hasStory) {
+    $sectionLinks['historia'] = 'Historia';
+}
+if ($hasGallery) {
+    $sectionLinks['galeria'] = 'Galería';
+}
+if ($showRsvp) {
+    $sectionLinks['rsvp'] = 'RSVP';
+}
+if ($hasVenues) {
+    $sectionLinks['eventos'] = 'Eventos';
+}
+if ($hasParty) {
+    $sectionLinks['cortejo'] = 'Cortejo';
+}
+if ($hasRegistry) {
+    $sectionLinks['regalos'] = 'Regalos';
+}
+if ($hasNews) {
+    $sectionLinks['noticias'] = 'Noticias';
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -247,13 +268,9 @@ $sectionLinks = [
     <div class="sk-container sk-header__inner">
         <a class="sk-brand" href="#hero">Feelings</a>
         <nav class="sk-nav" data-nav>
-            <?php if ($hasStory): ?><a href="#historia">Historia</a><?php endif; ?>
-            <?php if ($hasGallery): ?><a href="#galeria">Galería</a><?php endif; ?>
-            <a href="#rsvp">RSVP</a>
-            <?php if ($hasVenues): ?><a href="#eventos">Eventos</a><?php endif; ?>
-            <?php if ($hasParty): ?><a href="#cortejo">Cortejo</a><?php endif; ?>
-            <?php if ($hasRegistry): ?><a href="#regalos">Regalos</a><?php endif; ?>
-            <?php if ($hasNews): ?><a href="#noticias">Noticias</a><?php endif; ?>
+            <?php foreach ($sectionLinks as $id => $label): ?>
+                <a href="#<?= esc($id) ?>"><?= esc($label) ?></a>
+            <?php endforeach; ?>
         </nav>
         <button class="sk-nav-toggle" type="button" aria-label="Abrir menú" data-nav-toggle>
             <span></span><span></span><span></span>
@@ -265,6 +282,7 @@ $sectionLinks = [
 </header>
 
 <main>
+    <?php if ($showHero): ?>
     <section id="hero" class="sk-hero">
         <div class="sk-container sk-hero__grid">
             <div class="sk-hero__content sk-reveal">
@@ -272,6 +290,7 @@ $sectionLinks = [
                 <h1 class="sk-hero__title"><?= esc($coupleTitle) ?></h1>
                 <p class="sk-hero__subtitle"><?= esc($heroSubtitle) ?></p>
                 <p class="sk-hero__date"><?= esc($eventDateHuman) ?></p>
+                <?php if ($showCountdown): ?>
                 <div class="sk-countdown" data-countdown="<?= esc($eventDateIso) ?>">
                     <div class="sk-countdown__item">
                         <span data-count="days">00</span>
@@ -293,6 +312,7 @@ $sectionLinks = [
                         <small>Seg</small>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
             <div class="sk-hero__media sk-reveal">
                 <div class="sk-hero__decor sk-hero__decor--tl"></div>
@@ -301,7 +321,9 @@ $sectionLinks = [
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
+    <?php if ($showCouple): ?>
     <section id="pareja" class="sk-section">
         <div class="sk-container">
             <div class="sk-section__header sk-reveal">
@@ -348,7 +370,9 @@ $sectionLinks = [
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
+    <?php if ($hasStory): ?>
     <section id="historia" class="sk-section">
         <div class="sk-container">
             <div class="sk-section__header sk-reveal">
@@ -411,9 +435,13 @@ $sectionLinks = [
             <?php endif; ?>
         </div>
     </section>
+    <?php endif; ?>
 
-    <div id="banner" class="sk-parallax" style="background-image: <?= $parallaxBg ? "url('" . esc($parallaxBg) . "')" : 'linear-gradient(120deg, #f5efe9, #f0e5da)' ?>;"></div>
+    <?php if ($sectionVisibility['banner'] ?? ($hasGallery || $hasStory)): ?>
+        <div id="banner" class="sk-parallax" style="background-image: <?= $parallaxBg ? "url('" . esc($parallaxBg) . "')" : 'linear-gradient(120deg, #f5efe9, #f0e5da)' ?>;"></div>
+    <?php endif; ?>
 
+    <?php if ($hasGallery): ?>
     <section id="galeria" class="sk-section sk-section--alt">
         <div class="sk-container">
             <div class="sk-section__header sk-reveal">
@@ -450,7 +478,9 @@ $sectionLinks = [
             <?php endif; ?>
         </div>
     </section>
+    <?php endif; ?>
 
+    <?php if ($showRsvp): ?>
     <section id="rsvp" class="sk-section">
         <div class="sk-container">
             <div class="sk-section__header sk-reveal">
@@ -506,7 +536,9 @@ $sectionLinks = [
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
+    <?php if ($hasVenues): ?>
     <section id="eventos" class="sk-section sk-section--dark">
         <div class="sk-container">
             <div class="sk-section__header sk-reveal">
@@ -563,8 +595,10 @@ $sectionLinks = [
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <?php if ($hasParty): ?>
+        <?php if ($hasParty): ?>
         <section id="cortejo" class="sk-section">
             <div class="sk-container">
                 <div class="sk-section__header sk-reveal">
@@ -592,9 +626,11 @@ $sectionLinks = [
                 </div>
             </div>
         </section>
+        <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($hasRegistry): ?>
+        <?php if ($hasRegistry): ?>
         <section id="regalos" class="sk-section sk-section--alt">
             <div class="sk-container">
                 <div class="sk-section__header sk-reveal">
@@ -641,9 +677,11 @@ $sectionLinks = [
                 </div>
             </div>
         </section>
+        <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($hasNews): ?>
+        <?php if ($hasNews): ?>
         <section id="noticias" class="sk-section">
             <div class="sk-container">
                 <div class="sk-section__header sk-reveal">
@@ -686,6 +724,7 @@ $sectionLinks = [
                 </div>
             </div>
         </section>
+        <?php endif; ?>
     <?php endif; ?>
 </main>
 
