@@ -1,7 +1,12 @@
+<?php declare(strict_types=1); ?>
 <!-- ✅ app/Views/admin/events/edit.php (COMPLETO) -->
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?><?= esc($event['couple_title']) ?><?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -81,8 +86,7 @@
 </div>
 
 <!-- Tabs de navegación -->
-<?php $activeTab = 'info'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'informacion', 'event_id' => $event['id']]) ?>
 
 <!-- Contenido del Tab -->
 <div class="tab-content" id="eventTabsContent">
@@ -368,6 +372,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
     $(document).ready(function() {
         // Verificar disponibilidad del slug al cambiar

@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Agenda<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -24,8 +29,7 @@
     </button>
 </div>
 
-<?php $activeTab = 'schedule'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'agenda', 'event_id' => $event['id']]) ?>
 
 <div id="scheduleList" class="card">
     <div class="card-body">
@@ -59,7 +63,13 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openScheduleModal(<?= json_encode($item) ?>)' title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteScheduleItem('<?= $item['id'] ?>')" title="Eliminar">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-item"
+                                data-id="<?= $item['id'] ?>"
+                                data-name="<?= esc($item['title']) ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/schedule/delete/' . $item['id']) ?>"
+                                data-refresh-target="#scheduleList"
+                                title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -74,7 +84,11 @@
 <div class="modal fade" id="scheduleModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="scheduleForm">
+            <form id="scheduleForm"
+                class="modal-ajax-form"
+                data-refresh-target="#scheduleList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/schedule/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-clock me-2"></i><span id="scheduleModalTitle">Nueva Actividad</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -161,6 +175,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 const scheduleModalEl = document.getElementById('scheduleModal');
@@ -193,6 +208,10 @@ function openScheduleModal(item = null) {
     $('#is_visible').prop('checked', true);
     $('#icon').val('');
     syncIconPreview('');
+    const form = document.getElementById('scheduleForm');
+    form.action = item
+        ? `${BASE_URL}admin/events/${eventId}/schedule/update/${item.id}`
+        : `${BASE_URL}admin/events/${eventId}/schedule/store`;
 
     if (item) {
         $('#item_id').val(item.id);
@@ -210,50 +229,5 @@ function openScheduleModal(item = null) {
     scheduleModal.show();
 }
 
-$('#scheduleForm').on('submit', function(e) {
-    e.preventDefault();
-    const itemId = $('#item_id').val();
-    const url = itemId
-        ? `${BASE_URL}admin/events/${eventId}/schedule/update/${itemId}`
-        : `${BASE_URL}admin/events/${eventId}/schedule/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#scheduleList');
-                scheduleModal.hide();
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteScheduleItem(itemId) {
-    Swal.fire({
-        title: '¿Eliminar actividad?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/schedule/delete/${itemId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#scheduleList');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>

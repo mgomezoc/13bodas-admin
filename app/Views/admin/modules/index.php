@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Módulos<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -21,8 +26,7 @@
     </div>
 </div>
 
-<?php $activeTab = 'modules'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'modulos', 'event_id' => $event['id']]) ?>
 
 <div id="modulesList" class="card">
     <div class="card-body">
@@ -60,7 +64,11 @@
 <div class="modal fade" id="moduleModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="moduleForm">
+            <form id="moduleForm"
+                class="modal-ajax-form"
+                data-refresh-target="#modulesList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/modules/update') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-grid me-2"></i><span id="moduleModalTitle">Editar Módulo</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -102,6 +110,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -112,28 +121,11 @@ function openModuleModal(module) {
     $('#sort_order').val(module.sort_order);
     $('#is_enabled').prop('checked', parseInt(module.is_enabled) === 1);
     $('#content_payload').val(module.content_payload || '');
+    document.getElementById('moduleForm').action = `${BASE_URL}admin/events/${eventId}/modules/update/${module.id}`;
 
     const modal = new bootstrap.Modal(document.getElementById('moduleModal'));
     modal.show();
 }
 
-$('#moduleForm').on('submit', function(e) {
-    e.preventDefault();
-    const moduleId = $('#module_id').val();
-    const url = `${BASE_URL}admin/events/${eventId}/modules/update/${moduleId}`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#modulesList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
 </script>
 <?= $this->endSection() ?>

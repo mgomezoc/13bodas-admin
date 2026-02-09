@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Confirmaciones<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -104,8 +109,7 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
     </div>
 </div>
 
-<?php $activeTab = 'rsvp'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'confirmaciones', 'event_id' => $event['id']]) ?>
 
 <!-- Lista de respuestas -->
 <div class="card">
@@ -183,6 +187,7 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 let currentFilter = '';

@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Lista de Regalos<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -63,8 +68,7 @@
     </div>
 </div>
 
-<?php $activeTab = 'registry'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'regalos', 'event_id' => $event['id']]) ?>
 
 <!-- Lista de Regalos -->
 <div id="registrySection">
@@ -123,7 +127,12 @@
                             </a></li>
                             <?php endif; ?>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteItem('<?= $item['id'] ?>')">
+                            <li><a class="dropdown-item text-danger delete-item"
+                                href="#"
+                                data-id="<?= $item['id'] ?>"
+                                data-name="<?= esc($item['name']) ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/registry/delete/' . $item['id']) ?>"
+                                data-refresh-target="#registrySection">
                                 <i class="bi bi-trash me-2"></i>Eliminar
                             </a></li>
                         </ul>
@@ -145,7 +154,11 @@
                 <h5 class="modal-title"><i class="bi bi-gift me-2"></i>Agregar Regalo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="addItemForm">
+            <form id="addItemForm"
+                class="modal-ajax-form"
+                data-refresh-target="#registrySection"
+                action="<?= base_url('admin/events/' . $event['id'] . '/registry/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nombre del Regalo <span class="text-danger">*</span></label>
@@ -192,22 +205,9 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
-
-$('#addItemForm').on('submit', function(e) {
-    e.preventDefault();
-    
-    $.post(`${BASE_URL}admin/events/${eventId}/registry/store`, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#registrySection');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message });
-            }
-        });
-});
 
 function toggleClaimed(itemId) {
     $.post(`${BASE_URL}admin/events/${eventId}/registry/toggle-claimed/${itemId}`)
@@ -219,30 +219,6 @@ function toggleClaimed(itemId) {
                 Toast.fire({ icon: 'error', title: response.message });
             }
         });
-}
-
-function deleteItem(itemId) {
-    Swal.fire({
-        title: '¿Eliminar regalo?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/registry/delete/${itemId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        $(`[data-id="${itemId}"]`).fadeOut(300, function() { $(this).remove(); });
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
 }
 </script>
 <?= $this->endSection() ?>

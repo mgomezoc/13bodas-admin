@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Galería<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -27,8 +32,7 @@
 <!-- Input oculto para subir -->
 <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
-<?php $activeTab = 'gallery'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'galeria', 'event_id' => $event['id']]) ?>
 
 <!-- Category Nav -->
 <div class="card mb-3">
@@ -98,7 +102,13 @@
                             <a class="btn btn-outline-secondary" href="<?= base_url($image['file_url_original']) ?>" target="_blank" title="Ver">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <button type="button" class="btn btn-outline-danger" onclick="deleteImage('<?= $image['id'] ?>')" title="Eliminar">
+                            <button type="button"
+                                class="btn btn-outline-danger delete-item"
+                                data-id="<?= $image['id'] ?>"
+                                data-name="<?= esc($image['alt_text'] ?: 'imagen') ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/gallery/delete/' . $image['id']) ?>"
+                                data-refresh-target="#gallerySection"
+                                title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -113,6 +123,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 const dropZone = document.getElementById('dropZone');
@@ -252,56 +263,5 @@ function resetDropZone() {
     `;
 }
 
-function deleteImage(imageId) {
-    Swal.fire({
-        title: '¿Eliminar imagen?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Eliminando...',
-                text: 'Por favor espera',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            $.post(`${BASE_URL}admin/events/${eventId}/gallery/delete/${imageId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: response.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        $(`[data-id="${imageId}"]`).fadeOut(300, function() {
-                            $(this).remove();
-                            if ($('#galleryGrid [data-id]').length === 0) {
-                                refreshModuleSection('#gallerySection');
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: response.message
-                        });
-                    }
-                })
-                .fail(function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error de conexión'
-                    });
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>

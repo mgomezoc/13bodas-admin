@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Dominios<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -24,8 +29,7 @@
     </button>
 </div>
 
-<?php $activeTab = 'domains'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'dominios', 'event_id' => $event['id']]) ?>
 
 <div id="domainsList" class="card">
     <div class="card-body">
@@ -47,7 +51,13 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openDomainModal(<?= json_encode($domain) ?>)' title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteDomain('<?= $domain['id'] ?>')" title="Eliminar">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-item"
+                                data-id="<?= $domain['id'] ?>"
+                                data-name="<?= esc($domain['domain']) ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/domains/delete/' . $domain['id']) ?>"
+                                data-refresh-target="#domainsList"
+                                title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -62,7 +72,11 @@
 <div class="modal fade" id="domainModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="domainForm">
+            <form id="domainForm"
+                class="modal-ajax-form"
+                data-refresh-target="#domainsList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/domains/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-globe2 me-2"></i><span id="domainModalTitle">Nuevo Dominio</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -95,6 +109,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -102,6 +117,10 @@ function openDomainModal(domain = null) {
     $('#domainForm')[0].reset();
     $('#domain_id').val('');
     $('#domainModalTitle').text(domain ? 'Editar Dominio' : 'Nuevo Dominio');
+    const form = document.getElementById('domainForm');
+    form.action = domain
+        ? `${BASE_URL}admin/events/${eventId}/domains/update/${domain.id}`
+        : `${BASE_URL}admin/events/${eventId}/domains/store`;
 
     if (domain) {
         $('#domain_id').val(domain.id);
@@ -113,49 +132,5 @@ function openDomainModal(domain = null) {
     modal.show();
 }
 
-$('#domainForm').on('submit', function(e) {
-    e.preventDefault();
-    const domainId = $('#domain_id').val();
-    const url = domainId
-        ? `${BASE_URL}admin/events/${eventId}/domains/update/${domainId}`
-        : `${BASE_URL}admin/events/${eventId}/domains/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#domainsList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteDomain(domainId) {
-    Swal.fire({
-        title: '¿Eliminar dominio?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/domains/delete/${domainId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#domainsList');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>
