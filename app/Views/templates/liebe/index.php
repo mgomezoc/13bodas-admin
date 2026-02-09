@@ -48,7 +48,7 @@ if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
     $defaults = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
-// Section visibility (override desde theme_config del evento)
+// Section visibility (override desde configuración del template)
 $sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $slug = esc($event['slug'] ?? '');
@@ -111,7 +111,7 @@ $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
 $assetsBase = base_url('templates/liebe');
 
-// --- Theme (schema_json + theme_config overrides) ---
+// --- Theme (schema_json + overrides del template) ---
 $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];
@@ -1254,6 +1254,50 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.js" type="text/javascript"></script>
     <!-- All Scripts & Plugins -->
     <script src="<?= $assetsBase ?>/switcher/js/dmss.js"></script>
+    <?php if (!empty($sectionVisibility)): ?>
+        <script>
+            (function() {
+                const visibility = <?= json_encode($sectionVisibility) ?>;
+                const sectionMap = {
+                    hero: ['intro'],
+                    countdown: ['save-date', 'countdown'],
+                    couple: ['about'],
+                    story: ['story'],
+                    party: ['attendants'],
+                    event: ['event', 'schedule'],
+                    faq: ['faqs'],
+                    registry: ['registry'],
+                    gifts: ['registry'],
+                    gallery: ['gallery'],
+                    rsvp: ['rsvp'],
+                    location: ['contact', 'map-canvas']
+                };
+
+                const isEnabled = (key) => {
+                    if (Object.prototype.hasOwnProperty.call(visibility, key)) {
+                        return visibility[key] !== false;
+                    }
+                    if (key === 'event' && Object.prototype.hasOwnProperty.call(visibility, 'events')) {
+                        return visibility.events !== false;
+                    }
+                    if (key === 'registry' && Object.prototype.hasOwnProperty.call(visibility, 'gifts')) {
+                        return visibility.gifts !== false;
+                    }
+                    return true;
+                };
+
+                Object.entries(sectionMap).forEach(([key, ids]) => {
+                    if (isEnabled(key)) return;
+                    ids.forEach((id) => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.style.display = 'none';
+                        }
+                    });
+                });
+            })();
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

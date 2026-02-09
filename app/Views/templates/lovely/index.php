@@ -45,7 +45,7 @@ if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
     $defaults  = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
-// Section visibility (override desde theme_config del evento)
+// Section visibility (override desde configuración del template)
 $sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $slug        = esc($event['slug'] ?? '');
@@ -102,7 +102,7 @@ $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
 $assetsBase = base_url('templates/lovely');
 
-// --- Theme (schema_json + theme_config overrides) ---
+// --- Theme (schema_json + overrides del template) ---
 $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];
@@ -1301,6 +1301,50 @@ foreach ($weddingParty as $member) {
             });
         })();
     </script>
+    <?php if (!empty($sectionVisibility)): ?>
+        <script>
+            (function() {
+                const visibility = <?= json_encode($sectionVisibility) ?>;
+                const sectionMap = {
+                    hero: ['home'],
+                    countdown: ['clock'],
+                    couple: ['couple'],
+                    story: ['story'],
+                    event: ['events', 'schedule', 'whenwhere'],
+                    gallery: ['gallery'],
+                    party: ['people'],
+                    faq: ['faqs'],
+                    registry: ['registry'],
+                    gifts: ['registry'],
+                    rsvp: ['rsvp'],
+                    menu: ['menu']
+                };
+
+                const isEnabled = (key) => {
+                    if (Object.prototype.hasOwnProperty.call(visibility, key)) {
+                        return visibility[key] !== false;
+                    }
+                    if (key === 'event' && Object.prototype.hasOwnProperty.call(visibility, 'events')) {
+                        return visibility.events !== false;
+                    }
+                    if (key === 'registry' && Object.prototype.hasOwnProperty.call(visibility, 'gifts')) {
+                        return visibility.gifts !== false;
+                    }
+                    return true;
+                };
+
+                Object.entries(sectionMap).forEach(([key, ids]) => {
+                    if (isEnabled(key)) return;
+                    ids.forEach((id) => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.style.display = 'none';
+                        }
+                    });
+                });
+            })();
+        </script>
+    <?php endif; ?>
 
 </body>
 

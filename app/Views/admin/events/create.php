@@ -201,15 +201,6 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="site_mode">Modo del Sitio</label>
-                            <select id="site_mode" name="site_mode" class="form-select">
-                                <option value="auto" <?= old('site_mode', 'auto') === 'auto' ? 'selected' : '' ?>>Automático</option>
-                                <option value="pre" <?= old('site_mode') === 'pre' ? 'selected' : '' ?>>Pre-evento</option>
-                                <option value="live" <?= old('site_mode') === 'live' ? 'selected' : '' ?>>En vivo</option>
-                                <option value="post" <?= old('site_mode') === 'post' ? 'selected' : '' ?>>Post-evento</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label" for="visibility">Visibilidad</label>
                             <select id="visibility" name="visibility" class="form-select">
                                 <option value="private" <?= old('visibility', 'private') === 'private' ? 'selected' : '' ?>>Privado</option>
@@ -239,29 +230,6 @@
                                    class="form-control datetimepicker"
                                    value="<?= old('paid_until') ?>">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="venue_config">Venue config (JSON)</label>
-                            <textarea id="venue_config" name="venue_config" class="form-control" rows="4"
-                                placeholder='{"example":true}'><?= old('venue_config') ?></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="theme_config">Theme config (JSON)</label>
-                            <textarea id="theme_config" name="theme_config" class="form-control" rows="4"
-                                placeholder='{"colors":{"primary":"#000"}}'><?= old('theme_config') ?></textarea>
-                        </div>
-                        <?php if (!empty($templates)): ?>
-                            <div class="mb-0">
-                                <label class="form-label" for="template_id">Plantilla de Diseño</label>
-                                <select id="template_id" name="template_id" class="form-select">
-                                    <option value="">Sin plantilla</option>
-                                    <?php foreach ($templates as $template): ?>
-                                        <option value="<?= $template['id'] ?>" <?= old('template_id') == $template['id'] ? 'selected' : '' ?>>
-                                            <?= esc($template['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             <?php endif; ?>

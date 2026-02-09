@@ -1,6 +1,10 @@
 <?php
+
+declare(strict_types=1);
+
 $event            = $event ?? [];
 $template         = $template ?? [];
+$templateMeta     = $templateMeta ?? [];
 $theme            = $theme ?? [];
 $modules          = $modules ?? [];
 $mediaByCategory  = $mediaByCategory ?? [];
@@ -15,6 +19,9 @@ $weddingParty     = $weddingParty ?? [];
 $faqs             = $faqs ?? [];
 $scheduleItems    = $scheduleItems ?? [];
 $eventLocations   = $eventLocations ?? [];
+$sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
+$showEventSection = $sectionVisibility['event'] ?? ($sectionVisibility['events'] ?? true);
+$showGiftsSection = $sectionVisibility['gifts'] ?? ($sectionVisibility['registry'] ?? true);
 
 $assetsBase = base_url('templates/granboda');
 
@@ -37,6 +44,11 @@ $bgColor      = $theme['background'] ?? '#faf7f9';
 function safeText($value): string
 {
     return esc(trim((string) $value));
+}
+
+function isSectionVisible(array $sectionVisibility, string $key): bool
+{
+    return $sectionVisibility[$key] ?? true;
 }
 
 function formatDateLabel(?string $dt, string $fmt = 'd M Y'): string
@@ -130,6 +142,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
 </head>
 
 <body>
+    <?php if (isSectionVisible($sectionVisibility, 'hero')): ?>
     <header class="hero">
         <div class="hero__overlay"></div>
         <div class="container hero__content">
@@ -155,10 +168,14 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                 <?php endif; ?>
             </div>
         </div>
-        <div class="hero__countdown" data-date="<?= esc($startRaw ?? '') ?>"></div>
+        <?php if (isSectionVisible($sectionVisibility, 'countdown')): ?>
+            <div class="hero__countdown" data-date="<?= esc($startRaw ?? '') ?>"></div>
+        <?php endif; ?>
     </header>
+    <?php endif; ?>
 
     <main>
+        <?php if (isSectionVisible($sectionVisibility, 'couple')): ?>
         <section class="section section--overview">
             <div class="container grid grid--two">
                 <div>
@@ -166,9 +183,6 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                     <ul class="detail-list">
                         <?php if (!empty($event['service_status'])): ?>
                             <li><strong>Estado del servicio:</strong> <?= safeText($event['service_status']) ?></li>
-                        <?php endif; ?>
-                        <?php if (!empty($event['site_mode'])): ?>
-                            <li><strong>Modo del sitio:</strong> <?= safeText($event['site_mode']) ?></li>
                         <?php endif; ?>
                         <?php if (!empty($event['visibility'])): ?>
                             <li><strong>Visibilidad:</strong> <?= safeText($event['visibility']) ?></li>
@@ -196,8 +210,9 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                 </div>
             </div>
         </section>
+        <?php endif; ?>
 
-        <?php if (!empty($galleryAssets)): ?>
+        <?php if (isSectionVisible($sectionVisibility, 'gallery') && !empty($galleryAssets)): ?>
             <section class="section">
                 <div class="container">
                     <h2>Galería</h2>
@@ -218,7 +233,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($timeline)): ?>
+        <?php if (isSectionVisible($sectionVisibility, 'story') && !empty($timeline)): ?>
             <section class="section section--soft">
                 <div class="container">
                     <h2>Nuestra historia</h2>
@@ -245,7 +260,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($schedule)): ?>
+        <?php if ($showEventSection && !empty($schedule)): ?>
             <section class="section">
                 <div class="container">
                     <h2>Itinerario</h2>
@@ -264,7 +279,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($weddingParty)): ?>
+        <?php if (($sectionVisibility['party'] ?? true) && !empty($weddingParty)): ?>
             <section class="section section--soft">
                 <div class="container">
                     <h2>Cortejo nupcial</h2>
@@ -285,7 +300,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($menuOptions)): ?>
+        <?php if (($sectionVisibility['menu'] ?? true) && !empty($menuOptions)): ?>
             <section class="section">
                 <div class="container">
                     <h2>Opciones de menú</h2>
@@ -308,7 +323,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($registryItems)): ?>
+        <?php if ($showGiftsSection && !empty($registryItems)): ?>
             <section class="section section--soft">
                 <div class="container">
                     <h2>Mesa de regalos</h2>
@@ -340,7 +355,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($accommodation)): ?>
+        <?php if (($sectionVisibility['accommodation'] ?? true) && !empty($accommodation)): ?>
             <section class="section">
                 <div class="container">
                     <h2>Alojamiento recomendado</h2>
@@ -361,7 +376,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($faqItems)): ?>
+        <?php if (($sectionVisibility['faq'] ?? true) && !empty($faqItems)): ?>
             <section class="section section--soft">
                 <div class="container">
                     <h2>Preguntas frecuentes</h2>
@@ -377,7 +392,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($musicInfo)): ?>
+        <?php if (($sectionVisibility['music'] ?? true) && !empty($musicInfo)): ?>
             <section class="section">
                 <div class="container">
                     <h2>Música</h2>
@@ -391,7 +406,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if ($customHtml): ?>
+        <?php if (($sectionVisibility['custom'] ?? true) && $customHtml): ?>
             <section class="section section--soft">
                 <div class="container">
                     <h2>Contenido personalizado</h2>
@@ -402,7 +417,7 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
             </section>
         <?php endif; ?>
 
-        <?php if (!empty($guestGroups) || !empty($guests) || !empty($rsvpResponses)): ?>
+        <?php if (($sectionVisibility['guests'] ?? true) && (!empty($guestGroups) || !empty($guests) || !empty($rsvpResponses))): ?>
             <section class="section">
                 <div class="container">
                     <h2>Invitados y RSVP</h2>

@@ -46,7 +46,7 @@ if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
     $defaults  = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
-// Section visibility (override desde theme_config del evento)
+// Section visibility (override desde configuración del template)
 $sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $slug        = esc($event['slug'] ?? '');
@@ -103,7 +103,7 @@ $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
 $assetsBase = base_url('templates/olivia');
 
-// --- Theme (schema_json + theme_config overrides) ---
+// --- Theme (schema_json + overrides del template) ---
 $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];
@@ -820,6 +820,49 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
         <script src="<?= $assetsBase ?>/js/jquery.magnific-popup.min.js"></script>
         <script src="<?= $assetsBase ?>/js/owl.carousel.min.js"></script>
         <script src="<?= $assetsBase ?>/js/main.js"></script>
+        <?php if (!empty($sectionVisibility)): ?>
+            <script>
+                (function() {
+                    const visibility = <?= json_encode($sectionVisibility) ?>;
+                    const sectionMap = {
+                        hero: ['home'],
+                        countdown: ['countdown'],
+                        couple: ['couple'],
+                        story: ['story'],
+                        party: ['friends'],
+                        event: ['organization'],
+                        gallery: ['gallery'],
+                        location: ['whenwhere'],
+                        rsvp: ['rsvp'],
+                        registry: ['gift'],
+                        gifts: ['gift']
+                    };
+
+                    const isEnabled = (key) => {
+                        if (Object.prototype.hasOwnProperty.call(visibility, key)) {
+                            return visibility[key] !== false;
+                        }
+                        if (key === 'event' && Object.prototype.hasOwnProperty.call(visibility, 'events')) {
+                            return visibility.events !== false;
+                        }
+                        if (key === 'registry' && Object.prototype.hasOwnProperty.call(visibility, 'gifts')) {
+                            return visibility.gifts !== false;
+                        }
+                        return true;
+                    };
+
+                    Object.entries(sectionMap).forEach(([key, ids]) => {
+                        if (isEnabled(key)) return;
+                        ids.forEach((id) => {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                el.style.display = 'none';
+                            }
+                        });
+                    });
+                })();
+            </script>
+        <?php endif; ?>
     </div>
 </body>
 

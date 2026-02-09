@@ -144,25 +144,12 @@
                         <?= !empty($event['created_at']) ? date('d/m/Y', strtotime($event['created_at'])) : '<span class="text-muted">-</span>' ?>
                     </dd>
 
-                    <dt class="col-sm-4">Plantilla activa</dt>
-                    <dd class="col-sm-8">
-                        <?php if (!empty($activeTemplate['name'])): ?>
-                            <span class="badge bg-light text-dark"><?= esc($activeTemplate['name']) ?></span>
-                        <?php else: ?>
-                            <span class="text-muted">Sin plantilla</span>
-                        <?php endif; ?>
-                    </dd>
                 </dl>
 
                 <hr class="my-3">
 
                 <!-- Config útil (sin romper roles; si tu layout no manda isAdmin, esto solo muestra lo básico) -->
                 <dl class="row mb-0">
-                    <dt class="col-sm-4">Modo</dt>
-                    <dd class="col-sm-8">
-                        <?= !empty($event['site_mode']) ? esc($event['site_mode']) : '<span class="text-muted">-</span>' ?>
-                    </dd>
-
                     <dt class="col-sm-4">Visibilidad</dt>
                     <dd class="col-sm-8">
                         <?= !empty($event['visibility']) ? esc($event['visibility']) : '<span class="text-muted">-</span>' ?>
