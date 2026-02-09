@@ -46,7 +46,7 @@ if (isset($rawDefaults['copy']) && is_array($rawDefaults['copy'])) {
     $defaults  = $rawDefaults;
     $tplAssets = $templateMeta['assets'] ?? [];
 }
-// Section visibility (override desde theme_config del evento)
+// Section visibility (override desde configuración del template)
 $sectionVisibility = $theme['sections'] ?? ($templateMeta['section_visibility'] ?? []);
 
 $slug        = esc($event['slug'] ?? '');
@@ -103,7 +103,7 @@ $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
 $assetsBase = base_url('templates/olivia');
 
-// --- Theme (schema_json + theme_config overrides) ---
+// --- Theme (schema_json + overrides del template) ---
 $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];

@@ -1,6 +1,7 @@
 <?php
 $event = $event ?? [];
 $modules = $modules ?? [];
+$theme = $theme ?? [];
 $mediaByCategory = $mediaByCategory ?? [];
 $eventLocations = $eventLocations ?? [];
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
@@ -43,7 +44,6 @@ $weddingParty = $weddingParty ?? ($event['party_members'] ?? []);
     <style>
         :root {
             <?php 
-            $theme = json_decode($event['theme_config'] ?? '{}', true);
             $colors = $theme['colors'] ?? [];
             $fonts = $theme['fonts'] ?? [];
             ?>

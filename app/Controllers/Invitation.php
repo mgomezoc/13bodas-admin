@@ -307,12 +307,6 @@ class Invitation extends BaseController
             $templateMeta = json_decode($template['meta_json'], true) ?: [];
         }
 
-        // Parsear venue_config
-        $venueConfig = [];
-        if (!empty($event['venue_config'])) {
-            $venueConfig = json_decode($event['venue_config'], true) ?: [];
-        }
-
         /**
          * 8.5) Event Locations (tabla event_locations)
          */
@@ -354,8 +348,7 @@ class Invitation extends BaseController
             'modules'         => $modules,
             'template'        => $template,
             'templateMeta'    => $templateMeta,
-            'theme'           => json_decode($event['theme_config'] ?? '{}', true),
-            'venueConfig'     => $venueConfig,
+            'theme'           => [],
             'mediaByCategory' => $mediaByCategory,
 
             'galleryAssets'   => $galleryAssets,

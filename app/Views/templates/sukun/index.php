@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Template: Sukun (Estilo Feelings)
  * NO consulta BD. Consume: $event, $modules, $theme, $template,
- * $templateMeta, $venueConfig, $mediaByCategory, $galleryAssets,
+ * $templateMeta, $mediaByCategory, $galleryAssets,
  * $registryItems, $registryStats, $weddingParty, $menuOptions
  */
 
@@ -16,7 +16,6 @@ $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
 $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
-$venueConfig = $venueConfig ?? [];
 $eventLocations = $eventLocations ?? [];
 $selectedGuest = $selectedGuest ?? null;
 $selectedGuestName = '';
@@ -169,7 +168,7 @@ if (empty($galleryList)) {
     }
 }
 
-$venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
+$venueLocations = $eventLocations;
 if (empty($venueLocations) && (!empty($event['venue_name']) || !empty($event['venue_address']))) {
     $venueLocations = [[
         'name' => $event['venue_name'] ?? '',
