@@ -34,13 +34,15 @@ if ($isAdmin) {
     $tabs['dominios'] = ['icon' => 'bi-globe2', 'label' => 'Dominios', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/domains")];
 }
 
-$primaryTabs = array_filter($tabs, static fn(array $tab): bool => $tab['priority'] === 1);
-$secondaryTabs = array_filter($tabs, static fn(array $tab): bool => $tab['priority'] > 1);
+$orderedTabs = array_filter(
+    $tabs,
+    static fn(array $tab): bool => $tab['priority'] >= 1
+);
 ?>
 
 <div class="event-tabs-wrapper">
     <ul class="nav nav-tabs event-nav" id="eventMainTabs" role="tablist">
-        <?php foreach ($primaryTabs as $key => $tab): ?>
+        <?php foreach ($orderedTabs as $key => $tab): ?>
             <li class="nav-item" role="presentation">
                 <a class="nav-link <?= $active === $key ? 'active' : '' ?>"
                    href="<?= esc($tab['url']) ?>"
@@ -50,22 +52,5 @@ $secondaryTabs = array_filter($tabs, static fn(array $tab): bool => $tab['priori
                 </a>
             </li>
         <?php endforeach; ?>
-
-        <li class="nav-item dropdown">
-            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-three-dots-vertical"></i>
-                <span class="tab-label">Más</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark">
-                <?php foreach ($secondaryTabs as $key => $tab): ?>
-                    <li>
-                        <a class="dropdown-item <?= $active === $key ? 'active' : '' ?>"
-                           href="<?= esc($tab['url']) ?>">
-                            <i class="bi <?= esc($tab['icon']) ?> me-2"></i><?= esc($tab['label']) ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </li>
     </ul>
 </div>
