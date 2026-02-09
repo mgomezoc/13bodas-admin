@@ -492,35 +492,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
 
 <body id="page-top" data-spy="scroll" data-target=".navbar-custom">
     <!-- Start Switcher -->
-    <div class="demo_changer">
-        <div class="demo-icon">
-            <i class="fa fa-cog fa-spin fa-2x"></i>
-        </div>
-        <!-- end opener icon -->
-        <div class="form_holder text-center">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="predefined_styles">
-                        <h5>Choose a Color Skin</h5>
-                        <!-- MODULE #3 -->
-                        <a href="summer.html" class="styleswitch"><img src="<?= $assetsBase ?>/switcher/images/summer.png" alt="Summer"></a>
-                        <a href="serenity.html" class="styleswitch"><img src="<?= $assetsBase ?>/switcher/images/serenity.png" alt="Serenity"></a>
-                        <a href="lavender.html" class="styleswitch"><img src="<?= $assetsBase ?>/switcher/images/lavender.png" alt="Lavender"></a>
-                        <!-- END MODULE #3 -->
-                        <h5>Choose a Header style</h5>
-                        <div class="headerimg">
-                            <a href="index-2.html"><img src="<?= $assetsBase ?>/switcher/images/photoheader.jpg" alt="Photo Header" class=""></a>
-                            <a href="index2.html"><img src="<?= $assetsBase ?>/switcher/images/slideheader.jpg" alt="Slide Header" class=""></a>
-                        </div>
-                    </div>
-                </div>
-                <!-- end col -->
-            </div>
-            <!-- end row -->
-        </div>
-        <!-- end form_holder -->
-    </div>
-    <!-- end demo_changer -->
+
     <!-- Preloader -->
     <div id="preloader">
         <div class="spinner">
@@ -535,13 +507,6 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-brand-centered">
                     <i class="fa fa-bars"></i>
                 </button>
-                <div class="navbar-brand navbar-brand-centered page-scroll">
-                    <a href="#page-top">
-                        <!-- logo  -->
-                        <img src="<?= esc($logoUrl) ?>" class="img-responsive" alt="<?= esc($coupleTitle) ?>">
-                    </a>
-                </div>
-                <!--/navbar-brand -->
             </div>
             <!--/navbar-header -->
             <!-- Collect the nav links, forms, and other content for toggling  -->
@@ -1244,11 +1209,6 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="col-md-12 text-center">
-                <!-- Footer logo -->
-                <img src="<?= esc($logoUrl) ?>" alt="<?= esc($coupleTitle) ?>" class="center-block img-responsive">
-            </div>
-            <!-- /col-md-12 -->
             <!-- Credits-->
             <div class="credits col-md-12 text-center">
                 Copyright © <?= esc((string)date('Y')) ?> - <?= esc($templateMeta['footer_owner'] ?? '13Bodas') ?>

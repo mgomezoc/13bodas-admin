@@ -350,6 +350,13 @@ class Invitation extends BaseController
             'timelineItems'   => $timelineItems,
         ];
 
+        /* debug
+        ob_clean();
+        header('Content-Type: text/plain; charset=utf-8');
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+        */
+
         // 7) Cargar la vista basada en el CÓDIGO del template
         $viewPath = 'templates/' . $template['code'] . '/index';
 
