@@ -108,7 +108,7 @@ $rsvpDeadlineLabel = formatDateLabel($rsvpDeadline, 'd M Y');
 
 $assetsBase = base_url('templates/neela');
 
-// --- Theme (schema_json + theme_config overrides) ---
+// --- Theme (schema_json + overrides del template) ---
 $schema = [];
 if (!empty($template['schema_json'])) {
     $schema = json_decode($template['schema_json'], true) ?: [];

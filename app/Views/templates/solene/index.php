@@ -14,7 +14,6 @@ $registryItems = $registryItems ?? [];
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0];
 $weddingParty = $weddingParty ?? [];
 $menuOptions = $menuOptions ?? [];
-$venueConfig = $venueConfig ?? [];
 $eventLocations = $eventLocations ?? [];
 $selectedGuest = $selectedGuest ?? null;
 $selectedGuestName = '';
@@ -170,7 +169,7 @@ $storyItems = !empty($timelineItems)
     : ($timelinePayload['items'] ?? ($storyPayload['items'] ?? []));
 $galleryList = $galleryAssets;
 
-$venueLocations = $eventLocations ?: ($venueConfig['locations'] ?? []);
+$venueLocations = $eventLocations;
 $venueName = $event['venue_name'] ?? ($venueLocations[0]['name'] ?? ($venuePayload['title'] ?? ''));
 $venueAddress = $event['venue_address'] ?? ($venueLocations[0]['address'] ?? '');
 

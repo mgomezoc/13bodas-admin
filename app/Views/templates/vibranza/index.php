@@ -158,9 +158,6 @@ $storyText = $moduleData['timeline']['story'] ?? ($moduleData['couple_info']['st
                         <?php if (!empty($event['service_status'])): ?>
                             <li><strong>Estado:</strong> <?= safeText($event['service_status']) ?></li>
                         <?php endif; ?>
-                        <?php if (!empty($event['site_mode'])): ?>
-                            <li><strong>Modo:</strong> <?= safeText($event['site_mode']) ?></li>
-                        <?php endif; ?>
                         <?php if (!empty($event['visibility'])): ?>
                             <li><strong>Visibilidad:</strong> <?= safeText($event['visibility']) ?></li>
                         <?php endif; ?>
