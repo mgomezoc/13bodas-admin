@@ -271,4 +271,8 @@ class EventsCRUD {
 
 document.addEventListener('DOMContentLoaded', () => {
     window.eventsCRUD = new EventsCRUD();
+    const tabsWrapper = document.querySelector('.event-tabs-wrapper');
+    if (tabsWrapper) {
+        tabsWrapper.scrollLeft = 0;
+    }
 });

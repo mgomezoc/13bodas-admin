@@ -110,7 +110,8 @@
                     <?php if ($item['is_fund']): ?>
                     <span class="text-info"><i class="bi bi-piggy-bank me-1"></i>Fondo</span>
                     <?php else: ?>
-                    <span class="fw-bold">$<?= number_format($item['price'], 0) ?></span>
+                    <?php $price = is_numeric($item['price']) ? (float) $item['price'] : 0.0; ?>
+                    <span class="fw-bold">$<?= number_format($price, 0) ?></span>
                     <?php endif; ?>
                     <div class="dropdown">
                         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
