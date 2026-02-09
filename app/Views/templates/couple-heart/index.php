@@ -463,46 +463,6 @@ $contactAddress = esc($venueAddr);
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-
-    <style>
-        :root {
-            --t-primary: <?= esc($colorPrimary) ?>;
-            --t-accent: <?= esc($colorAccent) ?>;
-            --t-heading-font: "<?= esc($fontHeading) ?>", cursive;
-            --t-body-font: "<?= esc($fontBody) ?>", sans-serif;
-        }
-
-        body {
-            font-family: var(--t-body-font);
-        }
-
-        h1,
-        h2,
-        h3,
-        .text-thm2 {
-            font-family: var(--t-heading-font);
-        }
-
-        .text-thm2,
-        .ulockd-btn-thm2,
-        .ulockd-bgthm {
-            color: #fff;
-            background-color: var(--t-primary);
-        }
-
-        .ulockd-main-title .text-thm2 {
-            color: var(--t-primary);
-        }
-
-        .ulockd-btn-thm2 {
-            border-color: var(--t-primary);
-        }
-
-        .badge.ulockd-bgthm {
-            background-color: var(--t-accent);
-            color: #111;
-        }
-    </style>
 </head>
 
 <body>
@@ -658,7 +618,7 @@ $contactAddress = esc($venueAddr);
                                             <h5><?= esc($brideSubtitle) ?></h5>
                                         <?php endif; ?>
                                         <p class="fz16"><?= $brideBio ?></p>
-                                        <img alt="signature" src="<?= $assetsBase ?>/images/about/bride-signeture.png">
+
                                         <?php if (!empty($brideSocial)): ?>
                                             <ul class="icon-font-thm list-inline ulockd-mrgn1225">
                                                 <?php foreach ($brideSocial as $link): ?>
@@ -718,7 +678,7 @@ $contactAddress = esc($venueAddr);
                                             <h5><?= esc($groomSubtitle) ?></h5>
                                         <?php endif; ?>
                                         <p class="fz16"><?= $groomBio ?></p>
-                                        <img alt="signature" src="<?= $assetsBase ?>/images/about/groom-signeture.png">
+
                                         <?php if (!empty($groomSocial)): ?>
                                             <ul class="icon-font-thm list-inline ulockd-mrgn1225">
                                                 <?php foreach ($groomSocial as $link): ?>
@@ -1422,7 +1382,6 @@ $contactAddress = esc($venueAddr);
     <script>
         window.COUPLE_HEART_ASSETS = <?= json_encode($assetsBase, JSON_UNESCAPED_SLASHES) ?>;
     </script>
-    <script type="text/javascript" src="<?= $assetsBase ?>/js/color-switcher.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/script.js"></script>
 
     <script>
@@ -1490,7 +1449,5 @@ $contactAddress = esc($venueAddr);
         /* More_Style_Name_Here_Is_commented_By_Class=clear,=round,=shadows,=roundshadows,=imagebut /*image : "images/resource/flake.png",*/
     </script>
 </body>
-
-<!-- Mirrored from unlockdesizn.com/html/wedding/couple-heart/index-singlepage.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 09 Feb 2026 12:01:47 GMT -->
 
 </html>
