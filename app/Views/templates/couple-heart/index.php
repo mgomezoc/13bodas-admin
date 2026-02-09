@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // ================================================================
-// TEMPLATE: LIEBE — app/Views/templates/liebe/index.php
+// TEMPLATE: COUPLE-HEART — app/Views/templates/couple-heart/index.php
 // Versión: 2.0 — Con soporte completo de datos dinámicos + fallbacks
 // ================================================================
 
@@ -23,6 +23,7 @@ $faqs = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
 $blogPosts = $blogPosts ?? [];
+$timelineItems = $timelineItems ?? [];
 
 // --- Defaults from template meta_json ---
 // Retrocompatibilidad: soportar tanto estructura plana antigua como nueva con sub-objetos
@@ -110,14 +111,14 @@ $schemaFonts = !empty($themeDefaults['fonts'])
     ? [$themeDefaults['fonts']['heading'] ?? 'Great Vibes', $themeDefaults['fonts']['body'] ?? 'Dosis']
     : ($schema['fonts'] ?? ['Great Vibes', 'Dosis']);
 $schemaColors = !empty($themeDefaults['colors'])
-    ? [$themeDefaults['colors']['primary'] ?? '#86B1A1', $themeDefaults['colors']['accent'] ?? '#F5F0EB']
-    : ($schema['colors'] ?? ['#86B1A1', '#F5F0EB']);
+    ? [$themeDefaults['colors']['primary'] ?? '#b88f6f', $themeDefaults['colors']['accent'] ?? '#f3f0ee']
+    : ($schema['colors'] ?? ['#b88f6f', '#f3f0ee']);
 
 // Retrocompatibilidad: soportar tanto estructura plana como anidada
 $fontHeading = $theme['fonts']['heading'] ?? ($theme['font_heading'] ?? ($schemaFonts[0] ?? 'Great Vibes'));
 $fontBody = $theme['fonts']['body'] ?? ($theme['font_body'] ?? ($schemaFonts[1] ?? 'Dosis'));
-$colorPrimary = $theme['colors']['primary'] ?? ($theme['primary'] ?? ($schemaColors[0] ?? '#86B1A1'));
-$colorAccent = $theme['colors']['accent'] ?? ($theme['accent'] ?? ($schemaColors[1] ?? '#F5F0EB'));
+$colorPrimary = $theme['colors']['primary'] ?? ($theme['primary'] ?? ($schemaColors[0] ?? '#b88f6f'));
+$colorAccent = $theme['colors']['accent'] ?? ($theme['accent'] ?? ($schemaColors[1] ?? '#f3f0ee'));
 
 // --- Module finder (busca por module_type, NO por code) ---
 function findModule(array $modules, string $type): ?array
@@ -179,7 +180,7 @@ function getText(array $copyPayload, array $defaults, string $key, string $hardc
 }
 
 $heroTagline = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Guarda la fecha');
+$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Cuenta regresiva');
 $countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
 $ctaHeading = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
 $ctaSubheading = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
@@ -187,43 +188,19 @@ $rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asi
 $brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
 $groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
 $storyTitle = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
+$eventsTitle = 'Detalles del evento';
+$agendaTitle = getText($copyPayload, $defaults, 'agenda_title', 'Agenda');
 $galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
-$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Damas y Caballeros');
-$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'Sobre la pareja');
-$quoteText = getText(
-    $copyPayload,
-    $defaults,
-    'quote_text',
-    'Ser profundamente amado por alguien te da fuerza, mientras que amar profundamente a alguien te da valentía.'
-);
-$saveDateText = getText(
-    $copyPayload,
-    $defaults,
-    'save_date_text',
-    'Gracias por acompañarnos en este día tan especial.'
-);
-$eventIntroTitle = getText($copyPayload, $defaults, 'event_intro_title', 'Celebra con nosotros');
+$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
+$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'La pareja');
 $eventIntroText = getText(
     $copyPayload,
     $defaults,
     'event_description',
-    'Nos encantará verte ahí para compartir este momento con nosotros.'
+    ($templateMeta['description'] ?? 'Nos encantará verte ahí para compartir este momento con nosotros.')
 );
-$eventDetailsTitle = getText($copyPayload, $defaults, 'event_details_title', 'Un día muy especial...');
-$eventDetailsText = getText(
-    $copyPayload,
-    $defaults,
-    'event_details_text',
-    'Gracias por formar parte de nuestra historia.'
-);
-$eventAlertText = getText(
-    $copyPayload,
-    $defaults,
-    'event_alert_text',
-    'Esperamos celebrar contigo.'
-);
+$faqTitle = getText($copyPayload, $defaults, 'faq_title', 'Preguntas frecuentes');
 
 $brideName = esc($event['bride_name'] ?? ($couplePayload['bride']['name'] ?? ''));
 $groomName = esc($event['groom_name'] ?? ($couplePayload['groom']['name'] ?? ''));
@@ -291,24 +268,23 @@ if (empty($heroImages)) {
 }
 if (empty($heroImages)) {
     $heroImages = [
-        $assetsBase . '/img/couplemain.jpg',
-        $assetsBase . '/img/couple1.jpg',
-        $assetsBase . '/img/couple2.jpg',
+        $assetsBase . '/images/home/h1.jpg',
+        $assetsBase . '/images/home/h2.jpg',
+        $assetsBase . '/images/home/h3.jpg',
     ];
 }
-$heroMainImage = $heroImages[0] ?? ($assetsBase . '/img/couplemain.jpg');
-$heroWallLeft = $heroImages[1] ?? ($assetsBase . '/img/couple1.jpg');
-$heroWallRight = $heroImages[2] ?? ($assetsBase . '/img/couple2.jpg');
+$heroMainImage = $heroImages[0] ?? ($assetsBase . '/images/home/h1.jpg');
+$heroWallLeft = $heroImages[1] ?? ($assetsBase . '/images/home/h2.jpg');
+$heroWallRight = $heroImages[2] ?? ($assetsBase . '/images/home/h3.jpg');
 
 // Couple photos
-$groomPhoto = getMediaUrl($mediaByCategory, 'groom') ?: ($assetsBase . '/img/groom.jpg');
-$bridePhoto = getMediaUrl($mediaByCategory, 'bride') ?: ($assetsBase . '/img/bride.jpg');
-$rsvpBg = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/img/rsvp.jpg');
+$groomPhoto = getMediaUrl($mediaByCategory, 'groom') ?: ($assetsBase . '/images/about/groom.jpg');
+$bridePhoto = getMediaUrl($mediaByCategory, 'bride') ?: ($assetsBase . '/images/about/bride.jpg');
+$rsvpBg = getMediaUrl($mediaByCategory, 'rsvp_bg') ?: ($assetsBase . '/images/background/b3.jpg');
 
 // Event images
-$eventImagePrimary = getMediaUrl($mediaByCategory, 'event', 0) ?: ($assetsBase . '/img/party2.jpg');
-$eventImageSecondary = getMediaUrl($mediaByCategory, 'event', 1) ?: ($assetsBase . '/img/party1.jpg');
-
+$eventImagePrimary = getMediaUrl($mediaByCategory, 'event', 0) ?: ($assetsBase . '/images/event/1.jpg');
+$eventImageSecondary = getMediaUrl($mediaByCategory, 'event', 1) ?: ($assetsBase . '/images/event/2.jpg');
 
 // --- Small helpers ---
 function moneyFmt($val, string $currency = 'MXN'): string
@@ -334,6 +310,27 @@ function parseSocialLinks($raw): array
     return is_array($decoded) ? $decoded : [];
 }
 
+function socialIconFromUrl(string $url): string
+{
+    $urlLower = strtolower($url);
+    if (strpos($urlLower, 'facebook') !== false) {
+        return 'fa-facebook';
+    }
+    if (strpos($urlLower, 'instagram') !== false) {
+        return 'fa-instagram';
+    }
+    if (strpos($urlLower, 'pinterest') !== false) {
+        return 'fa-pinterest';
+    }
+    if (strpos($urlLower, 'twitter') !== false || strpos($urlLower, 'x.com') !== false) {
+        return 'fa-twitter';
+    }
+    if (strpos($urlLower, 'tiktok') !== false) {
+        return 'fa-music';
+    }
+    return 'fa-link';
+}
+
 $partyLabels = [
     'bride_side' => 'Lado de la novia',
     'groom_side' => 'Lado del novio',
@@ -357,27 +354,41 @@ $hasGroomSide = !empty($partyByCategory['groom_side']);
 $hasWeddingParty = $hasBrideSide || $hasGroomSide;
 $hasRegistry = !empty($registryItems);
 $hasLocations = !empty($eventLocations) || ($lat !== '' && $lng !== '');
+$hasSchedule = !empty($scheduleItems);
+$hasFaqs = !empty($faqs);
+$hasBlog = !empty($blogPosts);
 
-$logoUrl = $tplAssets['logo'] ?? 'img/logo.png';
-if ($logoUrl !== '' && !preg_match('#^https?://#i', $logoUrl)) {
-    $logoUrl = $assetsBase . '/' . ltrim($logoUrl, '/');
+$logoDisplay = $tplAssets['logo'] ?? 'images/header-logo.png';
+$logoScrolled = $tplAssets['logo_scrolled'] ?? 'images/header-logo2.png';
+if ($logoDisplay !== '' && !preg_match('#^https?://#i', $logoDisplay)) {
+    $logoDisplay = $assetsBase . '/' . ltrim($logoDisplay, '/');
+}
+if ($logoScrolled !== '' && !preg_match('#^https?://#i', $logoScrolled)) {
+    $logoScrolled = $assetsBase . '/' . ltrim($logoScrolled, '/');
 }
 
 $registryFallbacks = [
-    $assetsBase . '/img/brand1.png',
-    $assetsBase . '/img/brand2.png',
-    $assetsBase . '/img/brand3.png',
-    $assetsBase . '/img/brand4.png',
+    $assetsBase . '/images/partners/partner1.png',
+    $assetsBase . '/images/partners/partner2.png',
+    $assetsBase . '/images/partners/partner3.png',
+    $assetsBase . '/images/partners/partner4.png',
+    $assetsBase . '/images/partners/partner5.png',
+    $assetsBase . '/images/partners/partner6.png',
 ];
 
 $galleryFallbacks = [
-    $assetsBase . '/img/gallery1.jpg',
-    $assetsBase . '/img/gallery2.jpg',
-    $assetsBase . '/img/gallery3.jpg',
-    $assetsBase . '/img/gallery4.jpg',
-    $assetsBase . '/img/gallery5.jpg',
-    $assetsBase . '/img/gallery6.jpg',
-    $assetsBase . '/img/gallery7.jpg',
+    $assetsBase . '/images/gallery/1.jpg',
+    $assetsBase . '/images/gallery/1a.jpg',
+    $assetsBase . '/images/gallery/2.jpg',
+    $assetsBase . '/images/gallery/2a.jpg',
+    $assetsBase . '/images/gallery/3.jpg',
+    $assetsBase . '/images/gallery/3a.jpg',
+    $assetsBase . '/images/gallery/4.jpg',
+    $assetsBase . '/images/gallery/4a.jpg',
+    $assetsBase . '/images/gallery/5.jpg',
+    $assetsBase . '/images/gallery/5a.jpg',
+    $assetsBase . '/images/gallery/6.jpg',
+    $assetsBase . '/images/gallery/6a.jpg',
 ];
 
 $now = new DateTimeImmutable('now');
@@ -416,14 +427,17 @@ $mapInitialLng = $lng !== '' ? (float)$lng : ($mapMarkers[0]['longitude'] ?? nul
 
 $pageTitle = $templateMeta['title'] ?? ($coupleTitle !== '' ? $coupleTitle : 'Invitación');
 $pageDescription = $templateMeta['description'] ?? $coupleTitle;
-$countdownDateString = $startRaw ? date('Y/m/d H:i:s', strtotime($startRaw)) : '';
 
 $brideSocial = parseSocialLinks($couplePayload['bride']['social_links'] ?? ($couplePayload['bride']['social'] ?? []));
 $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($couplePayload['groom']['social'] ?? []));
+
+$contactEmail = esc($event['contact_email'] ?? ($defaults['contact_email'] ?? ''));
+$contactPhone = esc($event['contact_phone'] ?? ($defaults['contact_phone'] ?? ''));
+$contactAddress = esc($venueAddr);
 ?>
 
 <!DOCTYPE html>
-<html dir="ltr" lang="en">
+<html dir="ltr" lang="es">
 
 <!-- Mirrored from unlockdesizn.com/html/wedding/couple-heart/index-singlepage.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 09 Feb 2026 12:01:29 GMT -->
 
@@ -431,16 +445,17 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="<?= esc($pageDescription) ?>">
     <!-- css file -->
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/bootstrap.min.css">
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/style.css">
     <!-- Responsive stylesheet -->
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/responsive.css">
     <!-- Title -->
-    <title>Couple Heart - Wedding Event And Planner HTML Template</title>
+    <title><?= esc($pageTitle) ?> | 13Bodas</title>
     <!-- Favicon -->
-    <link href="images/favicon.ico" sizes="128x128" rel="shortcut icon" type="image/x-icon" />
-    <link href="images/favicon.ico" sizes="128x128" rel="shortcut icon" />
+    <link href="<?= $assetsBase ?>/images/favicon.ico" sizes="128x128" rel="shortcut icon" type="image/x-icon" />
+    <link href="<?= $assetsBase ?>/images/favicon.ico" sizes="128x128" rel="shortcut icon" />
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -448,6 +463,46 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <style>
+        :root {
+            --t-primary: <?= esc($colorPrimary) ?>;
+            --t-accent: <?= esc($colorAccent) ?>;
+            --t-heading-font: "<?= esc($fontHeading) ?>", cursive;
+            --t-body-font: "<?= esc($fontBody) ?>", sans-serif;
+        }
+
+        body {
+            font-family: var(--t-body-font);
+        }
+
+        h1,
+        h2,
+        h3,
+        .text-thm2 {
+            font-family: var(--t-heading-font);
+        }
+
+        .text-thm2,
+        .ulockd-btn-thm2,
+        .ulockd-bgthm {
+            color: #fff;
+            background-color: var(--t-primary);
+        }
+
+        .ulockd-main-title .text-thm2 {
+            color: var(--t-primary);
+        }
+
+        .ulockd-btn-thm2 {
+            border-color: var(--t-primary);
+        }
+
+        .badge.ulockd-bgthm {
+            background-color: var(--t-accent);
+            color: #111;
+        }
+    </style>
 </head>
 
 <body>
@@ -469,8 +524,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                                 <i class="fa fa-bars"></i>
                             </button>
                             <a class="navbar-brand ulockd-main-logo2" href="#brand">
-                                <img src="images/header-logo.png" class="logo logo-display hidden-md" alt="header-logo.png">
-                                <img src="images/header-logo2.png" class="logo logo-scrolled" alt="">
+                                <img src="<?= esc($logoDisplay) ?>" class="logo logo-display hidden-md" alt="logo">
+                                <img src="<?= esc($logoScrolled) ?>" class="logo logo-scrolled" alt="logo">
                             </a>
                         </div>
                         <!-- End Header Navigation -->
@@ -478,13 +533,27 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                         <!-- Collect the nav links, forms, and other content for toggling -->
                         <div class="collapse navbar-collapse" id="navbar-menu">
                             <ul class="nav navbar-nav navbar-center ulockd-pad9100 pull-right">
-                                <li class="active scroll"><a href="#home">Home</a></li>
-                                <li class="scroll"><a href="#about">About Us</a></li>
-                                <li class="scroll"><a href="#story">Story</a></li>
-                                <li class="scroll"><a href="#event">Event</a></li>
-                                <li class="scroll"><a href="#ourmaid">Maids</a></li>
-                                <li class="scroll"><a href="#blog">Blog</a></li>
-                                <li class="scroll"><a href="#contact">Contact</a></li>
+                                <li class="active scroll"><a href="#home">Inicio</a></li>
+                                <li class="scroll"><a href="#about"><?= $aboutTitle ?></a></li>
+                                <?php if ($hasStory): ?>
+                                    <li class="scroll"><a href="#story"><?= $storyTitle ?></a></li>
+                                <?php endif; ?>
+                                <li class="scroll"><a href="#event"><?= esc($eventsTitle) ?></a></li>
+                                <?php if ($hasSchedule): ?>
+                                    <li class="scroll"><a href="#agenda"><?= esc($agendaTitle) ?></a></li>
+                                <?php endif; ?>
+                                <?php if ($hasWeddingParty): ?>
+                                    <li class="scroll"><a href="#ourmaid"><?= esc($partyTitle) ?></a></li>
+                                <?php endif; ?>
+                                <?php if ($hasFaqs): ?>
+                                    <li class="scroll"><a href="#faq"><?= esc($faqTitle) ?></a></li>
+                                <?php endif; ?>
+                                <?php if ($hasBlog): ?>
+                                    <li class="scroll"><a href="#blog">Blog</a></li>
+                                <?php endif; ?>
+                                <?php if ($hasLocations): ?>
+                                    <li class="scroll"><a href="#contact">Ubicación</a></li>
+                                <?php endif; ?>
                             </ul>
                         </div><!-- /.navbar-collapse -->
                     </div>
@@ -493,23 +562,29 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                     <div class="side">
                         <a href="#" class="close-side"><i class="fa fa-times"></i></a>
                         <div class="widget">
-                            <h6 class="title">Custom Pages</h6>
+                            <h6 class="title">Enlaces rápidos</h6>
                             <ul class="link">
-                                <li><a href="#">About</a></li>
-                                <li><a href="#">Services</a></li>
-                                <li><a href="#">Blog</a></li>
-                                <li><a href="#">Portfolio</a></li>
-                                <li><a href="#">Contact</a></li>
+                                <li><a href="#about"><?= $aboutTitle ?></a></li>
+                                <li><a href="#event"><?= esc($eventsTitle) ?></a></li>
+                                <?php if ($hasSchedule): ?>
+                                    <li><a href="#agenda"><?= esc($agendaTitle) ?></a></li>
+                                <?php endif; ?>
+                                <li><a href="#rsvp">RSVP</a></li>
                             </ul>
                         </div>
                         <div class="widget">
-                            <h6 class="title">Additional Links</h6>
+                            <h6 class="title">Secciones</h6>
                             <ul class="link">
-                                <li><a href="#">Retina Homepage</a></li>
-                                <li><a href="#">New Page Examples</a></li>
-                                <li><a href="#">Parallax Sections</a></li>
-                                <li><a href="#">Shortcode Central</a></li>
-                                <li><a href="#">Ultimate Font Collection</a></li>
+                                <li><a href="#photostack-3"><?= esc($galleryTitle) ?></a></li>
+                                <?php if ($hasWeddingParty): ?>
+                                    <li><a href="#ourmaid"><?= esc($partyTitle) ?></a></li>
+                                <?php endif; ?>
+                                <?php if ($hasFaqs): ?>
+                                    <li><a href="#faq"><?= esc($faqTitle) ?></a></li>
+                                <?php endif; ?>
+                                <?php if ($hasLocations): ?>
+                                    <li><a href="#contact">Ubicación</a></li>
+                                <?php endif; ?>
                             </ul>
                         </div>
                     </div>
@@ -525,33 +600,32 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row">
                     <div id="sg-carousel" class="carousel slide carousel-fade" data-ride="carousel">
                         <ol class="carousel-indicators">
-                            <li data-target="#carousel" data-slide-to="0" class="active"></li>
-                            <li data-target="#carousel" data-slide-to="1" class=""></li>
-                            <li data-target="#carousel" data-slide-to="2" class=""></li>
+                            <?php foreach ($heroImages as $index => $image): ?>
+                                <li data-target="#carousel" data-slide-to="<?= esc((string)$index) ?>" class="<?= $index === 0 ? 'active' : '' ?>"></li>
+                            <?php endforeach; ?>
                         </ol>
                         <!-- Carousel items -->
                         <div class="carousel-inner carousel-zoom">
-                            <div class="item active"><img class="img-responsive" src="images/home/h1.jpg" alt="h1.jpg">
-                                <div class="carousel-caption">
-                                    <h2 data-animation="animated bounceInDown">WE ARE GETTING MARRIED</h2>
-                                    <h1 data-animation="animated zoomInLeft" class="cap-txt">Jessica & William</h1>
-                                    <p data-animation="animated zoomInRight">15 November 2018</p>
-                                    <a data-animation="animated bounceInUp" href="#rsvp_forms" data-toggle="modal" class="btn btn-lg ulockd-btn-thm2 hidden-xs bdrs20" title="CLick On It">RSVP NOW</a>
+                            <?php foreach ($heroImages as $index => $image): ?>
+                                <div class="item <?= $index === 0 ? 'active' : '' ?>">
+                                    <img class="img-responsive" src="<?= esc($image) ?>" alt="hero-<?= esc((string)$index) ?>">
+                                    <div class="carousel-caption<?= $index === 1 ? ' style2' : ($index === 2 ? ' animated slideInLeft style3' : '') ?>">
+                                        <?php if ($index === 0): ?>
+                                            <h2 data-animation="animated bounceInDown"><?= $heroTagline ?></h2>
+                                            <h1 data-animation="animated zoomInLeft" class="cap-txt"><?= esc($brideName) ?> &amp; <?= esc($groomName) ?></h1>
+                                            <p data-animation="animated zoomInRight"><?= esc($eventDateLabel) ?></p>
+                                            <a data-animation="animated bounceInUp" href="#rsvp" class="btn btn-lg ulockd-btn-thm2 hidden-xs bdrs20" title="RSVP">RSVP</a>
+                                        <?php elseif ($index === 1): ?>
+                                            <h1 data-animation="animated zoomInLeft" class="cap-txt xxss"><?= $ctaHeading ?></h1>
+                                            <h2 data-animation="animated bounceInDown"><?= esc($eventDateLabel) ?><br><?= $ctaSubheading ?></h2>
+                                        <?php else: ?>
+                                            <h1 data-animation="animated zoomInLeft" class="cap-txt"><?= $countdownSubtitle ?></h1>
+                                            <p data-animation="animated zoomInRight"><?= esc($eventDateLabel) ?></p>
+                                            <h2 data-animation="animated bounceInUp"><?= $countdownTitle ?></h2>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="item"><img class="img-responsive" src="images/home/h2.jpg" alt="h2.jpg">
-                                <div class="carousel-caption style2">
-                                    <h1 data-animation="animated zoomInLeft" class="cap-txt xxss">The Wedding Day</h1>
-                                    <h2 data-animation="animated bounceInDown">15 November 2018 <br>Save The Date</h2>
-                                </div>
-                            </div>
-                            <div class="item"><img class="img-responsive" src="images/home/h3.jpg" alt="h3.jpg">
-                                <div class="carousel-caption animated slideInLeft style3">
-                                    <h1 data-animation="animated zoomInLeft" class="cap-txt">The Wedding Day</h1>
-                                    <p data-animation="animated zoomInRight">15 November 2018</p>
-                                    <h2 data-animation="animated bounceInUp">Save The Date</h2>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                             <!-- Carousel nav -->
                             <a class="carousel-control left" href="#sg-carousel" data-slide="prev">‹</a>
                             <a class="carousel-control right" href="#sg-carousel" data-slide="next">›</a>
@@ -567,8 +641,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3 text-center">
                         <div class="ulockd-main-title">
-                            <h2 class="text-thm2">The Couple</h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
+                            <h2 class="text-thm2"><?= $aboutTitle ?></h2>
+                            <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
                         </div>
                     </div>
                 </div>
@@ -578,24 +652,40 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                             <div class="col-sm-6 ulockd-pad340">
                                 <div class="about-box">
                                     <div class="about-details text-right tac-xsd">
-                                        <h2 class="text-thm2">Bride</h2>
-                                        <h4>Jessica Rothe</h4>
-                                        <p class="fz16">Hi, it's jessica rothe Nostrum similique quae vel libero inventore et magni provident quaerat obcaecati commodi aliquam, nisi voluptate, consectetur ipsum ipsam ad sequi sit excepturi.</p>
-                                        <img alt="signeture.png" src="images/about/bride-signeture.png">
-                                        <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                        </ul>
+                                        <h2 class="text-thm2"><?= $brideSectionTitle ?></h2>
+                                        <h4><?= esc($brideName) ?></h4>
+                                        <?php if ($brideSubtitle): ?>
+                                            <h5><?= esc($brideSubtitle) ?></h5>
+                                        <?php endif; ?>
+                                        <p class="fz16"><?= $brideBio ?></p>
+                                        <img alt="signature" src="<?= $assetsBase ?>/images/about/bride-signeture.png">
+                                        <?php if (!empty($brideSocial)): ?>
+                                            <ul class="icon-font-thm list-inline ulockd-mrgn1225">
+                                                <?php foreach ($brideSocial as $link): ?>
+                                                    <?php
+                                                    $url = '';
+                                                    if (is_string($link)) {
+                                                        $url = $link;
+                                                    } elseif (is_array($link)) {
+                                                        $url = $link['url'] ?? ($link['link'] ?? '');
+                                                    }
+                                                    $url = trim((string)$url);
+                                                    if ($url === '') {
+                                                        continue;
+                                                    }
+                                                    $icon = socialIconFromUrl($url);
+                                                    ?>
+                                                    <li><a href="<?= esc($url) ?>" target="_blank" rel="noopener"><i class="fa <?= esc($icon) ?>"></i></a></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-6 ulockd-pad940">
                                 <div class="about-box">
                                     <div class="about-thumb tac-xsd">
-                                        <img src="images/about/bride.jpg" alt="bride.jpg">
+                                        <img src="<?= esc($bridePhoto) ?>" alt="<?= esc($brideName) ?>">
                                     </div>
                                 </div>
                             </div>
@@ -605,7 +695,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row ulockd-mrgn1240">
                     <div class="col-md-12">
                         <div class="couple-img">
-                            <img class="img-responsive" src="images/about/couple-heart.png" alt="couple-heart.png">
+                            <img class="img-responsive" src="<?= $assetsBase ?>/images/about/couple-heart.png" alt="couple-heart">
                         </div>
                     </div>
                 </div>
@@ -615,24 +705,40 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                             <div class="col-sm-6 ulockd-pad340">
                                 <div class="about-box">
                                     <div class="about-thumb tac-xsd">
-                                        <img class="fn-xsd pull-right" src="images/about/groom.jpg" alt="groom.jpg">
+                                        <img class="fn-xsd pull-right" src="<?= esc($groomPhoto) ?>" alt="<?= esc($groomName) ?>">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-6 ulockd-pad940">
                                 <div class="about-box tac-xsd">
                                     <div class="about-details">
-                                        <h2 class="text-thm2">Groom</h2>
-                                        <h4>William Moseley</h4>
-                                        <p class="fz16">Hi, it's william moseley Nostrum similique quae vel libero inventore et magni provident quaerat obcaecati commodi aliquam, nisi voluptate, consectetur ipsum ipsam ad sequi sit excepturi.</p>
-                                        <img alt="signeture.png" src="images/about/groom-signeture.png">
-                                        <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                            <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                        </ul>
+                                        <h2 class="text-thm2"><?= $groomSectionTitle ?></h2>
+                                        <h4><?= esc($groomName) ?></h4>
+                                        <?php if ($groomSubtitle): ?>
+                                            <h5><?= esc($groomSubtitle) ?></h5>
+                                        <?php endif; ?>
+                                        <p class="fz16"><?= $groomBio ?></p>
+                                        <img alt="signature" src="<?= $assetsBase ?>/images/about/groom-signeture.png">
+                                        <?php if (!empty($groomSocial)): ?>
+                                            <ul class="icon-font-thm list-inline ulockd-mrgn1225">
+                                                <?php foreach ($groomSocial as $link): ?>
+                                                    <?php
+                                                    $url = '';
+                                                    if (is_string($link)) {
+                                                        $url = $link;
+                                                    } elseif (is_array($link)) {
+                                                        $url = $link['url'] ?? ($link['link'] ?? '');
+                                                    }
+                                                    $url = trim((string)$url);
+                                                    if ($url === '') {
+                                                        continue;
+                                                    }
+                                                    $icon = socialIconFromUrl($url);
+                                                    ?>
+                                                    <li><a href="<?= esc($url) ?>" target="_blank" rel="noopener"><i class="fa <?= esc($icon) ?>"></i></a></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -648,8 +754,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row ulockd-mrgn1240">
                     <div class="col-md-4 p0-mdd">
                         <div class="wedding-invitation tac-xsd">
-                            <h2>Left The Event</h2>
-                            <h3 class="ff-alex">15 November 2018.</h3>
+                            <h2><?= $countdownTitle ?></h2>
+                            <h3 class="ff-alex"><?= esc($eventDateLabel) ?></h3>
                         </div>
                     </div>
                     <div class="col-md-8 text-center p0-mdd">
@@ -663,238 +769,85 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
         </section>
 
         <!-- Our Story -->
-        <section id="story" class="ulockd-about bgc-overlay-white9 ulockd_bgp3">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3 text-center">
-                        <div class="ulockd-main-title">
-                            <h2 class="text-thm2">Our Love Story</h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
+        <?php if ($hasStory): ?>
+            <section id="story" class="ulockd-about bgc-overlay-white9 ulockd_bgp3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 text-center">
+                            <div class="ulockd-main-title">
+                                <h2 class="text-thm2"><?= $storyTitle ?></h2>
+                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="our-story timeline">
+                                <?php foreach ($storyItems as $index => $item): ?>
+                                    <?php
+                                    $title = esc($item['title'] ?? ($item['heading'] ?? ''));
+                                    $subtitle = esc($item['subtitle'] ?? ($item['tagline'] ?? ''));
+                                    $desc = esc($item['description'] ?? ($item['body'] ?? ''));
+                                    $dateLabel = esc($item['date_label'] ?? ($item['year'] ?? ''));
+                                    $imageUrl = (string)($item['image_url'] ?? ($item['image'] ?? ''));
+                                    if ($imageUrl !== '' && !preg_match('#^https?://#i', $imageUrl)) {
+                                        $imageUrl = base_url($imageUrl);
+                                    }
+                                    $imageUrl = $imageUrl ?: ($galleryFallbacks[$index % count($galleryFallbacks)] ?? $assetsBase . '/images/about/s1.jpg');
+                                    $isInverted = $index % 2 === 1;
+                                    ?>
+                                    <li class="<?= $isInverted ? 'timeline-inverted' : '' ?>">
+                                        <div class="timeline-badge<?= $isInverted ? ' warning' : '' ?>"><i class="glyphicon glyphicon-check"></i></div>
+                                        <div class="timeline-panel <?= $isInverted ? 'right' : 'left' ?>">
+                                            <div class="timeline-body w50prcnt pull-left ulockd-pdng15">
+                                                <h3 class="timeline-title text-thm2"><?= $title ?></h3>
+                                                <?php if ($subtitle): ?>
+                                                    <h5><?= $subtitle ?></h5>
+                                                <?php endif; ?>
+                                                <?php if ($dateLabel): ?>
+                                                    <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> <?= $dateLabel ?></small></p>
+                                                <?php endif; ?>
+                                                <?php if ($desc): ?>
+                                                    <p><?= $desc ?></p>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="timeline-body w50prcnt <?= $isInverted ? 'pull-left' : 'pull-right' ?>">
+                                                <img src="<?= esc($imageUrl) ?>" alt="<?= $title ?>">
+                                            </div>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <ul class="our-story timeline">
-                            <li>
-                                <div class="timeline-badge"><i class="glyphicon glyphicon-check"></i></div>
-                                <div class="timeline-panel left">
-                                    <div class="timeline-body w50prcnt pull-left ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">OUR FIRST MEET</h3>
-                                        <h5>FEEL CHANGED THE LIFE</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, temporibus, doloremque. Excepturi iusto perferendis ad esse!</span></p>
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right">
-                                        <img src="images/about/s1.jpg" alt="1.png">
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="timeline-inverted">
-                                <div class="timeline-badge warning"><i class="glyphicon glyphicon-credit-card"></i></div>
-                                <div class="timeline-panel right">
-                                    <div class="timeline-body w50prcnt pull-left">
-                                        <img src="images/about/s2.jpg" alt="s2.jpg">
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">OUR FIRST DATE</h3>
-                                        <h5>SPENDING BEAUTIFUL DAY</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, temporibus, doloremque. Excepturi iusto perferendis ad esse!</span></p>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="timeline-badge danger"><i class="glyphicon glyphicon-credit-card"></i></div>
-                                <div class="timeline-panel left">
-                                    <div class="timeline-body w50prcnt pull-left ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">LOVE PROPOSAL</h3>
-                                        <h5>THAT WAS AWESOME</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, temporibus, doloremque. Excepturi iusto perferendis ad esse!</span></p>
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right">
-                                        <img src="images/about/s3.jpg" alt="s3.jpg">
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="timeline-inverted">
-                                <div class="timeline-panel right">
-                                    <div class="timeline-body w50prcnt pull-left">
-                                        <img src="images/about/s4.jpg" alt="s4.jpg">
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">OUR FIRST KISS</h3>
-                                        <h5>FEELING WAS AWESOME</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, temporibus, doloremque. Excepturi iusto perferendis ad esse!</span></p>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="timeline-badge info"><i class="glyphicon glyphicon-floppy-disk"></i></div>
-                                <div class="timeline-panel left">
-                                    <div class="timeline-body w50prcnt pull-left ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">WE TOGETHER NOW</h3>
-                                        <h5>LOVELY TIME SPENDING</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, temporibus, doloremque. Excepturi iusto perferendis ad esse!</span></p>
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right">
-                                        <img src="images/about/s5.jpg" alt="s5.jpg">
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="timeline-panel left">
-                                    <div class="timeline-body w50prcnt pull-left ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">WEDDING PROPOSAL</h3>
-                                        <h5>INSPIRATION OF LIFE</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, doloremque.</span></p>
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right">
-                                        <img src="images/about/s6.jpg" alt="s6.jpg">
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="timeline-inverted">
-                                <div class="timeline-badge success"><i class="glyphicon glyphicon-thumbs-up"></i></div>
-                                <div class="timeline-panel right">
-                                    <div class="timeline-body w50prcnt pull-left">
-                                        <img src="images/about/s7.jpg" alt="s7.jpg">
-                                    </div>
-                                    <div class="timeline-body w50prcnt pull-right ulockd-pdng15">
-                                        <h3 class="timeline-title text-thm2">ACCEPT PROPOSAL</h3>
-                                        <h5>FEEL CHANGED THE LIFE</h5>
-                                        <p><small class="text-muted badge ulockd-bgthm"><span class="text-thm2"></span> 31 Oct 2015</small></p>
-                                        <p>Amet consectetur adipisicing elit. Voluptatem, <span class="hiden414"> at placeat fugit magnam. Quam, doloremque.</span></p>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        <?php endif; ?>
 
         <!-- Our Gallery -->
         <section id="photostack-3" class="photostack ulockd-bgthm">
             <div>
-                <figure>
-                    <a href="images/gallery/1.jpg" class="photostack-img popup-img"><img src="images/gallery/1.jpg" alt="1.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">The Wedding</h2>
-                        <div class="photostack-back">
-                            <p>Iorem ipsum dolor sit amet, consectetur adipisicing elit. Et fugiat a fugit nostrum officia corporis quos sed suscipit laudantium dolore! Reprehenderit praesentium nam odio perferendis perspiciatis, voluptatem? </p>
-                        </div>
-                    </figcaption>
-                </figure>
-                <figure>
-                    <a href="images/gallery/1a.jpg" class="photostack-img popup-img"><img src="images/gallery/1a.jpg" alt="1a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Happy Days</h2>
-                        <div class="photostack-back">
-                            <p>Iorem ipsum dolor sit amet, consectetur adipisicing elit. Et fugiat a fugit nostrum officia corporis quos sed suscipit laudantium dolore! Reprehenderit praesentium nam odio perferendis perspiciatis, voluptatem? </p>
-                        </div>
-                    </figcaption>
-                </figure>
-                <figure>
-                    <a href="images/gallery/2.jpg" class="photostack-img popup-img"><img src="images/gallery/2.jpg" alt="2.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Beautywood</h2>
-                        <div class="photostack-back">
-                            <p>Iorem ipsum dolor sit amet, consectetur adipisicing elit. Et fugiat a fugit nostrum officia corporis quos sed suscipit laudantium dolore! Reprehenderit praesentium nam odio perferendis perspiciatis, voluptatem? </p>
-                        </div>
-                    </figcaption>
-                </figure>
-                <figure>
-                    <a href="images/gallery/2a.jpg" class="photostack-img popup-img"><img src="images/gallery/2a.jpg" alt="2a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Serenity Beach</h2>
-                        <div class="photostack-back">
-                            <p>Iorem ipsum dolor sit amet, consectetur adipisicing elit. Et fugiat a fugit nostrum officia corporis quos sed suscipit laudantium dolore! Reprehenderit praesentium nam odio perferendis perspiciatis, voluptatem? </p>
-                        </div>
-                    </figcaption>
-                </figure>
-                <figure>
-                    <a href="images/gallery/3.jpg" class="photostack-img popup-img"><img src="images/gallery/3.jpg" alt="3.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Heaven of time</h2>
-                        <div class="photostack-back">
-                            <p>Iorem ipsum dolor sit amet, consectetur adipisicing elit. Et fugiat a fugit nostrum officia corporis quos sed suscipit laudantium dolore! Reprehenderit praesentium nam odio perferendis perspiciatis, voluptatem? </p>
-                        </div>
-                    </figcaption>
-                </figure>
-                <figure>
-                    <a href="images/gallery/3a.jpg" class="photostack-img popup-img"><img src="images/gallery/3a.jpg" alt="3a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Forever this</h2>
-                        <div class="photostack-back">
-                            <p>Iorem ipsum dolor sit amet, consectetur adipisicing elit. Et fugiat a fugit nostrum officia corporis quos sed suscipit laudantium dolore! Reprehenderit praesentium nam odio perferendis perspiciatis, voluptatem? </p>
-                        </div>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/4.jpg" class="photostack-img popup-img"><img src="images/gallery/4.jpg" alt="4.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Lovely Green</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/4a.jpg" class="photostack-img popup-img"><img src="images/gallery/4a.jpg" alt="4a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Wonderful</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/5.jpg" class="photostack-img popup-img"><img src="images/gallery/5.jpg" alt="5.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Love Addict</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/5a.jpg" class="photostack-img popup-img"><img src="images/gallery/5a.jpg" alt="5a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Friendship</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/6.jpg" class="photostack-img popup-img"><img src="images/gallery/6.jpg" alt="6.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">White Nights</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/6a.jpg" class="photostack-img popup-img"><img src="images/gallery/6a.jpg" alt="6a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Serendipity</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/7.jpg" class="photostack-img popup-img"><img src="images/gallery/7.jpg" alt="7.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Pure Soul</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/7a.jpg" class="photostack-img popup-img"><img src="images/gallery/7a.jpg" alt="7a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Winds of Peace</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/8.jpg" class="photostack-img popup-img"><img src="images/gallery/8.jpg" alt="8.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Shades of blue</h2>
-                    </figcaption>
-                </figure>
-                <figure data-dummy>
-                    <a href="images/gallery/8a.jpg" class="photostack-img popup-img"><img src="images/gallery/8a.jpg" alt="8a.jpg" /></a>
-                    <figcaption>
-                        <h2 class="photostack-title">Lightness</h2>
-                    </figcaption>
-                </figure>
+                <?php
+                $galleryUrls = getGalleryUrls($galleryAssets);
+                if (empty($galleryUrls)) {
+                    $galleryUrls = $galleryFallbacks;
+                }
+                foreach ($galleryUrls as $index => $url):
+                    $title = esc($galleryAssets[$index]['title'] ?? ($galleryAssets[$index]['name'] ?? $galleryTitle));
+                    $caption = esc($galleryAssets[$index]['caption'] ?? ($galleryAssets[$index]['description'] ?? ''));
+                ?>
+                    <figure <?= $index > 11 ? 'data-dummy' : '' ?>>
+                        <a href="<?= esc($url) ?>" class="photostack-img popup-img"><img src="<?= esc($url) ?>" alt="gallery-<?= esc((string)$index) ?>" /></a>
+                        <figcaption>
+                            <h2 class="photostack-title"><?= $title ?></h2>
+                            <?php if ($caption): ?>
+                                <div class="photostack-back">
+                                    <p><?= $caption ?></p>
+                                </div>
+                            <?php endif; ?>
+                        </figcaption>
+                    </figure>
+                <?php endforeach; ?>
             </div>
         </section>
 
@@ -904,181 +857,92 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3 text-center">
                         <div class="ulockd-main-title">
-                            <h2 class="text-thm2">Our Events</h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
+                            <h2 class="text-thm2"><?= esc($eventsTitle) ?></h2>
+                            <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
+                    <div class="col-xxs-12 col-xs-12 col-sm-6 col-md-4 col-md-offset-4 ulockd-pdng5">
                         <div class="event-box">
                             <div class="thumb">
-                                <img class="img-responsive" src="images/event/1.jpg" alt="1.jpg">
+                                <img class="img-responsive" src="<?= esc($eventImagePrimary) ?>" alt="event">
                             </div>
                             <div class="details">
-                                <h3>Event Location</h3>
+                                <h3><?= esc($venueName ?: $coupleTitle) ?></h3>
                                 <ul class="list-unstyled">
-                                    <li><a href="#"><i class="fa fa-calendar text-thm2"></i> Friday, 15 November 2018</a></li>
-                                    <li><a href="#"><i class="fa fa-clock-o text-thm2"></i> 2:30 PM - 5:30 PM</a></li>
-                                    <li><a href="#"><i class="fa fa-home text-thm2"></i> City Hall Park, </a></li>
-                                    <li><a href="#"><i class="fa fa-map-marker text-thm2"></i> New York, NY 10007</a></li>
+                                    <?php if ($eventDateLabel): ?>
+                                        <li><a href="#"><i class="fa fa-calendar text-thm2"></i> <?= esc($eventDateLabel) ?></a></li>
+                                    <?php endif; ?>
+                                    <?php if ($eventTimeRange): ?>
+                                        <li><a href="#"><i class="fa fa-clock-o text-thm2"></i> <?= esc($eventTimeRange) ?></a></li>
+                                    <?php endif; ?>
+                                    <?php if ($venueName): ?>
+                                        <li><a href="#"><i class="fa fa-home text-thm2"></i> <?= esc($venueName) ?></a></li>
+                                    <?php endif; ?>
+                                    <?php if ($venueAddr): ?>
+                                        <li><a href="#"><i class="fa fa-map-marker text-thm2"></i> <?= esc($venueAddr) ?></a></li>
+                                    <?php endif; ?>
                                 </ul>
-                                <p>Our Chosen Place, You And Your Family Are Invited, <strong class="text-thm2"> Thanks</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="event-box">
-                            <div class="thumb">
-                                <img class="img-responsive" src="images/event/2.jpg" alt="2.jpg">
-                            </div>
-                            <div class="details">
-                                <h3>The Wedding</h3>
-                                <ul class="list-unstyled">
-                                    <li><a href="#"><i class="fa fa-calendar text-thm2"></i> Friday, 15 November 2018</a></li>
-                                    <li><a href="#"><i class="fa fa-clock-o text-thm2"></i> 2:30 PM - 5:30 PM</a></li>
-                                    <li><a href="#"><i class="fa fa-home text-thm2"></i> City Hall Park, </a></li>
-                                    <li><a href="#"><i class="fa fa-map-marker text-thm2"></i> New York, NY 10007</a></li>
-                                </ul>
-                                <p>Our Chosen Place, You And Your Family Are Invited, <strong class="text-thm2"> Thanks</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="event-box">
-                            <div class="thumb">
-                                <img class="img-responsive" src="images/event/3.jpg" alt="3.jpg">
-                            </div>
-                            <div class="details">
-                                <h3>Gift Registry</h3>
-                                <ul class="list-unstyled">
-                                    <li><a href="#"><i class="fa fa-calendar text-thm2"></i> Friday, 15 November 2018</a></li>
-                                    <li><a href="#"><i class="fa fa-clock-o text-thm2"></i> 2:30 PM - 5:30 PM</a></li>
-                                    <li><a href="#"><i class="fa fa-home text-thm2"></i> City Hall Park, </a></li>
-                                    <li><a href="#"><i class="fa fa-map-marker text-thm2"></i> New York, NY 10007</a></li>
-                                </ul>
-                                <p>Our Chosen Place, You And Your Family Are Invited, <strong class="text-thm2"> Thanks</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="event-box">
-                            <div class="thumb">
-                                <img class="img-responsive" src="images/event/4.jpg" alt="4.jpg">
-                            </div>
-                            <div class="details">
-                                <h3>Reception/Party</h3>
-                                <ul class="list-unstyled">
-                                    <li><a href="#"><i class="fa fa-calendar text-thm2"></i> Friday, 15 November 2018</a></li>
-                                    <li><a href="#"><i class="fa fa-clock-o text-thm2"></i> 2:30 PM - 5:30 PM</a></li>
-                                    <li><a href="#"><i class="fa fa-home text-thm2"></i> City Hall Park, </a></li>
-                                    <li><a href="#"><i class="fa fa-map-marker text-thm2"></i> New York, NY 10007</a></li>
-                                </ul>
-                                <p>Our Chosen Place, You And Your Family Are Invited, <strong class="text-thm2"> Thanks</strong></p>
+                                <p><?= $eventIntroText ?></p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row ulockd-mrgn1240">
                     <div class="col-md-12 text-center">
-                        <a href="#rsvp_forms" data-toggle="modal" class="btn btn-lg ulockd-btn-thm2 bdrs20" title="CLick On It">RSVP NOW</a>
-                        <!-- Product Popup View Start-->
-                        <div class="modal fade rsvp_forms" id="rsvp_forms">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header text-center">
-                                        <a href="#" data-dismiss="modal" class="class pull-right"><span class="glyphicon glyphicon-remove"></span></a>
-                                        <h3 class="modal-title">RSVP Form. </h3>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            <div class="col-md-10 col-md-offset-1">
-                                                <!-- RSVP Form Starts -->
-                                                <form id="rsvp_form" name="rsvp_form" class="rsvp_form text-left" method="post" novalidate="novalidate">
-                                                    <div class="messages"></div>
-                                                    <div class="row">
-                                                        <div class="col-xs-12 col-sm-12 col-md-12 text-center clearfix">
-                                                            <h1 class="text-thm2 ff-engnmt">Jessica & William Wedding RSVP</h1>
-                                                            <h5>You're Invited To Jessica & William Wedding Reception On 15 November 2018.</h5>
-                                                        </div>
-                                                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                                            <div class="form-group">
-                                                                <label for="form_name">Full Name <small>*</small></label>
-                                                                <input id="form_name" name="form_name" class="form-control" placeholder="Enter a name">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                                            <div class="form-group">
-                                                                <label for="FormControlSelect1">Are You Attending?</label>
-                                                                <select class="form-control" id="FormControlSelect1">
-                                                                    <option>Select an option</option>
-                                                                    <option>All event</option>
-                                                                    <option>Wedding</option>
-                                                                    <option>Reception</option>
-                                                                    <option>No</option>
-                                                                    <option>Other</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                                            <div class="form-group">
-                                                                <label for="FormControlSelect2">Your Meal Selection</label>
-                                                                <select class="form-control" id="FormControlSelect2">
-                                                                    <option>Select an option</option>
-                                                                    <option>Chicken</option>
-                                                                    <option>Beef</option>
-                                                                    <option>vegetarian</option>
-                                                                    <option>Other</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                                            <div class="form-group">
-                                                                <label for="FormControlSelect3">Are You Bringing a guest?</label>
-                                                                <select class="form-control" id="FormControlSelect3">
-                                                                    <option>Select an option</option>
-                                                                    <option>1</option>
-                                                                    <option>2</option>
-                                                                    <option>3</option>
-                                                                    <option>More..</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                                            <div class="form-group">
-                                                                <label for="form_name2">Guest Name</label>
-                                                                <input id="form_name2" name="form_name2" class="form-control" placeholder="Enter a name">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                                            <div class="form-group">
-                                                                <label for="FormControlSelect4">Meal Selection</label>
-                                                                <select class="form-control" id="FormControlSelect4">
-                                                                    <option>Select an option</option>
-                                                                    <option>Chicken</option>
-                                                                    <option>Beef</option>
-                                                                    <option>vegetarian</option>
-                                                                    <option>Other</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group text-center">
-                                                        <input id="form_botcheck" name="form_botcheck" class="form-control" value="" type="hidden">
-                                                        <button type="submit" class="btn btn-lg ulockd-btn-thm2 bdrs20">Send Us</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Product Popup View End-->
+                        <a href="#rsvp" class="btn btn-lg ulockd-btn-thm2 bdrs20" title="RSVP">RSVP</a>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Agenda -->
+        <?php if ($hasSchedule): ?>
+            <section id="agenda" class="events bgc-overlay-white7 ulockd_bgp3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 text-center">
+                            <div class="ulockd-main-title">
+                                <h2 class="text-thm2"><?= esc($agendaTitle) ?></h2>
+                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <?php foreach ($scheduleItems as $item): ?>
+                            <?php
+                            $itemTitle = esc($item['title'] ?? ($item['name'] ?? ''));
+                            $itemDescription = esc($item['description'] ?? '');
+                            $itemTime = formatScheduleTime($item);
+                            $itemLocation = esc($item['location'] ?? ($item['venue'] ?? ''));
+                            ?>
+                            <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
+                                <div class="event-box">
+                                    <div class="thumb">
+                                        <img class="img-responsive" src="<?= esc($eventImageSecondary) ?>" alt="agenda">
+                                    </div>
+                                    <div class="details">
+                                        <h3><?= $itemTitle ?></h3>
+                                        <ul class="list-unstyled">
+                                            <?php if ($itemTime): ?>
+                                                <li><a href="#"><i class="fa fa-clock-o text-thm2"></i> <?= $itemTime ?></a></li>
+                                            <?php endif; ?>
+                                            <?php if ($itemLocation): ?>
+                                                <li><a href="#"><i class="fa fa-map-marker text-thm2"></i> <?= $itemLocation ?></a></li>
+                                            <?php endif; ?>
+                                        </ul>
+                                        <?php if ($itemDescription): ?>
+                                            <p><?= $itemDescription ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <!-- Our Divider -->
         <section class="ulockd-video parallax ulockd_bgi2 overlay-tc75" data-stellar-background-ratio="0.3">
@@ -1086,7 +950,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3">
                         <div class="video-button text-center">
-                            <a class="mfp-iframe mfp-youtube color-white fz60" href="https://www.youtube.com/watch?time_continue=18&amp;v=teLhLLlhfzc" title="About Our Company"><span class="flaticon-play-button"></span></a>
+                            <a class="mfp-iframe mfp-youtube color-white fz60" href="https://www.youtube.com/watch?time_continue=18&amp;v=teLhLLlhfzc" title="Video"><span class="flaticon-play-button"></span></a>
                         </div>
                     </div>
                 </div>
@@ -1094,278 +958,200 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
         </section>
 
         <!-- Our BridesMaids -->
-        <section id="ourmaid" class="our-team bgc-overlay-white8 ulockd_bgp3">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3 text-center">
-                        <div class="ulockd-main-title">
-                            <h2 class="text-thm2">BridesMaids</h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
+        <?php if ($hasWeddingParty): ?>
+            <section id="ourmaid" class="our-team bgc-overlay-white8 ulockd_bgp3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 text-center">
+                            <div class="ulockd-main-title">
+                                <h2 class="text-thm2"><?= esc($partyTitle) ?></h2>
+                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                            </div>
                         </div>
+                    </div>
+                    <?php if ($hasBrideSide): ?>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3 class="text-center text-thm2"><?= esc($partyLabels['bride_side']) ?></h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <?php foreach ($partyByCategory['bride_side'] as $member): ?>
+                                <?php
+                                $memberName = esc($member['name'] ?? ($member['full_name'] ?? ''));
+                                $memberRole = esc($member['role'] ?? ($member['title'] ?? ''));
+                                $memberPhoto = (string)($member['image_url'] ?? ($member['photo'] ?? ''));
+                                if ($memberPhoto !== '' && !preg_match('#^https?://#i', $memberPhoto)) {
+                                    $memberPhoto = base_url($memberPhoto);
+                                }
+                                $memberPhoto = $memberPhoto ?: ($assetsBase . '/images/team/1.jpg');
+                                $memberNote = esc($member['note'] ?? ($member['message'] ?? ''));
+                                ?>
+                                <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
+                                    <div class="team-one text-center">
+                                        <div class="team-thumb">
+                                            <img class="img-responsive img-whp" src="<?= esc($memberPhoto) ?>" alt="<?= $memberName ?>">
+                                        </div>
+                                        <div class="team-details">
+                                            <h3 class="member-name"><?= $memberName ?></h3>
+                                            <?php if ($memberRole): ?>
+                                                <h5 class="member-post"><?= $memberRole ?></h5>
+                                            <?php endif; ?>
+                                            <?php if ($memberNote): ?>
+                                                <p><?= $memberNote ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php if ($hasGroomSide): ?>
+                    <div class="container">
+                        <div class="row ulockd-mrgn1230">
+                            <div class="col-md-6 col-md-offset-3 text-center">
+                                <div class="ulockd-main-title">
+                                    <h2 class="text-thm2"><?= esc($partyLabels['groom_side']) ?></h2>
+                                    <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <?php foreach ($partyByCategory['groom_side'] as $member): ?>
+                                <?php
+                                $memberName = esc($member['name'] ?? ($member['full_name'] ?? ''));
+                                $memberRole = esc($member['role'] ?? ($member['title'] ?? ''));
+                                $memberPhoto = (string)($member['image_url'] ?? ($member['photo'] ?? ''));
+                                if ($memberPhoto !== '' && !preg_match('#^https?://#i', $memberPhoto)) {
+                                    $memberPhoto = base_url($memberPhoto);
+                                }
+                                $memberPhoto = $memberPhoto ?: ($assetsBase . '/images/team/5.jpg');
+                                $memberNote = esc($member['note'] ?? ($member['message'] ?? ''));
+                                ?>
+                                <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
+                                    <div class="team-one text-center">
+                                        <div class="team-thumb">
+                                            <img class="img-responsive img-whp" src="<?= esc($memberPhoto) ?>" alt="<?= $memberName ?>">
+                                        </div>
+                                        <div class="team-details">
+                                            <h3 class="member-name"><?= $memberName ?></h3>
+                                            <?php if ($memberRole): ?>
+                                                <h5 class="member-post"><?= $memberRole ?></h5>
+                                            <?php endif; ?>
+                                            <?php if ($memberNote): ?>
+                                                <p><?= $memberNote ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
+
+        <!-- FAQs -->
+        <?php if ($hasFaqs): ?>
+            <section id="faq" class="ulockd-blog bgc-overlay-white8 ulockd_bgp3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 text-center">
+                            <div class="ulockd-main-title">
+                                <h2><span class="text-thm2"><?= esc($faqTitle) ?></span></h2>
+                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <?php foreach ($faqs as $faq): ?>
+                            <?php
+                            $question = esc($faq['question'] ?? ($faq['title'] ?? ''));
+                            $answer = esc($faq['answer'] ?? ($faq['content'] ?? ''));
+                            ?>
+                            <div class="col-xxs-12 col-xs-12 col-sm-6 col-md-4">
+                                <div class="blog-post text-center wow fadeInUp" data-wow-duration="1s">
+                                    <div class="details">
+                                        <h4 class="eventdate text-center ulockd-bgthm"><?= $question ?></h4>
+                                        <?php if ($answer): ?>
+                                            <p><?= $answer ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/1.jpg" alt="1.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Madeleine</h3>
-                                <h5 class="member-post">BrideMaids</h5>
-                                <p>Beautiful Comment From <a href="#">her..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/2.jpg" alt="2.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Mackenzie</h3>
-                                <h5 class="member-post">BrideMaids</h5>
-                                <p>Beautiful Comment From <a href="#">her..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/3.jpg" alt="3.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Savannah</h3>
-                                <h5 class="member-post">BrideMaids</h5>
-                                <p>Beautiful Comment From <a href="#">her..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/4.jpg" alt="4.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Isabella</h3>
-                                <h5 class="member-post">BrideMaids</h5>
-                                <p>Beautiful Comment From <a href="#">her..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="container">
-                <div class="row ulockd-mrgn1230">
-                    <div class="col-md-6 col-md-offset-3 text-center">
-                        <div class="ulockd-main-title">
-                            <h2 class="text-thm2">GroomsMen</h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/5.jpg" alt="5.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Andrew Garfield</h3>
-                                <h5 class="member-post">GroomsMen</h5>
-                                <p>Beautiful Comment From <a href="#">Him..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/6.jpg" alt="6.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Chris Evans</h3>
-                                <h5 class="member-post">GroomsMen</h5>
-                                <p>Beautiful Comment From <a href="#">Him..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/7.jpg" alt="7.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Tobey Maguire</h3>
-                                <h5 class="member-post">GroomsMen</h5>
-                                <p>Beautiful Comment From <a href="#">Him..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-3 ulockd-pdng5">
-                        <div class="team-one text-center">
-                            <div class="team-thumb">
-                                <img class="img-responsive img-whp" src="images/team/8.jpg" alt="8.jpg">
-                                <div class="small-layer">
-                                    <ul class="icon-font-thm list-inline ulockd-mrgn1225">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="team-details">
-                                <h3 class="member-name">Ben Affleck</h3>
-                                <h5 class="member-post">GroomsMen</h5>
-                                <p>Beautiful Comment From <a href="#">Him..</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        <?php endif; ?>
 
         <!-- Our RSVP -->
-        <section class="ulockd-rsvp ulockd_bgi3 parallax" data-stellar-background-ratio="0.3">
+        <section id="rsvp" class="ulockd-rsvp ulockd_bgi3 parallax" data-stellar-background-ratio="0.3" style="background-image: url('<?= esc($rsvpBg) ?>');">
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <form id="rsvp_form3" name="rsvp_form3" class="rsvp_form3 bgc-overlay-white7" method="post" novalidate="novalidate">
+                        <form id="rsvp_form3" name="rsvp_form3" class="rsvp_form3 bgc-overlay-white7" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>" novalidate="novalidate">
+                            <?= csrf_field() ?>
                             <div class="messages"></div>
                             <div class="row">
                                 <div class="col-xs-12 col-sm-12 col-md-12 text-center clearfix">
-                                    <h1 class="text-thm2 ff-engnmt">Jessica & William Wedding RSVP</h1>
-                                    <p>You're Invited To Jessica & William Wedding Reception On 15 November 2018.</p>
+                                    <h1 class="text-thm2 ff-engnmt"><?= esc($brideName) ?> &amp; <?= esc($groomName) ?> RSVP</h1>
+                                    <?php if ($rsvpDeadlineLabel): ?>
+                                        <p>Por favor confirma antes del <?= esc($rsvpDeadlineLabel) ?>.</p>
+                                    <?php else: ?>
+                                        <p>Por favor confirma tu asistencia.</p>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
-                                        <label for="form_name3">Full Name <small>*</small></label>
-                                        <input id="form_name3" name="form_name3" class="form-control" placeholder="Enter a name">
+                                        <label for="rsvp_name">Nombre completo <small>*</small></label>
+                                        <input id="rsvp_name" name="name" class="form-control" placeholder="Ingresa tu nombre" required>
                                     </div>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
-                                        <label for="FormControlSelect5">Are You Attending?</label>
-                                        <select class="form-control" id="FormControlSelect5">
-                                            <option>Select an option</option>
-                                            <option>All event</option>
-                                            <option>Wedding</option>
-                                            <option>Reception</option>
-                                            <option>No</option>
-                                            <option>Other</option>
+                                        <label for="rsvp_email">Email <small>*</small></label>
+                                        <input id="rsvp_email" name="email" type="email" class="form-control" placeholder="tu@email.com" required>
+                                    </div>
+                                </div>
+                                <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
+                                    <div class="form-group">
+                                        <label for="rsvp_phone">Teléfono</label>
+                                        <input id="rsvp_phone" name="phone" class="form-control" placeholder="Tu teléfono">
+                                    </div>
+                                </div>
+                                <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
+                                    <div class="form-group">
+                                        <label for="rsvp_attending">¿Asistirás? <small>*</small></label>
+                                        <select class="form-control" id="rsvp_attending" name="attending" required>
+                                            <option value="" disabled selected>Selecciona una opción</option>
+                                            <option value="accepted">Sí, asistiré</option>
+                                            <option value="declined">No podré asistir</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
-                                        <label for="FormControlSelect6">Your Meal Selection</label>
-                                        <select class="form-control" id="FormControlSelect6">
-                                            <option>Select an option</option>
-                                            <option>Chicken</option>
-                                            <option>Beef</option>
-                                            <option>vegetarian</option>
-                                            <option>Other</option>
-                                        </select>
+                                        <label for="rsvp_guests">Número de invitados</label>
+                                        <input id="rsvp_guests" name="guests" type="number" min="1" class="form-control" placeholder="1">
                                     </div>
                                 </div>
                                 <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
                                     <div class="form-group">
-                                        <label for="FormControlSelect7">Are You Bringing a guest?</label>
-                                        <select class="form-control" id="FormControlSelect7">
-                                            <option>Select an option</option>
-                                            <option>1</option>
-                                            <option>2</option>
-                                            <option>3</option>
-                                            <option>More..</option>
-                                        </select>
+                                        <label for="rsvp_song">Canción sugerida</label>
+                                        <input id="rsvp_song" name="song_request" class="form-control" placeholder="¿Qué canción no puede faltar?">
                                     </div>
                                 </div>
-                                <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
+                                <div class="col-xxs-12 col-xs-12 col-sm-12 col-md-12 clearfix">
                                     <div class="form-group">
-                                        <label for="form_name4">Guest Name</label>
-                                        <input id="form_name4" name="form_name4" class="form-control" placeholder="Enter a name">
-                                    </div>
-                                </div>
-                                <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-6 clearfix">
-                                    <div class="form-group">
-                                        <label for="FormControlSelect8">Meal Selection</label>
-                                        <select class="form-control" id="FormControlSelect8">
-                                            <option>Select an option</option>
-                                            <option>Chicken</option>
-                                            <option>Beef</option>
-                                            <option>vegetarian</option>
-                                            <option>Other</option>
-                                        </select>
+                                        <label for="rsvp_message">Mensaje</label>
+                                        <textarea id="rsvp_message" name="message" class="form-control" rows="4" placeholder="Escribe un mensaje para los novios"></textarea>
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-2 col-md-12 clearfix">
                                     <div class="form-group text-center">
-                                        <input id="form_botcheck2" name="form_botcheck2" class="form-control" value="" type="hidden">
-                                        <button type="submit" class="btn btn-lg ulockd-btn-thm2 bdrs20">Send Us</button>
+                                        <button type="submit" class="btn btn-lg ulockd-btn-thm2 bdrs20">Enviar confirmación</button>
                                     </div>
                                 </div>
                             </div>
@@ -1376,160 +1162,169 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
         </section>
 
         <!-- Our Blog -->
-        <section id="blog" class="ulockd-blog bgc-overlay-white8 ulockd_bgp3">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3 text-center">
-                        <div class="ulockd-main-title">
-                            <h2><span class="text-thm2">Our Blog</span></h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-4">
-                        <div class="blog-post text-center wow fadeInUp" data-wow-duration="1s">
-                            <div class="thumb">
-                                <img class="img-responsive img-whp" src="images/blog/1.jpg" alt="1.jpg">
-                            </div>
-                            <div class="details">
-                                <h4 class="eventdate text-center ulockd-bgthm">Let's Move With Our Blog</h4>
-                                <h5>Our Beautiful Events</h5>
-                                <h3 class="post-title tdu-hvr">Tue 15 May 2018</h3>
-                                <p>Uorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis nostrum hic quae ab nihil fuga? Maiores.</p>
+        <?php if ($hasBlog): ?>
+            <section id="blog" class="ulockd-blog bgc-overlay-white8 ulockd_bgp3">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 text-center">
+                            <div class="ulockd-main-title">
+                                <h2><span class="text-thm2">Blog</span></h2>
+                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
                             </div>
                         </div>
                     </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-4">
-                        <div class="blog-post text-center wow fadeInUp" data-wow-duration="1.3s">
-                            <div class="thumb">
-                                <img class="img-responsive img-whp" src="images/blog/2.jpg" alt="2.jpg">
-                            </div>
-                            <div class="details">
-                                <h4 class="eventdate text-center ulockd-bgthm">Let's Move With Our Blog</h4>
-                                <h5>Our Beautiful Events</h5>
-                                <h3 class="post-title tdu-hvr">Tue 15 May 2018</h3>
-                                <p>Uorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis nostrum hic quae ab nihil fuga? Maiores.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-4">
-                        <div class="blog-post text-center wow fadeInUp" data-wow-duration="1.6s">
-                            <div class="thumb">
-                                <img class="img-responsive img-whp" src="images/blog/3.jpg" alt="3.jpg">
-                            </div>
-                            <div class="details">
-                                <h4 class="eventdate text-center ulockd-bgthm">Let's Move With Our Blog</h4>
-                                <h5>Our Beautiful Events</h5>
-                                <h3 class="post-title tdu-hvr">Tue 15 May 2018</h3>
-                                <p>Uorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis nostrum hic quae ab nihil fuga? Maiores.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Our Contact -->
-        <section id="contact" class="ulockd-contact">
-            <div class="container-fluid ulockd-padz">
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3 text-center">
-                        <div class="ulockd-main-title">
-                            <h2><span class="text-thm2">Our Contact</span></h2>
-                            <img src="images/resource/title-bottom.png" alt="title-bottom.png">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="ulockd-google-map">
-                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3145.2543150778074!2d23.710822715553515!3d37.97119390860681!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14a1bce23216bc8b%3A0xfad295e22d902ed!2zzqTOsc6yzq3Pgc69zrEgzpTOuc6_zrzOsc-EzqzPgc63z4I!5e0!3m2!1sen!2sgr!4v1464458530549" width="600" height="550" frameborder="0" style="border:0" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="container">
-                <div class="row ulockd-mrgn12-150 dib">
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-5 ulockd-bgthm">
-                        <div class="contact-info ulockd-mrgn1225">
-                            <ul class="list-unstyled">
-                                <li><span class="flaticon-black-back-closed-envelope-shape" title="CHeart@email.com"> <small>CHeart@email.com </small></span></li>
-                                <li><span class="flaticon-old-handphone" title="99 55 66 88 526"> <small> +99 55 66 88 526 </small></span></li>
-                                <li><span class="flaticon-map-marker" title="Victoria 8007 Australia Envato HQ 121 King Street, Melbourne"> <small>Victoria 8007 Australia Envato </small></span></li>
-                                <li><span class="flaticon-checkbox-pen-outline" title="Written Your Message"> <small>Left Some Word </small></span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-7 bgc-white">
-                        <div class="ulockd-contact-form ulockd-mrgn1225">
-                            <form id="contact_form" name="contact_form" class="contact-form" action="#" method="post" novalidate="novalidate">
-                                <div class="messages"></div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input id="form_name" name="form_name" class="form-control ulockd-form-fg required" placeholder="Your name" required="required" data-error="Name is required." type="text">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
+                    <div class="row">
+                        <?php foreach ($blogPosts as $post): ?>
+                            <?php
+                            $postTitle = esc($post['title'] ?? '');
+                            $postExcerpt = esc($post['excerpt'] ?? ($post['summary'] ?? ''));
+                            $postDate = esc($post['published_at'] ?? ($post['date'] ?? ''));
+                            $postImage = (string)($post['image_url'] ?? '');
+                            if ($postImage !== '' && !preg_match('#^https?://#i', $postImage)) {
+                                $postImage = base_url($postImage);
+                            }
+                            $postImage = $postImage ?: ($assetsBase . '/images/blog/1.jpg');
+                            ?>
+                            <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-4">
+                                <div class="blog-post text-center wow fadeInUp" data-wow-duration="1s">
+                                    <div class="thumb">
+                                        <img class="img-responsive img-whp" src="<?= esc($postImage) ?>" alt="<?= $postTitle ?>">
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input id="form_email" name="form_email" class="form-control ulockd-form-fg required email" placeholder="Your email" required="required" data-error="Email is required." type="email">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input id="form_phone" name="form_phone" class="form-control ulockd-form-fg required" placeholder="Phone" required="required" data-error="Phone Number is required." type="text">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input id="form_subject" name="form_subject" class="form-control ulockd-form-fg required" placeholder="Subject" required="required" data-error="Subject is required." type="text">
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <textarea id="form_message" name="form_message" class="form-control ulockd-form-tb required" rows="8" placeholder="Your massage" required="required" data-error="Message is required."></textarea>
-                                            <div class="help-block with-errors"></div>
-                                        </div>
-                                        <div class="form-group ulockd-contact-btn">
-                                            <input id="form_botcheck" name="form_botcheck" class="form-control" value="" type="hidden">
-                                            <button type="submit" class="btn btn-default ulockd-btn-thm2" data-loading-text="Getting Few Sec...">SUBMIT</button>
-                                        </div>
+                                    <div class="details">
+                                        <h4 class="eventdate text-center ulockd-bgthm"><?= $postTitle ?></h4>
+                                        <?php if ($postDate): ?>
+                                            <h3 class="post-title tdu-hvr"><?= $postDate ?></h3>
+                                        <?php endif; ?>
+                                        <?php if ($postExcerpt): ?>
+                                            <p><?= $postExcerpt ?></p>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- Our Contact -->
+        <?php if ($hasLocations): ?>
+            <section id="contact" class="ulockd-contact">
+                <div class="container-fluid ulockd-padz">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 text-center">
+                            <div class="ulockd-main-title">
+                                <h2><span class="text-thm2">Ubicación</span></h2>
+                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="ulockd-google-map">
+                                <div id="map-location" style="width: 100%; height: 550px;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="container">
+                    <div class="row ulockd-mrgn12-150 dib">
+                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-5 ulockd-bgthm">
+                            <div class="contact-info ulockd-mrgn1225">
+                                <ul class="list-unstyled">
+                                    <?php if ($contactEmail): ?>
+                                        <li><span class="flaticon-black-back-closed-envelope-shape" title="<?= $contactEmail ?>"> <small><?= $contactEmail ?></small></span></li>
+                                    <?php endif; ?>
+                                    <?php if ($contactPhone): ?>
+                                        <li><span class="flaticon-old-handphone" title="<?= $contactPhone ?>"> <small><?= $contactPhone ?></small></span></li>
+                                    <?php endif; ?>
+                                    <?php if ($contactAddress): ?>
+                                        <li><span class="flaticon-map-marker" title="<?= $contactAddress ?>"> <small><?= $contactAddress ?></small></span></li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-7 bgc-white">
+                            <div class="ulockd-contact-form ulockd-mrgn1225">
+                                <form id="contact_form" name="contact_form" class="contact-form" action="#" method="post" novalidate="novalidate">
+                                    <div class="messages"></div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <input id="form_name" name="form_name" class="form-control ulockd-form-fg required" placeholder="Tu nombre" required="required" data-error="El nombre es requerido." type="text">
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <input id="form_email" name="form_email" class="form-control ulockd-form-fg required email" placeholder="Tu email" required="required" data-error="El email es requerido." type="email">
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <input id="form_phone" name="form_phone" class="form-control ulockd-form-fg required" placeholder="Teléfono" required="required" data-error="El teléfono es requerido." type="text">
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <input id="form_subject" name="form_subject" class="form-control ulockd-form-fg required" placeholder="Asunto" required="required" data-error="El asunto es requerido." type="text">
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <textarea id="form_message" name="form_message" class="form-control ulockd-form-tb required" rows="8" placeholder="Tu mensaje" required="required" data-error="El mensaje es requerido."></textarea>
+                                                <div class="help-block with-errors"></div>
+                                            </div>
+                                            <div class="form-group ulockd-contact-btn">
+                                                <input id="form_botcheck" name="form_botcheck" class="form-control" value="" type="hidden">
+                                                <button type="submit" class="btn btn-default ulockd-btn-thm2" data-loading-text="Enviando...">Enviar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <!-- Our Partner -->
         <section class="ulockd-partner">
             <div class="container">
                 <div class="row">
-                    <div class="col-xs-6 col-sm-4 col-md-2">
-                        <div class="ulockd-partner-thumb text-center"><img src="images/partners/partner1.png" alt="partner1.png"></div>
+                    <div class="col-md-6 col-md-offset-3 text-center">
+                        <div class="ulockd-main-title">
+                            <h2 class="text-thm2"><?= esc($registryTitle) ?></h2>
+                            <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
+                        </div>
                     </div>
-                    <div class="col-xs-6 col-sm-4 col-md-2">
-                        <div class="ulockd-partner-thumb text-center"><img src="images/partners/partner2.png" alt="partner2.png"></div>
-                    </div>
-                    <div class="col-xs-6 col-sm-4 col-md-2">
-                        <div class="ulockd-partner-thumb text-center"><img src="images/partners/partner3.png" alt="partner3.png"></div>
-                    </div>
-                    <div class="col-xs-6 col-sm-4 col-md-2">
-                        <div class="ulockd-partner-thumb text-center"><img src="images/partners/partner4.png" alt="partner4.png"></div>
-                    </div>
-                    <div class="col-xs-6 col-sm-4 col-md-2">
-                        <div class="ulockd-partner-thumb text-center"><img src="images/partners/partner5.png" alt="partner5.png"></div>
-                    </div>
-                    <div class="col-xs-6 col-sm-4 col-md-2">
-                        <div class="ulockd-partner-thumb text-center"><img src="images/partners/partner6.png" alt="partner6.png"></div>
-                    </div>
+                </div>
+                <div class="row">
+                    <?php
+                    $registryToRender = !empty($registryItems) ? $registryItems : array_map(fn($url) => ['image_url' => $url], $registryFallbacks);
+                    foreach ($registryToRender as $item):
+                        $itemTitle = esc($item['title'] ?? ($item['name'] ?? $registryTitle));
+                        $itemImage = (string)($item['image_url'] ?? '');
+                        if ($itemImage !== '' && !preg_match('#^https?://#i', $itemImage)) {
+                            $itemImage = base_url($itemImage);
+                        }
+                        $itemImage = $itemImage ?: ($assetsBase . '/images/partners/partner1.png');
+                        $itemUrl = esc($item['product_url'] ?? ($item['external_url'] ?? ''));
+                    ?>
+                        <div class="col-xs-6 col-sm-4 col-md-2">
+                            <div class="ulockd-partner-thumb text-center">
+                                <?php if ($itemUrl): ?>
+                                    <a href="<?= $itemUrl ?>" target="_blank" rel="noopener"><img src="<?= esc($itemImage) ?>" alt="<?= $itemTitle ?>"></a>
+                                <?php else: ?>
+                                    <img src="<?= esc($itemImage) ?>" alt="<?= $itemTitle ?>">
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </section>
@@ -1540,8 +1335,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3">
                         <div class="footer-box text-center">
-                            <h2 class="text-thm2">Jessica & William</h2>
-                            <h1 class="text-thm2">Are Getting Married</h1>
+                            <h2 class="text-thm2"><?= esc($brideName) ?> &amp; <?= esc($groomName) ?></h2>
+                            <h1 class="text-thm2"><?= esc($coupleTitle) ?></h1>
                         </div>
                     </div>
                 </div>
@@ -1552,8 +1347,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                                 <div class="about-icon2 text-center"><i class="flaticon-map-marker"></i></div>
                             </div>
                             <div class="ab-details">
-                                <h3>Location</h3>
-                                <p>Government buildings with lawns, benches & a fountain. 43 Park Row, New York, NY 10038.</p>
+                                <h3>Ubicación</h3>
+                                <p><?= esc($venueAddr) ?></p>
                             </div>
                         </div>
                     </div>
@@ -1563,8 +1358,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                                 <div class="about-icon2 text-center"><i class="flaticon-black-back-closed-envelope-shape"></i></div>
                             </div>
                             <div class="ab-details">
-                                <h3>Mail Us</h3>
-                                <p>coupleheart@mail.com <br> heartcouple@info.com </p>
+                                <h3>Escríbenos</h3>
+                                <p><?= $contactEmail ?: esc($pageTitle) ?></p>
                             </div>
                         </div>
                     </div>
@@ -1574,8 +1369,8 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                                 <div class="about-icon2 text-center"><i class="flaticon-telephone-1"></i></div>
                             </div>
                             <div class="ab-details">
-                                <h3>Call Us</h3>
-                                <p>+99 55 66 88 526 <br> +55 99 66 88 526</p>
+                                <h3>Llámanos</h3>
+                                <p><?= $contactPhone ?: esc($pageTitle) ?></p>
                             </div>
                         </div>
                     </div>
@@ -1588,7 +1383,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <p class="color-white">Couple Heart Copyright© 2017. <a href="https://goo.gl/8HdP67" target="_blank">UnlockDesign</a> All right reserved.</p>
+                        <p class="color-white">Couple Heart Copyright© 2017. <a href="https://goo.gl/8HdP67" target="_blank" rel="noopener">UnlockDesign</a> All right reserved.</p>
                     </div>
                 </div>
             </div>
@@ -1597,6 +1392,17 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
         <a class="scrollToHome ulockd-bgthm" href="#"><i class="fa fa-home"></i></a>
     </div>
     <!-- Wrapper End -->
+    <script>
+        const slideshow_images = <?= json_encode($heroImages, JSON_UNESCAPED_SLASHES) ?>;
+        const slidehow_images = slideshow_images;
+        const c_days = <?= (int)$countdownDays ?>;
+        const c_hours = <?= (int)$countdownHours ?>;
+        const c_minutes = <?= (int)$countdownMinutes ?>;
+        const c_seconds = <?= (int)$countdownSeconds ?>;
+        const map_markers = <?= json_encode($mapMarkers, JSON_UNESCAPED_SLASHES) ?>;
+        const map_initial_latitude = <?= $mapInitialLat !== null ? json_encode($mapInitialLat) : 'null' ?>;
+        const map_initial_longitude = <?= $mapInitialLng !== null ? json_encode($mapInitialLng) : 'null' ?>;
+    </script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="<?= $assetsBase ?>/js/bootsnav.js"></script>
@@ -1623,6 +1429,28 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
                 //console.log(item)
             }
         });
+
+        if (typeof GMaps !== 'undefined' && map_initial_latitude !== null && map_initial_longitude !== null && document.getElementById('map-location')) {
+            const map = new GMaps({
+                el: '#map-location',
+                zoom: 15,
+                scrollwheel: false,
+                lat: map_initial_latitude,
+                lng: map_initial_longitude
+            });
+            if (Array.isArray(map_markers)) {
+                map_markers.forEach(function(marker) {
+                    map.addMarker({
+                        lat: marker.latitude,
+                        lng: marker.longitude,
+                        title: marker.title,
+                        infoWindow: {
+                            content: marker.address ? '<strong>' + marker.title + '</strong><br>' + marker.address : marker.title
+                        }
+                    });
+                });
+            }
+        }
     </script>
     <script type='text/javascript'>
         var collectOnMe = document.querySelectorAll('.collectonme'),
