@@ -86,6 +86,8 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('(:segment)/guests/edit/(:segment)', 'Admin\Guests::edit/$1/$2');
         $routes->post('(:segment)/guests/update/(:segment)', 'Admin\Guests::update/$1/$2');
         $routes->post('(:segment)/guests/delete/(:segment)', 'Admin\Guests::delete/$1/$2');
+        $routes->get('(:segment)/guests/(:segment)/invite-link', 'Admin\Guests::inviteLink/$1/$2', ['as' => 'admin.guests.invite_link']);
+        $routes->post('(:segment)/guests/(:segment)/send-invite', 'Admin\Guests::sendInvite/$1/$2', ['as' => 'admin.guests.send_invite']);
         $routes->get('(:segment)/guests/import', 'Admin\Guests::import/$1');
         $routes->post('(:segment)/guests/process-import', 'Admin\Guests::processImport/$1');
         $routes->get('(:segment)/guests/export', 'Admin\Guests::export/$1');

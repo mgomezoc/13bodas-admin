@@ -1,3 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
+?>
 <section class="majestic-rsvp" id="rsvp">
     <div class="container">
         <h2 class="section-title" data-aos="fade-up">Confirma tu Asistencia</h2>
@@ -6,8 +23,11 @@
         </p>
         
         <div class="rsvp-form-container" data-aos="fade-up" data-aos-delay="200">
-            <form id="rsvpForm" class="rsvp-form" method="POST" action="<?= esc(route_to('rsvp.submit', $event['slug'])) ?>">
+            <form id="rsvpForm" class="rsvp-form" method="POST" action="<?= esc(base_url(route_to('rsvp.submit', $event['slug']))) ?>">
                 <?= csrf_field() ?>
+                <?php if (!empty($selectedGuest['id'])): ?>
+                    <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                <?php endif; ?>
                 
                 <div class="form-group">
                     <label for="guest_code">Código de Invitación</label>
@@ -16,6 +36,8 @@
                            name="guest_code" 
                            class="form-control"
                            placeholder="Ingresa tu código"
+                           value="<?= esc($selectedGuestCode) ?>"
+                           <?= $selectedGuestCode !== '' ? 'readonly' : '' ?>
                            required>
                     <small class="form-text">Revisa tu invitación para encontrar tu código único</small>
                 </div>
@@ -27,6 +49,7 @@
                            name="name" 
                            class="form-control"
                            placeholder="Tu nombre"
+                           value="<?= esc($selectedGuestName) ?>"
                            required>
                 </div>
                 
@@ -37,6 +60,7 @@
                            name="email" 
                            class="form-control"
                            placeholder="tu@email.com"
+                           value="<?= esc($selectedGuestEmail) ?>"
                            required>
                 </div>
                 
@@ -46,7 +70,8 @@
                            id="guest_phone" 
                            name="phone" 
                            class="form-control"
-                           placeholder="(555) 123-4567">
+                           placeholder="(555) 123-4567"
+                           value="<?= esc($selectedGuestPhone) ?>">
                 </div>
                 
                 <div class="form-group">

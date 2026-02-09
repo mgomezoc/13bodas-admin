@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // ===========================
 // Datos base (defensivo)
 // ===========================
@@ -15,6 +16,18 @@ $registryItems = $registryItems ?? ($gifts ?? []);     // compat fallback
 $registryStats = $registryStats ?? ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0.0];
 $faqs          = $faqs ?? [];
 $scheduleItems = $scheduleItems ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 $slug        = esc($event['slug'] ?? '');
 $eventId     = esc($event['id'] ?? '');
@@ -617,17 +630,23 @@ if (!empty($registryItems) && is_array($registryItems)) {
                 </div>
 
                 <div class="w-rsvp" data-reveal>
-                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                    <form id="rsvp-form" class="w-card w-form" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>">
                         <?= csrf_field() ?>
+                        <?php if (!empty($selectedGuest['id'])): ?>
+                            <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                            <?php if ($selectedGuestCode !== ''): ?>
+                                <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                            <?php endif; ?>
+                        <?php endif; ?>
 
                         <div class="w-field">
                             <label>Tu nombre*</label>
-                            <input name="name" required autocomplete="name" placeholder="Nombre y apellido">
+                            <input name="name" required autocomplete="name" placeholder="Nombre y apellido" value="<?= esc($selectedGuestName) ?>">
                         </div>
 
                         <div class="w-field">
                             <label>Email*</label>
-                            <input type="email" name="email" autocomplete="email" placeholder="correo@ejemplo.com" required>
+                            <input type="email" name="email" autocomplete="email" placeholder="correo@ejemplo.com" required value="<?= esc($selectedGuestEmail) ?>">
                         </div>
 
                         <div class="w-field">
@@ -673,7 +692,7 @@ if (!empty($registryItems) && is_array($registryItems)) {
             eventId: <?= json_encode($eventId) ?>,
             slug: <?= json_encode($slug) ?>,
             eventDateISO: <?= json_encode($eventDateISO) ?>,
-            rsvpUrl: <?= json_encode(route_to('rsvp.submit', $slug)) ?>,
+            rsvpUrl: <?= json_encode(base_url(route_to('rsvp.submit', $slug))) ?>,
         };
     </script>
     <script src="<?= $assetsBase ?>/js/weddingo.js"></script>

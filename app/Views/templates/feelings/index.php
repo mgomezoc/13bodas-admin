@@ -26,6 +26,18 @@ $scheduleItems = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations = $eventLocations ?? [];
 $timelineItems = $timelineItems ?? [];
 $venueConfig   = $venueConfig ?? [];
+$selectedGuest = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 // --- Defaults from template meta_json ---
 $rawDefaults = $templateMeta['defaults'] ?? [];
@@ -609,18 +621,24 @@ $storyItems = array_map(static function (array $item): array {
                             </div>
 
                             <div class="form-area">
-                                <form action="<?= esc(route_to('rsvp.submit', $slug)) ?>" method="POST" class="contact-validation-active" id="rsvp-form">
+                                <form action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>" method="POST" class="contact-validation-active" id="rsvp-form">
                                     <?= csrf_field() ?>
+                                    <?php if (!empty($selectedGuest['id'])): ?>
+                                        <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                                        <?php if ($selectedGuestCode !== ''): ?>
+                                            <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                                        <?php endif; ?>
+                                    <?php endif; ?>
 
                                     <div class="row">
                                         <div class="col-lg-6 col-md-6 col-12">
-                                            <input type="text" class="form-control" name="name" placeholder="Nombre completo *" required>
+                                            <input type="text" class="form-control" name="name" placeholder="Nombre completo *" required value="<?= esc($selectedGuestName) ?>">
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-12">
-                                            <input type="email" class="form-control" name="email" placeholder="Email *" required>
+                                            <input type="email" class="form-control" name="email" placeholder="Email *" required value="<?= esc($selectedGuestEmail) ?>">
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-12">
-                                            <input type="tel" class="form-control" name="phone" placeholder="Teléfono">
+                                            <input type="tel" class="form-control" name="phone" placeholder="Teléfono" value="<?= esc($selectedGuestPhone) ?>">
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-12">
                                             <select class="form-control" name="attending" required>

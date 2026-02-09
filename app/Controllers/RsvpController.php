@@ -26,10 +26,13 @@ class RsvpController extends BaseController
         $payload = $this->normalizePayload();
 
         $rules = [
-            'name' => 'required|min_length[2]',
-            'email' => 'required|valid_email',
             'attending' => 'required|in_list[accepted,declined,maybe]',
         ];
+
+        if ($payload['guest_id'] === '') {
+            $rules['name'] = 'required|min_length[2]';
+            $rules['email'] = 'required|valid_email';
+        }
 
         if (!$this->validateData($payload, $rules)) {
             $message = implode(' ', $this->validator->getErrors());
@@ -61,6 +64,7 @@ class RsvpController extends BaseController
             'guests' => trim((string) ($this->request->getPost('guests') ?? $this->request->getPost('guest_count') ?? '')),
             'meal_option' => trim((string) ($this->request->getPost('meal_option') ?? '')),
             'guest_code' => trim((string) ($this->request->getPost('guest_code') ?? '')),
+            'guest_id' => trim((string) ($this->request->getPost('guest_id') ?? '')),
         ];
     }
 

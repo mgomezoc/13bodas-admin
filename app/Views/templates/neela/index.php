@@ -21,6 +21,18 @@ $weddingParty    = $weddingParty ?? [];
 $faqs            = $faqs ?? ($event['faqs'] ?? []);
 $scheduleItems   = $scheduleItems ?? ($event['schedule_items'] ?? []);
 $eventLocations  = $eventLocations ?? [];
+$selectedGuest   = $selectedGuest ?? null;
+$selectedGuestName = '';
+$selectedGuestEmail = '';
+$selectedGuestPhone = '';
+$selectedGuestCode = '';
+
+if (!empty($selectedGuest)) {
+    $selectedGuestName = trim((string) ($selectedGuest['first_name'] ?? '') . ' ' . (string) ($selectedGuest['last_name'] ?? ''));
+    $selectedGuestEmail = (string) ($selectedGuest['email'] ?? '');
+    $selectedGuestPhone = (string) ($selectedGuest['phone_number'] ?? '');
+    $selectedGuestCode = (string) ($selectedGuest['access_code'] ?? '');
+}
 
 // --- Defaults from template meta_json ---
 $rawDefaults = $templateMeta['defaults'] ?? [];
@@ -957,21 +969,27 @@ $pageDescription = $templateMeta['description'] ?? $coupleTitle;
                         <div class="form-wrapper flowers neela-style">
                             <h1 class="section-title"><?= $rsvpHeading ?></h1>
 
-                            <form id="form-rsvp" method="post" action="<?= esc(route_to('rsvp.submit', $slug)) ?>">
+                            <form id="form-rsvp" method="post" action="<?= esc(base_url(route_to('rsvp.submit', $slug))) ?>">
                                 <?= csrf_field() ?>
+                                <?php if (!empty($selectedGuest['id'])): ?>
+                                    <input type="hidden" name="guest_id" value="<?= esc((string) $selectedGuest['id']) ?>">
+                                    <?php if ($selectedGuestCode !== ''): ?>
+                                        <input type="hidden" name="guest_code" value="<?= esc($selectedGuestCode) ?>">
+                                    <?php endif; ?>
+                                <?php endif; ?>
 
                                 <div class="form-floating">
-                                    <input type="text" name="name" id="name" placeholder="Nombre" class="form-control required fromName">
+                                    <input type="text" name="name" id="name" placeholder="Nombre" class="form-control required fromName" value="<?= esc($selectedGuestName) ?>">
                                     <label for="name">Nombre*</label>
                                 </div>
 
                                 <div class="form-floating">
-                                    <input type="email" name="email" id="email" placeholder="E-mail" class="form-control required fromEmail">
+                                    <input type="email" name="email" id="email" placeholder="E-mail" class="form-control required fromEmail" value="<?= esc($selectedGuestEmail) ?>">
                                     <label for="email">E-mail*</label>
                                 </div>
 
                                 <div class="form-floating">
-                                    <input type="tel" name="phone" id="phone" placeholder="Teléfono" class="form-control">
+                                    <input type="tel" name="phone" id="phone" placeholder="Teléfono" class="form-control" value="<?= esc($selectedGuestPhone) ?>">
                                     <label for="phone">Teléfono</label>
                                 </div>
 

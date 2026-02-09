@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\GuestInvitationService;
 use App\Models\EventModel;
 use App\Models\EventFaqItemModel;
 use App\Models\EventScheduleItemModel;
 use App\Models\ContentModuleModel;
 use App\Models\TemplateModel;
+use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Invitation extends BaseController
 {
-    public function view($slug)
+    public function __construct(private GuestInvitationService $invitationService = new GuestInvitationService())
+    {
+    }
+
+    public function view(string $slug): string
     {
         $db = \Config\Database::connect();
 
@@ -326,6 +332,22 @@ class Invitation extends BaseController
         $event['faqs'] = $faqs;
         $event['schedule_items'] = $scheduleItems;
 
+        $guestId = trim((string) ($this->request->getGet('guest') ?? ''));
+        $accessCode = trim((string) ($this->request->getGet('code') ?? ''));
+        $selectedGuest = null;
+
+        if ($guestId !== '') {
+            $requireAccessCode = ($event['access_mode'] ?? 'open') === 'invite_code';
+            $context = $this->invitationService->resolveContextForEvent($event, $guestId, $accessCode, $requireAccessCode);
+            if (($context['success'] ?? false) === true) {
+                $group = $context['group'] ?? [];
+                $selectedGuest = array_merge(
+                    $context['guest'] ?? [],
+                    ['access_code' => $group['access_code'] ?? null]
+                );
+            }
+        }
+
         // Preparar datos para la vista
         $data = [
             'event'           => $event,
@@ -348,6 +370,7 @@ class Invitation extends BaseController
             'scheduleItems'   => $scheduleItems,
             'eventLocations'  => $eventLocations,
             'timelineItems'   => $timelineItems,
+            'selectedGuest'   => $selectedGuest,
         ];
 
         /* debug
@@ -371,7 +394,7 @@ class Invitation extends BaseController
      * RSVP público (cuando access_mode = open).
      * - guest_groups / guests / rsvp_responses (según tu esquema actual)
      */
-    public function submitRsvp(string $slug)
+    public function submitRsvp(string $slug): ResponseInterface
     {
         $resp = ['success' => false, 'message' => 'Solicitud inválida.', 'data' => null];
 
