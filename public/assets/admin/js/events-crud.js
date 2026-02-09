@@ -272,7 +272,13 @@ class EventsCRUD {
 document.addEventListener('DOMContentLoaded', () => {
     window.eventsCRUD = new EventsCRUD();
     const tabsWrapper = document.querySelector('.event-tabs-wrapper');
-    if (tabsWrapper) {
-        tabsWrapper.scrollLeft = 0;
+    if (!tabsWrapper) {
+        return;
     }
+    const activeTab = tabsWrapper.querySelector('.nav-link.active');
+    if (activeTab) {
+        activeTab.scrollIntoView({ inline: 'center', block: 'nearest' });
+        return;
+    }
+    tabsWrapper.scrollLeft = 0;
 });
