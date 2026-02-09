@@ -455,6 +455,8 @@ $contactAddress = esc($venueAddr);
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/style.css">
     <!-- Responsive stylesheet -->
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/responsive.css">
+    <!-- Custom enhancements -->
+    <link rel="stylesheet" href="<?= $assetsBase ?>/css/custom-enhancements.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
     <!-- Title -->
     <title><?= esc($pageTitle) ?> | 13Bodas</title>
@@ -859,6 +861,17 @@ $contactAddress = esc($venueAddr);
             </div>
         </section>
 
+        <!-- Our Divider -->
+        <section class="ulockd-video parallax ulockd_bgi2 overlay-tc75" data-stellar-background-ratio="0.3" style="background-image: url('<?= esc($heroWallLeft) ?>');">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Agenda -->
         <?php if ($hasSchedule): ?>
             <section id="agenda" class="events bgc-overlay-white7 ulockd_bgp3">
@@ -1014,7 +1027,7 @@ $contactAddress = esc($venueAddr);
 
         <!-- FAQs -->
         <?php if ($hasFaqs): ?>
-            <section id="faq" class="ulockd-blog bgc-overlay-white8 ulockd_bgp3">
+            <section id="faq">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-6 col-md-offset-3 text-center">
@@ -1025,22 +1038,34 @@ $contactAddress = esc($venueAddr);
                         </div>
                     </div>
                     <div class="row">
-                        <?php foreach ($faqs as $faq): ?>
-                            <?php
-                            $question = esc($faq['question'] ?? ($faq['title'] ?? ''));
-                            $answer = esc($faq['answer'] ?? ($faq['content'] ?? ''));
-                            ?>
-                            <div class="col-xxs-12 col-xs-12 col-sm-6 col-md-4">
-                                <div class="blog-post text-center wow fadeInUp" data-wow-duration="1s">
-                                    <div class="details">
-                                        <h4 class="eventdate text-center ulockd-bgthm" style="display: inline-block; padding: 10px 18px; border-radius: 999px; font-weight: 600; line-height: 1.4; background-color: <?= esc($colorPrimary) ?>; color: #fff;"><?= $question ?></h4>
+                        <div class="col-md-10 col-md-offset-1">
+                            <div class="faq-accordion">
+                                <?php foreach ($faqs as $faqIndex => $faq): ?>
+                                    <?php
+                                    $question = esc($faq['question'] ?? ($faq['title'] ?? ''));
+                                    $answer = esc($faq['answer'] ?? ($faq['content'] ?? ''));
+                                    ?>
+                                    <div class="faq-item<?= $faqIndex === 0 ? ' active' : '' ?>">
+                                        <div class="faq-question" role="button" tabindex="0" aria-expanded="<?= $faqIndex === 0 ? 'true' : 'false' ?>">
+                                            <div class="faq-question-text">
+                                                <span class="faq-question-icon"><i class="fa fa-question"></i></span>
+                                                <h4><?= $question ?></h4>
+                                            </div>
+                                            <span class="faq-toggle-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                            </span>
+                                        </div>
                                         <?php if ($answer): ?>
-                                            <p><?= $answer ?></p>
+                                            <div class="faq-answer">
+                                                <div class="faq-answer-inner">
+                                                    <p><?= $answer ?></p>
+                                                </div>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
-                        <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1167,86 +1192,65 @@ $contactAddress = esc($venueAddr);
             </section>
         <?php endif; ?>
 
-        <!-- Our Contact -->
+        <!-- Our Contact / Ubicación -->
         <?php if ($hasLocations): ?>
-            <section id="contact" class="ulockd-contact">
-                <div class="container-fluid ulockd-padz">
-                    <div class="row">
-                        <div class="col-md-6 col-md-offset-3 text-center">
-                            <div class="ulockd-main-title">
-                                <h2><span class="text-thm2">Ubicación</span></h2>
-                                <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
-                            </div>
+            <section id="contact">
+                <div class="location-section-inner">
+                    <div class="text-center">
+                        <div class="ulockd-main-title">
+                            <h2><span class="text-thm2">Ubicación</span></h2>
+                            <img src="<?= $assetsBase ?>/images/resource/title-bottom.png" alt="title-bottom">
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="ulockd-google-map" style="position: relative; z-index: 1; margin-bottom: 40px;">
-                                <div id="map-location" style="width: 100%; height: 550px;"></div>
-                            </div>
-                        </div>
+
+                    <!-- Map -->
+                    <div class="map-wrapper">
+                        <div id="map-location"></div>
+                        <?php if ($lat !== '' && $lng !== ''): ?>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=<?= esc((string)$lat) ?>,<?= esc((string)$lng) ?>" target="_blank" rel="noopener" class="map-directions-btn">
+                                <i class="fa fa-location-arrow"></i> Cómo llegar
+                            </a>
+                        <?php endif; ?>
                     </div>
-                </div>
-                <div class="container">
-                    <div class="row ulockd-mrgn12-150 dib">
-                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-5 ulockd-bgthm">
-                            <div class="contact-info ulockd-mrgn1225">
-                                <ul class="list-unstyled">
-                                    <?php if ($contactEmail): ?>
-                                        <li><span class="flaticon-black-back-closed-envelope-shape" title="<?= $contactEmail ?>"> <small><?= $contactEmail ?></small></span></li>
-                                    <?php endif; ?>
-                                    <?php if ($contactPhone): ?>
-                                        <li><span class="flaticon-old-handphone" title="<?= $contactPhone ?>"> <small><?= $contactPhone ?></small></span></li>
-                                    <?php endif; ?>
-                                    <?php if ($contactAddress): ?>
-                                        <li><span class="flaticon-map-marker" title="<?= $contactAddress ?>"> <small><?= $contactAddress ?></small></span></li>
-                                    <?php endif; ?>
-                                </ul>
+
+                    <!-- Venue info cards -->
+                    <div class="venue-cards-row">
+                        <?php if ($venueName): ?>
+                            <div class="venue-card">
+                                <div class="venue-card-icon"><i class="fa fa-home"></i></div>
+                                <div class="venue-card-content">
+                                    <h4>Lugar</h4>
+                                    <p><?= esc($venueName) ?></p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-xxs-12 col-xs-6 col-sm-6 col-md-7 bgc-white">
-                            <div class="ulockd-contact-form ulockd-mrgn1225">
-                                <form id="contact_form" name="contact_form" class="contact-form" action="#" method="post" novalidate="novalidate">
-                                    <div class="messages"></div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <input id="form_name" name="form_name" class="form-control ulockd-form-fg required" placeholder="Tu nombre" required="required" data-error="El nombre es requerido." type="text">
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <input id="form_email" name="form_email" class="form-control ulockd-form-fg required email" placeholder="Tu email" required="required" data-error="El email es requerido." type="email">
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <input id="form_phone" name="form_phone" class="form-control ulockd-form-fg required" placeholder="Teléfono" required="required" data-error="El teléfono es requerido." type="text">
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <input id="form_subject" name="form_subject" class="form-control ulockd-form-fg required" placeholder="Asunto" required="required" data-error="El asunto es requerido." type="text">
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <textarea id="form_message" name="form_message" class="form-control ulockd-form-tb required" rows="8" placeholder="Tu mensaje" required="required" data-error="El mensaje es requerido."></textarea>
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                            <div class="form-group ulockd-contact-btn">
-                                                <input id="form_botcheck" name="form_botcheck" class="form-control" value="" type="hidden">
-                                                <button type="submit" class="btn btn-default ulockd-btn-thm2" data-loading-text="Enviando...">Enviar</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                        <?php endif; ?>
+                        <?php if ($venueAddr): ?>
+                            <div class="venue-card">
+                                <div class="venue-card-icon"><i class="fa fa-map-marker"></i></div>
+                                <div class="venue-card-content">
+                                    <h4>Dirección</h4>
+                                    <p><?= esc($venueAddr) ?></p>
+                                </div>
                             </div>
-                        </div>
+                        <?php endif; ?>
+                        <?php if ($eventDateLabel): ?>
+                            <div class="venue-card">
+                                <div class="venue-card-icon"><i class="fa fa-calendar"></i></div>
+                                <div class="venue-card-content">
+                                    <h4>Fecha</h4>
+                                    <p><?= esc($eventDateLabel) ?><?= $eventTimeRange ? ' · ' . esc($eventTimeRange) : '' ?></p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($contactPhone): ?>
+                            <div class="venue-card">
+                                <div class="venue-card-icon"><i class="fa fa-phone"></i></div>
+                                <div class="venue-card-content">
+                                    <h4>Contacto</h4>
+                                    <p><a href="tel:<?= esc($contactPhone) ?>"><?= esc($contactPhone) ?></a></p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </section>
@@ -1404,6 +1408,37 @@ $contactAddress = esc($venueAddr);
             }
         }
     </script>
+    <!-- FAQ Accordion -->
+    <script>
+        (function() {
+            var faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(function(item) {
+                var question = item.querySelector('.faq-question');
+                if (!question) return;
+                question.addEventListener('click', function() {
+                    var isActive = item.classList.contains('active');
+                    // Close all
+                    faqItems.forEach(function(other) {
+                        other.classList.remove('active');
+                        var btn = other.querySelector('.faq-question');
+                        if (btn) btn.setAttribute('aria-expanded', 'false');
+                    });
+                    // Toggle current
+                    if (!isActive) {
+                        item.classList.add('active');
+                        question.setAttribute('aria-expanded', 'true');
+                    }
+                });
+                question.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        question.click();
+                    }
+                });
+            });
+        })();
+    </script>
+
     <script type='text/javascript'>
         var collectOnMe = document.querySelectorAll('.collectonme'),
             buttons = document.getElementsByTagName("input");
