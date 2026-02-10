@@ -31,6 +31,7 @@
 
 <?= view('admin/events/partials/_section_help', ['message' => 'Gestiona la mesa de regalos y fondos para que los invitados sepan qué opciones tienen para obsequiar.']) ?>
 
+<div id="registryContent">
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
@@ -135,7 +136,7 @@
                                 data-id="<?= $item['id'] ?>"
                                 data-name="<?= esc($item['name']) ?>"
                                 data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/registry/delete/' . $item['id']) ?>"
-                                data-refresh-target="#registrySection">
+                                data-refresh-target="#registryContent">
                                 <i class="bi bi-trash me-2"></i>Eliminar
                             </a></li>
                         </ul>
@@ -148,6 +149,7 @@
 </div>
 <?php endif; ?>
 </div>
+</div>
 
 <!-- Modal Agregar Regalo -->
 <div class="modal fade" id="addItemModal" tabindex="-1">
@@ -159,7 +161,7 @@
             </div>
             <form id="addItemForm"
                 class="modal-ajax-form"
-                data-refresh-target="#registrySection"
+                data-refresh-target="#registryContent"
                 action="<?= base_url('admin/events/' . $event['id'] . '/registry/store') ?>">
                 <?= csrf_field() ?>
                 <div class="modal-body">
@@ -217,7 +219,7 @@ function toggleClaimed(itemId) {
         .done(function(response) {
             if (response.success) {
                 Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#registrySection');
+                refreshModuleSection('#registryContent');
             } else {
                 Toast.fire({ icon: 'error', title: response.message });
             }
