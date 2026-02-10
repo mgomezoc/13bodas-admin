@@ -59,14 +59,39 @@ class TemplateModel extends Model
     public function isTemplateInUse(int $templateId): array
     {
         $db = \Config\Database::connect();
-        $count = $db->table('event_templates')
-            ->where('template_id', $templateId)
+        $count = $db->table('event_templates et')
+            ->join('events e', 'e.id = et.event_id', 'inner')
+            ->where('et.template_id', $templateId)
+            ->where('et.is_active', 1)
             ->countAllResults();
 
         return [
             'in_use' => $count > 0,
             'count'  => (int) $count,
         ];
+    }
+
+
+
+    /**
+     * Elimina un template y su histórico en event_templates en una transacción.
+     */
+    public function deleteTemplateWithRelations(int $templateId): bool
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $db->table('event_templates')
+            ->where('template_id', $templateId)
+            ->delete();
+
+        $db->table($this->table)
+            ->where('id', $templateId)
+            ->delete();
+
+        $db->transComplete();
+
+        return $db->transStatus();
     }
 
     /**
