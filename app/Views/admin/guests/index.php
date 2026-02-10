@@ -25,7 +25,7 @@
         <h1 class="page-title">Invitados</h1>
         <p class="page-subtitle"><?= esc($event['couple_title']) ?></p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
         <a href="<?= base_url('admin/events/' . $event['id'] . '/guests/import') ?>" class="btn btn-outline-secondary">
             <i class="bi bi-upload me-2"></i>Importar
         </a>

@@ -24,7 +24,7 @@
         <h1 class="page-title"><?= esc($pageTitle) ?></h1>
         <p class="page-subtitle">Gestiona los hitos de la historia del evento</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
         <a href="<?= base_url('admin/events/edit/' . $event['id']) ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Volver al Evento
         </a>
