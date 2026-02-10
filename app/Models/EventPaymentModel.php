@@ -10,6 +10,9 @@ use CodeIgniter\Model;
 
 class EventPaymentModel extends Model
 {
+    /** @var array<string, true>|null */
+    private ?array $tableColumns = null;
+
     protected $table            = 'event_payments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
@@ -90,6 +93,12 @@ class EventPaymentModel extends Model
         }
 
         $data['id'] = $data['id'] ?? $this->generateUUIDv4();
+        $data = $this->sanitizeDataForCurrentSchema($data);
+
+        $missingRequired = array_diff(['id', 'event_id', 'payment_provider', 'payment_reference', 'amount', 'currency', 'status'], array_keys($data));
+        if ($missingRequired !== []) {
+            throw new \RuntimeException('event_payments schema incompleto. Faltan columnas requeridas: ' . implode(', ', $missingRequired));
+        }
 
         try {
             if (!$this->insert($data)) {
@@ -133,5 +142,58 @@ class EventPaymentModel extends Model
     {
         return str_contains(strtolower($exception->getMessage()), 'duplicate')
             || str_contains((string) $exception->getCode(), '1062');
+    }
+
+    private function sanitizeDataForCurrentSchema(array $data): array
+    {
+        $columns = $this->loadTableColumns();
+        if ($columns === []) {
+            return $data;
+        }
+
+        $sanitized = [];
+        $droppedKeys = [];
+
+        foreach ($data as $key => $value) {
+            $column = (string) $key;
+            if (isset($columns[$column])) {
+                $sanitized[$column] = $value;
+                continue;
+            }
+
+            $droppedKeys[] = $column;
+        }
+
+        if ($droppedKeys !== []) {
+            log_message('warning', 'EventPaymentModel dropped non-existing columns: {columns}', [
+                'columns' => implode(',', $droppedKeys),
+            ]);
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * @return array<string, true>
+     */
+    private function loadTableColumns(): array
+    {
+        if ($this->tableColumns !== null) {
+            return $this->tableColumns;
+        }
+
+        $fields = $this->db->getFieldData($this->table);
+        $columns = [];
+
+        foreach ($fields as $field) {
+            $name = (string) ($field->name ?? '');
+            if ($name !== '') {
+                $columns[$name] = true;
+            }
+        }
+
+        $this->tableColumns = $columns;
+
+        return $columns;
     }
 }
