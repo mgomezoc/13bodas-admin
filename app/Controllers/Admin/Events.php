@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\PaymentService;
 use App\Models\EventModel;
 use App\Models\ClientModel;
 use App\Models\GuestModel;
 use App\Models\ContentModuleModel;
 use App\Models\EventTemplateModel;
 use App\Models\TemplateModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Events extends BaseController
 {
@@ -18,6 +20,7 @@ class Events extends BaseController
     protected ClientModel $clientModel;
     protected EventTemplateModel $eventTemplateModel;
     protected TemplateModel $templateModel;
+    protected PaymentService $paymentService;
 
     public function __construct()
     {
@@ -25,6 +28,7 @@ class Events extends BaseController
         $this->clientModel        = new ClientModel();
         $this->eventTemplateModel = new EventTemplateModel();
         $this->templateModel      = new TemplateModel();
+        $this->paymentService     = new PaymentService();
     }
 
     public function index()
@@ -649,6 +653,79 @@ class Events extends BaseController
         }
 
         return redirect()->to(base_url('i/' . $event['slug'] . '?preview=1'));
+    }
+
+    public function markPaid(string $eventId): ResponseInterface
+    {
+        $session = session();
+        $userRoles = $session->get('user_roles');
+        $roles = is_array($userRoles) ? $userRoles : [];
+
+        $isAdmin = in_array('superadmin', $roles, true) || in_array('admin', $roles, true);
+        if (!$isAdmin) {
+            $message = 'No tienes permisos para ejecutar esta acción.';
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => $message]);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            $message = 'Evento no encontrado.';
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['success' => false, 'message' => $message]);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
+        $reason = trim((string) $this->request->getPost('reason'));
+
+        try {
+            $result = $this->paymentService->markPaidManually($eventId, [
+                'admin_user_id' => (string) ($session->get('user_id') ?? ''),
+                'admin_email' => (string) ($session->get('user_email') ?? ''),
+                'ip' => (string) $this->request->getIPAddress(),
+                'user_agent' => substr((string) $this->request->getUserAgent(), 0, 255),
+            ], $reason !== '' ? $reason : null);
+
+            $alreadyProcessed = (bool) ($result['already_processed'] ?? false);
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'already_processed' => $alreadyProcessed,
+                    'message' => $alreadyProcessed
+                        ? 'El evento ya estaba activo/pagado.'
+                        : 'Evento marcado como pagado correctamente.',
+                ]);
+            }
+
+            return redirect()->back()->with(
+                $alreadyProcessed ? 'info' : 'success',
+                $alreadyProcessed
+                    ? 'El evento ya estaba activo/pagado.'
+                    : 'Evento marcado como pagado correctamente.'
+            );
+        } catch (\Throwable $exception) {
+            log_message('error', 'Admin\Events::markPaid failed event={eventId} admin={adminId} error={error}', [
+                'eventId' => $eventId,
+                'adminId' => (string) ($session->get('user_id') ?? ''),
+                'error' => $exception->getMessage(),
+            ]);
+
+            $message = 'No fue posible marcar el evento como pagado.';
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(500)->setJSON(['success' => false, 'message' => $message]);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
     }
 
     protected function canAccessEvent(string $eventId): bool

@@ -160,6 +160,71 @@ class PaymentService
         return true;
     }
 
+    public function markPaidManually(string $eventId, array $auditMeta = [], ?string $reason = null): array
+    {
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            throw new \RuntimeException('Evento no encontrado.');
+        }
+
+        $isAlreadyActive = (int) ($event['is_paid'] ?? 0) === 1
+            && (int) ($event['is_demo'] ?? 1) === 0
+            && (string) ($event['service_status'] ?? '') === 'active'
+            && !empty($event['paid_until']);
+
+        if ($isAlreadyActive) {
+            return [
+                'already_processed' => true,
+                'event_id' => $eventId,
+                'payment_reference' => null,
+            ];
+        }
+
+        $manualReference = sprintf(
+            'manual-%s-%s-%s',
+            substr(str_replace('-', '', $eventId), 0, 8),
+            date('YmdHis'),
+            bin2hex(random_bytes(3))
+        );
+
+        $auditPayload = [
+            'source' => 'admin_manual_mark_paid',
+            'timestamp' => date(DATE_ATOM),
+            'admin_user_id' => $auditMeta['admin_user_id'] ?? null,
+            'admin_email' => $auditMeta['admin_email'] ?? null,
+            'ip' => $auditMeta['ip'] ?? null,
+            'user_agent' => $auditMeta['user_agent'] ?? null,
+            'reason' => $reason,
+        ];
+
+        $result = $this->persistSuccessfulPayment([
+            'event_id' => $eventId,
+            'payment_provider' => 'manual',
+            'payment_reference' => $manualReference,
+            'amount' => $this->settingModel->getEventPrice(),
+            'currency' => strtoupper((string) env('STRIPE_CURRENCY', 'MXN')),
+            'status' => 'completed',
+            'customer_email' => $event['primary_contact_email'] ?? null,
+            'customer_name' => $event['couple_title'] ?? null,
+            'payment_method' => 'manual_override',
+            'paid_at' => date('Y-m-d H:i:s'),
+            'provider_event_id' => null,
+            'webhook_received_at' => date('Y-m-d H:i:s'),
+            'notes' => sprintf(
+                'Manual override by admin %s%s',
+                (string) ($auditMeta['admin_user_id'] ?? 'unknown'),
+                $reason !== null && trim($reason) !== '' ? ' | reason: ' . trim($reason) : ''
+            ),
+            'webhook_payload' => json_encode($auditPayload, JSON_THROW_ON_ERROR),
+        ], $manualReference);
+
+        return [
+            'already_processed' => $result['already_processed'] ?? false,
+            'event_id' => $eventId,
+            'payment_reference' => $manualReference,
+        ];
+    }
+
     private function persistSuccessfulPayment(array $paymentData, string $correlationId): array
     {
         $db = \Config\Database::connect();

@@ -197,6 +197,10 @@ class Invitation extends BaseController
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
+            log_message('warning', 'Invitation::view guests query failed event={eventId} error={error}', [
+                'eventId' => (string) ($event['id'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             $guests = [];
         }
 
@@ -210,6 +214,10 @@ class Invitation extends BaseController
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
+            log_message('warning', 'Invitation::view rsvp_responses query failed event={eventId} error={error}', [
+                'eventId' => (string) ($event['id'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             $rsvpResponses = [];
         }
 
@@ -230,6 +238,10 @@ class Invitation extends BaseController
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
+            log_message('warning', 'Invitation::view wedding_party_members query failed event={eventId} error={error}', [
+                'eventId' => (string) ($event['id'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             $weddingPartyMembers = [];
         }
 
