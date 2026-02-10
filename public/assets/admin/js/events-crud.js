@@ -278,7 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeTab = tabsWrapper.querySelector('.nav-link.active');
     if (activeTab) {
         activeTab.scrollIntoView({ inline: 'center', block: 'nearest' });
-        return;
+    } else {
+        tabsWrapper.scrollLeft = 0;
     }
-    tabsWrapper.scrollLeft = 0;
+    tabsWrapper.addEventListener('wheel', (event) => {
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+            return;
+        }
+        tabsWrapper.scrollLeft += event.deltaY;
+        event.preventDefault();
+    }, { passive: false });
 });
