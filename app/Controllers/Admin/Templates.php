@@ -162,7 +162,11 @@ class Templates extends BaseController
             return redirect()->back()->with('error', $message);
         }
 
-        $deleted = $this->templateModel->delete($id);
+        try {
+            $deleted = $this->templateModel->deleteTemplateWithRelations($id);
+        } catch (\Throwable $exception) {
+            $deleted = false;
+        }
 
         if ($deleted) {
             if ($this->request->isAJAX()) {

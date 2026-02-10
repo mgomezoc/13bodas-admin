@@ -71,6 +71,29 @@ class TemplateModel extends Model
         ];
     }
 
+
+
+    /**
+     * Elimina un template y su histórico en event_templates en una transacción.
+     */
+    public function deleteTemplateWithRelations(int $templateId): bool
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $db->table('event_templates')
+            ->where('template_id', $templateId)
+            ->delete();
+
+        $db->table($this->table)
+            ->where('id', $templateId)
+            ->delete();
+
+        $db->transComplete();
+
+        return $db->transStatus();
+    }
+
     /**
      * Lista templates con conteo de uso:
      * - usage_count: eventos donde ES ACTIVO actualmente (event_templates.is_active = 1)
