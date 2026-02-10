@@ -24,7 +24,3 @@ CREATE TABLE IF NOT EXISTS `event_payments` (
   KEY `idx_event_payments_event_id` (`event_id`),
   KEY `idx_event_payments_provider_event_id` (`provider_event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-ALTER TABLE `events`
-  ADD COLUMN IF NOT EXISTS `payment_provider` VARCHAR(30) NULL AFTER `paid_until`,
-  ADD COLUMN IF NOT EXISTS `payment_reference` VARCHAR(120) NULL AFTER `payment_provider`;

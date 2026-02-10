@@ -245,8 +245,6 @@ class PaymentService
             'is_paid' => 1,
             'service_status' => 'active',
             'visibility' => 'public',
-            'payment_provider' => $provider,
-            'payment_reference' => $reference,
             'paid_until' => $paidUntil,
         ];
 

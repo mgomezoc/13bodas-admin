@@ -103,28 +103,6 @@ class AddPaymentsHardening extends Migration
             $this->forge->addKey('provider_event_id', false, false, 'idx_event_payments_provider_event_id');
             $this->forge->createTable('event_payments', true);
         }
-
-        if ($this->db->tableExists('events') && !$this->db->fieldExists('payment_provider', 'events')) {
-            $this->forge->addColumn('events', [
-                'payment_provider' => [
-                    'type' => 'VARCHAR',
-                    'constraint' => 30,
-                    'null' => true,
-                    'after' => 'paid_until',
-                ],
-            ]);
-        }
-
-        if ($this->db->tableExists('events') && !$this->db->fieldExists('payment_reference', 'events')) {
-            $this->forge->addColumn('events', [
-                'payment_reference' => [
-                    'type' => 'VARCHAR',
-                    'constraint' => 120,
-                    'null' => true,
-                    'after' => 'payment_provider',
-                ],
-            ]);
-        }
     }
 
     public function down(): void
@@ -133,12 +111,5 @@ class AddPaymentsHardening extends Migration
             $this->forge->dropTable('event_payments', true);
         }
 
-        if ($this->db->tableExists('events') && $this->db->fieldExists('payment_reference', 'events')) {
-            $this->forge->dropColumn('events', 'payment_reference');
-        }
-
-        if ($this->db->tableExists('events') && $this->db->fieldExists('payment_provider', 'events')) {
-            $this->forge->dropColumn('events', 'payment_provider');
-        }
     }
 }
