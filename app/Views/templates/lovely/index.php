@@ -562,9 +562,16 @@ foreach ($weddingParty as $member) {
             position: relative;
         }
     </style>
+<?php if (!empty($isDemoMode)): ?>
+    <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
+<?php endif; ?>
 </head>
 
 <body id="home">
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-banner">🚀 Evento DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar por $800 MXN</a></div>
+<?php endif; ?>
+
 
     <div class="page-wrapper">
 
@@ -1346,6 +1353,9 @@ foreach ($weddingParty as $member) {
         </script>
     <?php endif; ?>
 
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-watermark">DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar</a></div>
+<?php endif; ?>
 </body>
 
 </html>

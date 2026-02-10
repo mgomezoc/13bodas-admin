@@ -1,86 +1,162 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use App\Models\ClientModel;
+use App\Models\ContentModuleModel;
+use App\Models\EventModel;
 use App\Models\UserModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Auth extends BaseController
 {
-    /**
-     * Muestra el formulario de login
-     */
-    public function login()
+    public function __construct(
+        private readonly UserModel $userModel = new UserModel(),
+        private readonly EventModel $eventModel = new EventModel(),
+        private readonly ClientModel $clientModel = new ClientModel(),
+        private readonly ContentModuleModel $contentModuleModel = new ContentModuleModel(),
+    ) {
+    }
+
+    public function login(): string|ResponseInterface
     {
-        // Si ya está logueado, redirigir al dashboard
         if (session()->get('isLoggedIn')) {
-            return redirect()->to(base_url('admin/dashboard'));
+            return redirect()->route('admin.dashboard');
         }
-        
+
         return view('auth/login');
     }
 
-    /**
-     * Procesa el intento de login
-     */
-    public function attemptLogin()
+    public function attemptLogin(): ResponseInterface
     {
-        $validation = \Config\Services::validation();
-        
-        // Validar los campos
         $rules = [
-            'email'    => 'required|valid_email',
-            'password' => 'required|min_length[6]'
+            'email' => 'required|valid_email',
+            'password' => 'required|min_length[6]',
         ];
-        
+
         if (!$this->validate($rules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Por favor, completa todos los campos correctamente.');
+            return redirect()->back()->withInput()->with('error', 'Por favor, completa todos los campos correctamente.');
         }
-        
-        $email = $this->request->getPost('email');
-        $password = $this->request->getPost('password');
-        
-        $userModel = new UserModel();
-        $user = $userModel->where('email', $email)->first();
-        
-        if ($user && password_verify($password, $user['password'])) {
-            // Verificar si el usuario está activo
-            if ($user['is_active'] != 1) {
-                return redirect()->back()
-                    ->with('error', 'Tu cuenta está desactivada. Contacta al administrador.');
-            }
-            
-            // Crear la sesión
-            $sessionData = [
-                'user_id'    => $user['id'],
-                'user_name'  => $user['name'],
-                'user_email' => $user['email'],
-                'user_role'  => $user['role'],
-                'isLoggedIn' => true
-            ];
-            
-            session()->set($sessionData);
-            
-            // Actualizar último login
-            $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
-            
-            return redirect()->to(base_url('admin/dashboard'))
-                ->with('success', '¡Bienvenido de vuelta, ' . $user['name'] . '!');
+
+        $email = (string) $this->request->getPost('email');
+        $password = (string) $this->request->getPost('password');
+        $user = $this->userModel->findByEmail($email);
+
+        if (!$user || !password_verify($password, (string) $user['password_hash'])) {
+            return redirect()->back()->withInput()->with('error', 'Credenciales incorrectas. Verifica tu email y contraseña.');
         }
-        
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Credenciales incorrectas. Verifica tu email y contraseña.');
+
+        if ((int) $user['is_active'] !== 1) {
+            return redirect()->back()->with('error', 'Tu cuenta está desactivada. Contacta al administrador.');
+        }
+
+        $sessionData = [
+            'user_id' => $user['id'],
+            'user_name' => $user['full_name'] ?? $user['email'],
+            'user_email' => $user['email'],
+            'isLoggedIn' => true,
+        ];
+
+        session()->set($sessionData);
+        $this->userModel->updateLastLogin((string) $user['id']);
+
+        return redirect()->route('admin.dashboard')->with('success', '¡Bienvenido de vuelta!');
     }
 
-    /**
-     * Cierra la sesión del usuario
-     */
-    public function logout()
+    public function register(): string|ResponseInterface
+    {
+        if (session()->get('isLoggedIn')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return view('auth/register');
+    }
+
+    public function processRegister(): ResponseInterface
+    {
+        $rules = [
+            'name' => 'required|min_length[3]|max_length[120]',
+            'email' => 'required|valid_email|is_unique[users.email]',
+            'phone' => 'permit_empty|max_length[30]',
+            'password' => 'required|min_length[6]',
+            'password_confirm' => 'required|matches[password]',
+            'couple_title' => 'required|min_length[3]|max_length[255]',
+            'event_date' => 'required|valid_date[Y-m-d]',
+            'terms' => 'required',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator?->getErrors() ?? []);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transException(true)->transStart();
+
+        try {
+            $userId = UserModel::generateUUID();
+            $this->userModel->insert([
+                'id' => $userId,
+                'email' => (string) $this->request->getPost('email'),
+                'password_hash' => password_hash((string) $this->request->getPost('password'), PASSWORD_BCRYPT),
+                'full_name' => (string) $this->request->getPost('name'),
+                'phone' => (string) $this->request->getPost('phone'),
+                'is_active' => 1,
+            ]);
+
+            $this->userModel->assignRole($userId, 4);
+
+            $clientId = UserModel::generateUUID();
+            $this->clientModel->insert([
+                'id' => $clientId,
+                'user_id' => $userId,
+                'company_name' => (string) $this->request->getPost('couple_title'),
+                'notes' => 'Registro público',
+            ]);
+
+            $eventId = $this->eventModel->createEvent([
+                'client_id' => $clientId,
+                'couple_title' => (string) $this->request->getPost('couple_title'),
+                'slug' => $this->eventModel->generateUniqueSlug((string) $this->request->getPost('couple_title')),
+                'event_date_start' => (string) $this->request->getPost('event_date') . ' 18:00:00',
+                'time_zone' => 'America/Mexico_City',
+                'primary_contact_email' => (string) $this->request->getPost('email'),
+                'service_status' => 'draft',
+                'visibility' => 'private',
+                'is_demo' => 1,
+                'is_paid' => 0,
+            ]);
+
+            if (!$eventId) {
+                throw new \RuntimeException('No fue posible crear el evento demo.');
+            }
+
+            $this->contentModuleModel->createDefaultModules($eventId);
+            $db->transComplete();
+
+            session()->set([
+                'user_id' => $userId,
+                'user_name' => (string) $this->request->getPost('name'),
+                'user_email' => (string) $this->request->getPost('email'),
+                'user_roles' => ['client'],
+                'client_id' => $clientId,
+                'isLoggedIn' => true,
+            ]);
+
+            return redirect()->to(base_url('admin/events/edit/' . $eventId))
+                ->with('success', '¡Bienvenido! Tu evento se creó en modo DEMO.');
+        } catch (\Throwable $exception) {
+            $db->transRollback();
+            log_message('error', 'Public register failed: {message}', ['message' => $exception->getMessage()]);
+
+            return redirect()->back()->withInput()->with('error', 'Error al procesar el registro.');
+        }
+    }
+
+    public function logout(): ResponseInterface
     {
         session()->destroy();
-        return redirect()->to(base_url('auth/login'))
-            ->with('success', 'Has cerrado sesión exitosamente.');
+        return redirect()->route('admin.login')->with('success', 'Has cerrado sesión exitosamente.');
     }
 }

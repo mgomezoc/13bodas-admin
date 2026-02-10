@@ -270,9 +270,16 @@ if (!empty($registryItems) && is_array($registryItems)) {
             --w-font-body: "<?= esc($fontBody) ?>", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         }
     </style>
+<?php if (!empty($isDemoMode)): ?>
+    <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
+<?php endif; ?>
 </head>
 
 <body>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-banner">🚀 Evento DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar por $800 MXN</a></div>
+<?php endif; ?>
+
 
     <header class="w-topbar">
         <a class="w-brand" href="#home"><?= $coupleTitle ?></a>
@@ -696,6 +703,9 @@ if (!empty($registryItems) && is_array($registryItems)) {
         };
     </script>
     <script src="<?= $assetsBase ?>/js/weddingo.js"></script>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-watermark">DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar</a></div>
+<?php endif; ?>
 </body>
 
 </html>

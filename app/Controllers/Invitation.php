@@ -10,6 +10,7 @@ use App\Models\EventFaqItemModel;
 use App\Models\EventScheduleItemModel;
 use App\Models\ContentModuleModel;
 use App\Models\TemplateModel;
+use App\Models\PaymentSettingModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Exceptions\PageNotFoundException;
 
@@ -342,6 +343,19 @@ class Invitation extends BaseController
             }
         }
 
+
+        $isPaidActive = (int) ($event['is_paid'] ?? 0) === 1
+            && (empty($event['paid_until']) || strtotime((string) $event['paid_until']) > time());
+        $isDemoMode = !$isPaidActive || (int) ($event['is_demo'] ?? 0) === 1;
+
+        if ($isDemoMode) {
+            $paymentSettingModel = new PaymentSettingModel();
+            $demoLimits = $paymentSettingModel->getDemoLimits();
+            $galleryAssets = array_slice($galleryAssets, 0, (int) $demoLimits['gallery']);
+            $timelineItems = array_slice($timelineItems, 0, (int) $demoLimits['timeline']);
+            $registryItems = [];
+        }
+
         // Preparar datos para la vista
         $data = [
             'event'           => $event,
@@ -364,6 +378,8 @@ class Invitation extends BaseController
             'eventLocations'  => $eventLocations,
             'timelineItems'   => $timelineItems,
             'selectedGuest'   => $selectedGuest,
+            'isDemoMode'      => $isDemoMode,
+            'isPaidActive'    => $isPaidActive,
         ];
 
         /* debug

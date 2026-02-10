@@ -483,9 +483,16 @@ $contactAddress = esc($venueAddr);
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+<?php if (!empty($isDemoMode)): ?>
+    <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
+<?php endif; ?>
 </head>
 
 <body>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-banner">🚀 Evento DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar por $800 MXN</a></div>
+<?php endif; ?>
+
     <div class="wrapper">
         <div id="preloader" class="preloader">
             <div id="pre" class="preloader_container">
@@ -1530,6 +1537,9 @@ $contactAddress = esc($venueAddr);
             })();
         </script>
     <?php endif; ?>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-watermark">DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar</a></div>
+<?php endif; ?>
 </body>
 
 <!-- Mirrored from unlockdesizn.com/html/wedding/couple-heart/index-singlepage.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 09 Feb 2026 12:01:47 GMT -->

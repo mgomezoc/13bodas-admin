@@ -1,0 +1,32 @@
+.demo-banner {
+    position: sticky;
+    top: 0;
+    z-index: 9998;
+    padding: 12px;
+    text-align: center;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(90deg, #6c63ff 0%, #4834d4 100%);
+}
+
+.demo-watermark {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.82);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.upgrade-prompt {
+    margin: 24px auto;
+    padding: 24px;
+    border-radius: 12px;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(90deg, #ff7a18 0%, #ff3c38 100%);
+}
