@@ -144,8 +144,8 @@ class Auth extends BaseController
                 'isLoggedIn' => true,
             ]);
 
-            return redirect()->to(base_url('admin/events/edit/' . $eventId))
-                ->with('success', '¡Bienvenido! Tu evento se creó en modo DEMO.');
+            return redirect()->to(base_url('admin/events/edit/' . $eventId . '?highlight=template'))
+                ->with('success', '¡Bienvenido! Tu evento se creó en modo DEMO. Elige tu template para continuar.');
         } catch (\Throwable $exception) {
             $db->transRollback();
             log_message('error', 'Public register failed: {message}', ['message' => $exception->getMessage()]);

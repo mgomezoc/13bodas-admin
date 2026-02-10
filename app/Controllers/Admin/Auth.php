@@ -1,17 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\ClientOnboardingService;
 use App\Models\UserModel;
 use App\Models\ClientModel;
 
 class Auth extends BaseController
 {
+    public function __construct(private readonly ClientOnboardingService $clientOnboardingService = new ClientOnboardingService())
+    {
+    }
     /**
      * Mostrar formulario de login
      */
-    public function login()
+    public function login(): string|\CodeIgniter\HTTP\ResponseInterface
     {
         // Si ya está logueado, redirigir al dashboard
         if (session()->get('isLoggedIn')) {
@@ -24,7 +30,7 @@ class Auth extends BaseController
     /**
      * Procesar intento de login
      */
-    public function attemptLogin()
+    public function attemptLogin(): \CodeIgniter\HTTP\ResponseInterface
     {
         $rules = [
             'email'    => 'required|valid_email',
@@ -87,9 +93,14 @@ class Auth extends BaseController
         // Actualizar último login
         $userModel->updateLastLogin($user['id']);
 
-        // Redirigir a URL guardada o al dashboard
-        $redirectUrl = session()->get('redirect_url') ?? base_url('admin/dashboard');
+        // Redirigir a URL guardada o flujo de onboarding cliente (selección de template)
+        $redirectUrl = session()->get('redirect_url');
         session()->remove('redirect_url');
+
+        if (empty($redirectUrl)) {
+            $redirectUrl = $this->clientOnboardingService->resolvePostLoginRedirect($roleNames, $clientId)
+                ?? base_url('admin/dashboard');
+        }
 
         return redirect()->to($redirectUrl)
             ->with('success', '¡Bienvenido, ' . ($user['full_name'] ?? $user['email']) . '!');
@@ -98,7 +109,7 @@ class Auth extends BaseController
     /**
      * Cerrar sesión
      */
-    public function logout()
+    public function logout(): \CodeIgniter\HTTP\ResponseInterface
     {
         session()->destroy();
 
