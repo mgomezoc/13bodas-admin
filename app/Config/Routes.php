@@ -132,7 +132,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/gallery/reorder', 'Admin\Gallery::reorder/$1');
 
         // Lista de regalos
-        $routes->get('(:segment)/registry', 'Admin\Registry::index/$1', ['filter' => 'eventpayment:$1']);
+        $routes->get('(:segment)/registry', 'Admin\Registry::index/$1');
         $routes->post('(:segment)/registry/store', 'Admin\Registry::store/$1');
         $routes->post('(:segment)/registry/update/(:segment)', 'Admin\Registry::update/$1/$2');
         $routes->post('(:segment)/registry/toggle-claimed/(:segment)', 'Admin\Registry::toggleClaimed/$1/$2');
