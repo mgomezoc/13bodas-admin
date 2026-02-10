@@ -10,18 +10,21 @@ use App\Models\ClientModel;
 use App\Models\GuestModel;
 use App\Models\ContentModuleModel;
 use App\Models\EventTemplateModel;
+use App\Models\TemplateModel;
 
 class Events extends BaseController
 {
     protected EventModel $eventModel;
     protected ClientModel $clientModel;
     protected EventTemplateModel $eventTemplateModel;
+    protected TemplateModel $templateModel;
 
     public function __construct()
     {
         $this->eventModel         = new EventModel();
         $this->clientModel        = new ClientModel();
         $this->eventTemplateModel = new EventTemplateModel();
+        $this->templateModel      = new TemplateModel();
     }
 
     public function index()
@@ -265,7 +268,150 @@ class Events extends BaseController
             'isAdmin'       => $isAdmin,
             'invitationUrl' => base_url('i/' . $event['slug']),
             'clients'       => $isClient ? [] : $this->clientModel->listWithUsers(),
+            'templates'     => $this->getTemplateOptions($event['template_id']),
         ]);
+    }
+
+    public function updateSettings(string $id)
+    {
+        $event = $this->eventModel->find($id);
+
+        if (!$event) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Evento no encontrado.',
+            ]);
+        }
+
+        if (!$this->canAccessEvent($id)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Sin acceso.',
+            ]);
+        }
+
+        $session   = session();
+        $userRoles = $session->get('user_roles') ?? [];
+        $isAdmin   = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
+
+        if (!$isAdmin) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No tienes permisos para modificar la configuración del evento.',
+            ]);
+        }
+
+        $eventData = [];
+
+        $serviceStatus = $this->request->getPost('service_status');
+        if ($serviceStatus !== null && $serviceStatus !== '') {
+            $allowedStatuses = ['draft', 'active', 'suspended', 'archived'];
+            if (!in_array($serviceStatus, $allowedStatuses, true)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'service_status inválido.',
+                ]);
+            }
+            $eventData['service_status'] = $serviceStatus;
+        }
+
+        $visibility = $this->request->getPost('visibility');
+        if ($visibility !== null && $visibility !== '') {
+            $allowedVisibility = ['public', 'private'];
+            if (!in_array($visibility, $allowedVisibility, true)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'visibility inválido.',
+                ]);
+            }
+            $eventData['visibility'] = $visibility;
+        }
+
+        $accessMode = $this->request->getPost('access_mode');
+        if ($accessMode !== null && $accessMode !== '') {
+            $allowedAccessMode = ['open', 'invite_code'];
+            if (!in_array($accessMode, $allowedAccessMode, true)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'access_mode inválido.',
+                ]);
+            }
+            $eventData['access_mode'] = $accessMode;
+        }
+
+        $eventData['is_demo'] = $this->request->getPost('is_demo') ? 1 : 0;
+        $isPaid               = $this->request->getPost('is_paid') ? 1 : 0;
+        $eventData['is_paid'] = $isPaid;
+
+        if ($isPaid === 1) {
+            $paidUntil = $this->request->getPost('paid_until');
+            $eventData['paid_until'] = !empty($paidUntil) ? $this->formatDateTime($paidUntil) : null;
+        } else {
+            $eventData['paid_until'] = null;
+        }
+
+        if (!empty($eventData)) {
+            $updated = $this->eventModel->update($id, $eventData);
+            if (!$updated) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'No se pudo actualizar la configuración.',
+                    'errors'  => $this->eventModel->errors(),
+                ]);
+            }
+        }
+
+        $templateId = $this->request->getPost('template_id');
+        if ($templateId !== null && $templateId !== '') {
+            $template = $this->templateModel->find((int) $templateId);
+            if (!$template) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Template inválido.',
+                ]);
+            }
+
+            $templateUpdated = $this->eventTemplateModel->setActiveTemplate($id, (int) $templateId);
+            if (!$templateUpdated) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'No se pudo actualizar el template del evento.',
+                ]);
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Configuración actualizada.',
+        ]);
+    }
+
+    private function getTemplateOptions(?int $activeTemplateId): array
+    {
+        $templates = $this->templateModel
+            ->where('is_active', 1)
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->findAll();
+
+        if ($activeTemplateId !== null) {
+            $existsInList = false;
+            foreach ($templates as $template) {
+                if ((int) ($template['id'] ?? 0) === $activeTemplateId) {
+                    $existsInList = true;
+                    break;
+                }
+            }
+
+            if (!$existsInList) {
+                $activeTemplate = $this->templateModel->find($activeTemplateId);
+                if ($activeTemplate) {
+                    $templates[] = $activeTemplate;
+                }
+            }
+        }
+
+        return $templates;
     }
 
     public function update(string $id)

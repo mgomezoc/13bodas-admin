@@ -74,6 +74,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('view/(:segment)', 'Admin\Events::view/$1');
         $routes->get('edit/(:segment)', 'Admin\Events::edit/$1');
         $routes->post('update/(:segment)', 'Admin\Events::update/$1');
+        $routes->post('update-settings/(:segment)', 'Admin\Events::updateSettings/$1', ['as' => 'admin.events.update_settings']);
         $routes->post('delete/(:segment)', 'Admin\Events::delete/$1');
         $routes->post('check-slug', 'Admin\Events::checkSlug');
         $routes->get('preview/(:segment)', 'Admin\Events::preview/$1');
