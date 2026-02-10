@@ -42,6 +42,16 @@ class PaymentService
         ]);
     }
 
+
+    public function getCheckoutSessionStatus(string $sessionId): array
+    {
+        if (trim($sessionId) === '') {
+            throw new \RuntimeException('Session ID inválido.');
+        }
+
+        return $this->provider->getCheckoutSessionStatus($sessionId);
+    }
+
     public function processWebhook(string $payload, string $signature): bool
     {
         if (!$this->provider->verifyWebhook($payload, $signature)) {

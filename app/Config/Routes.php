@@ -35,8 +35,8 @@ $routes->post('register', 'Auth::processRegister', ['as' => 'register.store']);
 $routes->group('checkout', static function ($routes) {
     $routes->get('(:segment)', 'Checkout::index/$1', ['filter' => 'auth', 'as' => 'checkout.index']);
     $routes->post('create-session/(:segment)', 'Checkout::createSession/$1', ['filter' => 'auth', 'as' => 'checkout.create_session']);
-    $routes->get('success', 'Checkout::success', ['as' => 'checkout.success']);
-    $routes->get('cancel', 'Checkout::cancel', ['as' => 'checkout.cancel']);
+    $routes->get('success', 'Checkout::success', ['filter' => 'auth', 'as' => 'checkout.success']);
+    $routes->get('cancel', 'Checkout::cancel', ['filter' => 'auth', 'as' => 'checkout.cancel']);
 });
 
 // Webhook Stripe (sin CSRF)

@@ -54,7 +54,7 @@ class StripeProvider implements PaymentProviderInterface
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => $this->successUrl . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => $this->buildSuccessUrl(),
             'cancel_url' => $this->cancelUrl,
             'customer_email' => $data['customer_email'] ?? null,
             'metadata' => [
@@ -98,6 +98,32 @@ class StripeProvider implements PaymentProviderInterface
         }
 
         return $url;
+    }
+
+
+    private function buildSuccessUrl(): string
+    {
+        if (str_contains($this->successUrl, '{CHECKOUT_SESSION_ID}')) {
+            return $this->successUrl;
+        }
+
+        $separator = str_contains($this->successUrl, '?') ? '&' : '?';
+
+        return $this->successUrl . $separator . 'session_id={CHECKOUT_SESSION_ID}';
+    }
+
+    public function getCheckoutSessionStatus(string $sessionId): array
+    {
+        $session = $this->stripe->checkout->sessions->retrieve($sessionId, []);
+
+        return [
+            'session_id' => (string) ($session->id ?? ''),
+            'payment_status' => (string) ($session->payment_status ?? ''),
+            'status' => (string) ($session->status ?? ''),
+            'event_id' => (string) ($session->metadata->event_id ?? ''),
+            'amount_total' => ((int) ($session->amount_total ?? 0)) / 100,
+            'currency' => strtoupper((string) ($session->currency ?? 'MXN')),
+        ];
     }
 
     public function processPayment(string $payload): array

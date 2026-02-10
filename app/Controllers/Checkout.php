@@ -64,14 +64,45 @@ class Checkout extends BaseController
         }
     }
 
-    public function success(): string
+    public function success(): string|ResponseInterface
     {
-        return view('checkout/success', ['sessionId' => (string) $this->request->getGet('session_id')]);
+        $sessionId = trim((string) $this->request->getGet('session_id'));
+
+        if ($sessionId === '') {
+            return redirect()->route('admin.events.index')->with('error', 'No se recibió el identificador de sesión de Stripe.');
+        }
+
+        try {
+            $sessionStatus = $this->paymentService()->getCheckoutSessionStatus($sessionId);
+        } catch (\Throwable $exception) {
+            log_message('error', 'Checkout::success validation error: {message}', ['message' => $exception->getMessage()]);
+
+            return view('checkout/success', [
+                'sessionId' => $sessionId,
+                'isPaid' => false,
+                'paymentStatus' => 'unknown',
+                'errorMessage' => 'No fue posible verificar el estado del pago en este momento.',
+            ]);
+        }
+
+        $isPaid = ($sessionStatus['payment_status'] ?? '') === 'paid';
+
+        return view('checkout/success', [
+            'sessionId' => $sessionId,
+            'isPaid' => $isPaid,
+            'paymentStatus' => (string) ($sessionStatus['payment_status'] ?? 'unknown'),
+            'eventId' => (string) ($sessionStatus['event_id'] ?? ''),
+            'amount' => (float) ($sessionStatus['amount_total'] ?? 0.0),
+            'currency' => (string) ($sessionStatus['currency'] ?? 'MXN'),
+            'errorMessage' => $isPaid ? '' : 'Stripe aún no confirma el pago. Si ya pagaste, recarga esta página en unos segundos.',
+        ]);
     }
 
     public function cancel(): string
     {
-        return view('checkout/cancel');
+        return view('checkout/cancel', [
+            'eventId' => (string) $this->request->getGet('event_id'),
+        ]);
     }
 
     private function canAccessEvent(string $eventId): bool
