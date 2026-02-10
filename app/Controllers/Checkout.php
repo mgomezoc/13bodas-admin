@@ -87,6 +87,11 @@ class Checkout extends BaseController
     {
         $sessionId = trim((string) $this->request->getGet('session_id'));
         $eventIdFromQuery = trim((string) $this->request->getGet('event_id'));
+        
+        log_message('info', 'Checkout::success CALLED session={s} event={e}', [
+            's' => $sessionId,
+            'e' => $eventIdFromQuery,
+        ]);
 
         if ($sessionId === '') {
             return redirect()->route('admin.events.index')->with('error', 'No se recibió el identificador de sesión de Stripe.');

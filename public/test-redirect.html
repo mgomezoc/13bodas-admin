@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Redirect Success</title>
+</head>
+<body>
+    <h1>🧪 Test de Redirect a Checkout Success</h1>
+    <p>Este botón simula el redirect que hace Stripe después de un pago exitoso.</p>
+    
+    <form method="GET" action="/13bodas/public/checkout/success">
+        <label>Session ID (del último pago):</label><br>
+        <input type="text" name="session_id" value="cs_test_a1MR9rAQPL0gIG5jsVLftK6z323cdd3yqfFQsLcC3kxfpUxpmGQxIxOt5d" style="width: 500px; padding: 10px; font-size: 14px; margin: 10px 0;">
+        <br><br>
+        <button type="submit" style="background: #4CAF50; color: white; padding: 15px 30px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
+            ▶️ Simular Redirect de Stripe
+        </button>
+    </form>
+    
+    <hr>
+    
+    <h3>📝 Qué hace este test:</h3>
+    <ol>
+        <li>Redirige a <code>/checkout/success?session_id=XXX</code></li>
+        <li>Debería ejecutar <code>Checkout::success()</code></li>
+        <li>Debería generar logs en <code>writable/logs/log-2026-02-10.log</code></li>
+    </ol>
+    
+    <h3>🔍 Después del redirect, revisar:</h3>
+    <pre style="background: #f5f5f5; padding: 15px; border: 1px solid #ddd;">
+# En PowerShell o CMD:
+cd C:\laragon\www\13bodas
+Get-Content writable\logs\log-2026-02-10.log -Tail 50 | Select-String "Checkout::success"
+    </pre>
+    
+    <p><strong>Si NO aparecen logs:</strong> El método no se ejecuta (problema de routing o filtros)</p>
+    <p><strong>Si aparecen logs:</strong> El problema está en otro lugar</p>
+</body>
+</html>

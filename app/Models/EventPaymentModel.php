@@ -61,8 +61,24 @@ class EventPaymentModel extends Model
             return false;
         }
 
-        $data['id'] = $data['id'] ?? UserModel::generateUUID();
+        // FIX: Usar método local en lugar de UserModel::generateUUID()
+        $data['id'] = $data['id'] ?? $this->generateUUID();
 
         return $this->insert($data) ? (string) $data['id'] : false;
+    }
+
+    /**
+     * Genera un UUID v4
+     */
+    protected function generateUUID(): string
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
     }
 }

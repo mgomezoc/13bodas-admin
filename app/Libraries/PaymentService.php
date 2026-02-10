@@ -53,8 +53,15 @@ class PaymentService
 
     public function finalizeCheckoutSession(string $sessionId): array
     {
+        log_message('info', 'PaymentService::finalizeCheckoutSession START session={sessionId}', ['sessionId' => $sessionId]);
+        
         $sessionData = $this->getCheckoutSessionStatus($sessionId);
         $isPaid = ($sessionData['payment_status'] ?? '') === 'paid';
+        
+        log_message('info', 'PaymentService::finalizeCheckoutSession status={status} paid={paid}', [
+            'status' => $sessionData['payment_status'] ?? 'unknown',
+            'paid' => $isPaid ? 'yes' : 'no',
+        ]);
 
         if (!$isPaid) {
             return [
@@ -67,8 +74,11 @@ class PaymentService
 
         $eventId = (string) ($sessionData['event_id'] ?? '');
         if ($eventId === '') {
+            log_message('error', 'PaymentService::finalizeCheckoutSession ERROR no event_id in metadata');
             throw new \RuntimeException('La sesión Stripe no incluye event_id en metadata.');
         }
+        
+        log_message('info', 'PaymentService::finalizeCheckoutSession event={eventId}', ['eventId' => $eventId]);
 
         $provider = $this->currentProviderName();
         $reference = (string) ($sessionData['payment_reference'] ?? '');
@@ -77,6 +87,7 @@ class PaymentService
         }
 
         if ($this->paymentModel->existsByReference($provider, $reference)) {
+            log_message('info', 'PaymentService::finalizeCheckoutSession payment exists, ensuring activation');
             $this->ensureEventActivated($eventId, $provider, $reference);
 
             return [
@@ -107,8 +118,11 @@ class PaymentService
         ]);
 
         if (!$paymentId) {
+            log_message('error', 'PaymentService::finalizeCheckoutSession ERROR failed to create payment');
             throw new \RuntimeException('No fue posible registrar el pago localmente.');
         }
+        
+        log_message('info', 'PaymentService::finalizeCheckoutSession payment created id={paymentId}', ['paymentId' => $paymentId]);
 
         $this->activateEvent($eventId, $provider, $reference);
 
@@ -166,6 +180,8 @@ class PaymentService
 
     private function activateEvent(string $eventId, string $provider, string $reference): void
     {
+        log_message('info', 'PaymentService::activateEvent START event={eventId}', ['eventId' => $eventId]);
+        
         $event = $this->eventModel->find($eventId);
         if (!$event) {
             throw new \RuntimeException('Event not found: ' . $eventId);
@@ -175,7 +191,7 @@ class PaymentService
         $validDays = (int) $this->settingModel->getValue('payment_valid_days_after_event', 30);
         $paidUntil = $eventDate->modify(sprintf('+%d days', $validDays))->format('Y-m-d H:i:s');
 
-        $this->eventModel->update($eventId, [
+        $updateData = [
             'is_demo' => 0,
             'is_paid' => 1,
             'service_status' => 'active',
@@ -183,7 +199,18 @@ class PaymentService
             'payment_provider' => $provider,
             'payment_reference' => $reference,
             'paid_until' => $paidUntil,
-        ]);
+        ];
+        
+        log_message('info', 'PaymentService::activateEvent updating event={eventId}', ['eventId' => $eventId]);
+        
+        $result = $this->eventModel->update($eventId, $updateData);
+        
+        if ($result) {
+            log_message('info', 'PaymentService::activateEvent SUCCESS event={eventId} activated', ['eventId' => $eventId]);
+        } else {
+            log_message('error', 'PaymentService::activateEvent FAILED event={eventId}', ['eventId' => $eventId]);
+            throw new \RuntimeException('Failed to activate event: ' . $eventId);
+        }
     }
 
     private function ensureEventActivated(string $eventId, string $provider, string $reference): void
