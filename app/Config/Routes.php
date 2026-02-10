@@ -87,7 +87,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('list', 'Admin\Events::list');
         $routes->get('create', 'Admin\Events::create');
         $routes->post('store', 'Admin\Events::store');
-        $routes->get('view/(:segment)', 'Admin\Events::view/$1');
+        $routes->get('view/(:segment)', 'Admin\Events::view/$1', ['as' => 'admin.events.view']);
         $routes->get('edit/(:segment)', 'Admin\Events::edit/$1');
         $routes->post('update/(:segment)', 'Admin\Events::update/$1');
         $routes->post('update-settings/(:segment)', 'Admin\Events::updateSettings/$1', ['as' => 'admin.events.update_settings']);

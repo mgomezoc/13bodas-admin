@@ -40,6 +40,8 @@ class StripeProvider implements PaymentProviderInterface
 
     public function createCheckoutSession(array $data): array
     {
+        $eventId = (string) ($data['event_id'] ?? '');
+
         $session = $this->stripe->checkout->sessions->create([
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -54,11 +56,11 @@ class StripeProvider implements PaymentProviderInterface
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => $this->buildSuccessUrl(),
-            'cancel_url' => $this->cancelUrl,
+            'success_url' => $this->buildSuccessUrl($eventId),
+            'cancel_url' => $this->buildCancelUrl($eventId),
             'customer_email' => $data['customer_email'] ?? null,
             'metadata' => [
-                'event_id' => (string) $data['event_id'],
+                'event_id' => $eventId,
                 'source' => '13bodas_checkout',
             ],
             'locale' => 'es',
@@ -86,32 +88,6 @@ class StripeProvider implements PaymentProviderInterface
         }
     }
 
-    private function resolveAbsoluteUrl(string $url): string
-    {
-        if ($url === '') {
-            throw new \RuntimeException('Configura STRIPE_SUCCESS_URL y STRIPE_CANCEL_URL con URLs válidas en tu .env.');
-        }
-
-        $uri = new URI($url);
-        if ($uri->getScheme() === '' || $uri->getHost() === '') {
-            throw new \RuntimeException('Las URLs de Stripe deben ser absolutas (https://dominio/ruta). Revisa tu .env.');
-        }
-
-        return $url;
-    }
-
-
-    private function buildSuccessUrl(): string
-    {
-        if (str_contains($this->successUrl, '{CHECKOUT_SESSION_ID}')) {
-            return $this->successUrl;
-        }
-
-        $separator = str_contains($this->successUrl, '?') ? '&' : '?';
-
-        return $this->successUrl . $separator . 'session_id={CHECKOUT_SESSION_ID}';
-    }
-
     public function getCheckoutSessionStatus(string $sessionId): array
     {
         $session = $this->stripe->checkout->sessions->retrieve($sessionId, []);
@@ -121,8 +97,13 @@ class StripeProvider implements PaymentProviderInterface
             'payment_status' => (string) ($session->payment_status ?? ''),
             'status' => (string) ($session->status ?? ''),
             'event_id' => (string) ($session->metadata->event_id ?? ''),
-            'amount_total' => ((int) ($session->amount_total ?? 0)) / 100,
+            'payment_reference' => (string) ($session->payment_intent ?? ($session->id ?? '')),
+            'amount' => ((int) ($session->amount_total ?? 0)) / 100,
             'currency' => strtoupper((string) ($session->currency ?? 'MXN')),
+            'paid_at' => date('Y-m-d H:i:s', (int) ($session->created ?? time())),
+            'customer_email' => $session->customer_details->email ?? null,
+            'customer_name' => $session->customer_details->name ?? null,
+            'payment_method' => 'card',
         ];
     }
 
@@ -148,5 +129,48 @@ class StripeProvider implements PaymentProviderInterface
             'customer_name' => $sessionData['customer_details']['name'] ?? null,
             'payment_method' => 'card',
         ];
+    }
+
+    private function resolveAbsoluteUrl(string $url): string
+    {
+        if ($url === '') {
+            throw new \RuntimeException('Configura STRIPE_SUCCESS_URL y STRIPE_CANCEL_URL con URLs válidas en tu .env.');
+        }
+
+        $uri = new URI($url);
+        if ($uri->getScheme() === '' || $uri->getHost() === '') {
+            throw new \RuntimeException('Las URLs de Stripe deben ser absolutas (https://dominio/ruta). Revisa tu .env.');
+        }
+
+        return $url;
+    }
+
+    private function buildSuccessUrl(string $eventId): string
+    {
+        $urlWithSessionId = str_contains($this->successUrl, '{CHECKOUT_SESSION_ID}')
+            ? $this->successUrl
+            : $this->appendQueryParam($this->successUrl, 'session_id={CHECKOUT_SESSION_ID}');
+
+        if ($eventId === '' || str_contains($urlWithSessionId, 'event_id=')) {
+            return $urlWithSessionId;
+        }
+
+        return $this->appendQueryParam($urlWithSessionId, 'event_id=' . urlencode($eventId));
+    }
+
+    private function buildCancelUrl(string $eventId): string
+    {
+        if ($eventId === '' || str_contains($this->cancelUrl, 'event_id=')) {
+            return $this->cancelUrl;
+        }
+
+        return $this->appendQueryParam($this->cancelUrl, 'event_id=' . urlencode($eventId));
+    }
+
+    private function appendQueryParam(string $url, string $query): string
+    {
+        $separator = str_contains($url, '?') ? '&' : '?';
+
+        return $url . $separator . $query;
     }
 }
