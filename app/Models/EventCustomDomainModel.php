@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Entities\EventCustomDomain;
+use App\Enums\DomainRequestStatus;
 use CodeIgniter\Model;
 
 class EventCustomDomainModel extends Model
@@ -9,7 +13,7 @@ class EventCustomDomainModel extends Model
     protected $table            = 'event_custom_domains';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = false;
-    protected $returnType       = 'array';
+    protected $returnType       = EventCustomDomain::class;
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
 
@@ -18,26 +22,42 @@ class EventCustomDomainModel extends Model
         'event_id',
         'domain',
         'status',
+        'requested_by_user_id',
+        'admin_notes',
+        'dns_configured_at',
+        'created_at',
+        'updated_at',
     ];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
 
-    public function getByEvent(string $eventId): array
+    public function findLatestByEvent(string $eventId): ?EventCustomDomain
     {
-        return $this->where('event_id', $eventId)
-            ->orderBy('domain', 'ASC')
-            ->findAll();
+        $record = $this->where('event_id', $eventId)
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        return $record instanceof EventCustomDomain ? $record : null;
     }
 
-    public function createDomain(array $data): ?string
+    public function findActiveRequestByEvent(string $eventId): ?EventCustomDomain
     {
-        $domainId = UserModel::generateUUID();
-        $data['id'] = $domainId;
+        $record = $this->where('event_id', $eventId)
+            ->whereIn('status', [
+                DomainRequestStatus::Requested->value,
+                DomainRequestStatus::Processing->value,
+            ])
+            ->orderBy('created_at', 'DESC')
+            ->first();
 
-        if ($this->insert($data)) {
-            return $domainId;
-        }
+        return $record instanceof EventCustomDomain ? $record : null;
+    }
 
-        return null;
+    public function existsByDomain(string $domain): bool
+    {
+        return $this->where('domain', $domain)->countAllResults() > 0;
     }
 }

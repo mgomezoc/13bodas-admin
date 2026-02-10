@@ -255,7 +255,7 @@
                                 <!-- ✅ Paso 1 (CRÍTICO) enums corregidos -->
                                 <div class="mb-3">
                                     <label class="form-label" for="service_status">Estado del Servicio</label>
-                                    <select id="service_status" name="service_status" class="form-select">
+                                    <select id="service_status" name="service_status" class="form-select js-config-autosave">
                                         <option value="draft" <?= ($event['service_status'] ?? '') === 'draft' ? 'selected' : '' ?>>Borrador</option>
                                         <option value="active" <?= ($event['service_status'] ?? '') === 'active' ? 'selected' : '' ?>>Activo</option>
                                         <option value="suspended" <?= ($event['service_status'] ?? '') === 'suspended' ? 'selected' : '' ?>>Suspendido</option>
@@ -266,7 +266,7 @@
 
                                 <div class="mb-3">
                                     <label class="form-label" for="visibility">Visibilidad</label>
-                                    <select id="visibility" name="visibility" class="form-select">
+                                    <select id="visibility" name="visibility" class="form-select js-config-autosave">
                                         <option value="private" <?= ($event['visibility'] ?? '') === 'private' ? 'selected' : '' ?>>Privado</option>
                                         <option value="public" <?= ($event['visibility'] ?? '') === 'public' ? 'selected' : '' ?>>Público</option>
                                     </select>
@@ -275,21 +275,33 @@
                                 <!-- ✅ Paso 2 (admin-only) campos en events -->
                                 <div class="mb-3">
                                     <label class="form-label" for="access_mode">Modo de Acceso</label>
-                                    <select id="access_mode" name="access_mode" class="form-select">
+                                    <select id="access_mode" name="access_mode" class="form-select js-config-autosave">
                                         <option value="open" <?= ($event['access_mode'] ?? '') === 'open' ? 'selected' : '' ?>>Abierto</option>
                                         <option value="invite_code" <?= ($event['access_mode'] ?? '') === 'invite_code' ? 'selected' : '' ?>>Con código</option>
                                     </select>
                                     <div class="form-text">Controla el acceso a la invitación</div>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label" for="template_id">Template</label>
+                                    <select id="template_id" name="template_id" class="form-select js-config-autosave">
+                                        <option value="">Selecciona un template</option>
+                                        <?php foreach (($templates ?? []) as $template): ?>
+                                            <option value="<?= (int) ($template['id'] ?? 0) ?>" <?= (string) ($event['template_id'] ?? '') === (string) ($template['id'] ?? '') ? 'selected' : '' ?>>
+                                                <?= esc($template['name'] ?? 'Sin nombre') ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="is_demo" name="is_demo" value="1"
+                                    <input class="form-check-input js-config-autosave" type="checkbox" id="is_demo" name="is_demo" value="1"
                                         <?= !empty($event['is_demo']) ? 'checked' : '' ?>>
                                     <label class="form-check-label" for="is_demo">Es demo</label>
                                 </div>
 
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="is_paid" name="is_paid" value="1"
+                                    <input class="form-check-input js-config-autosave" type="checkbox" id="is_paid" name="is_paid" value="1"
                                         <?= !empty($event['is_paid']) ? 'checked' : '' ?>>
                                     <label class="form-check-label" for="is_paid">Pagado</label>
                                 </div>
@@ -297,11 +309,12 @@
                                 <div class="mb-3">
                                     <label class="form-label" for="paid_until">Pagado hasta</label>
                                     <input type="text" id="paid_until" name="paid_until"
-                                        class="form-control datetimepicker"
+                                        class="form-control datetimepicker js-config-autosave"
                                         value="<?= !empty($event['paid_until']) ? date('Y-m-d H:i', strtotime($event['paid_until'])) : '' ?>">
                                     <div class="form-text">Si “Pagado” está desactivado, este campo se guarda como NULL.</div>
                                 </div>
 
+                                <div id="configAutosaveStatus" class="small text-muted" aria-live="polite"></div>
 
                             </div>
                         </div>
@@ -405,7 +418,71 @@
         }
 
         syncPaidUntil();
-        $('#is_paid').on('change', syncPaidUntil);
+        $('#is_paid').on('change', function() {
+            syncPaidUntil();
+        });
+
+        let configAutosaveTimeout;
+        let configAutosaveRequest = null;
+
+        function setConfigAutosaveStatus(message, cssClass = 'text-muted') {
+            const $status = $('#configAutosaveStatus');
+            if (!$status.length) {
+                return;
+            }
+
+            $status.removeClass('text-muted text-success text-danger').addClass(cssClass).text(message);
+        }
+
+        function buildConfigAutosavePayload() {
+            const csrfInput = $('#eventForm input[name="<?= csrf_token() ?>"]');
+
+            return {
+                service_status: $('#service_status').val() || '',
+                visibility: $('#visibility').val() || '',
+                access_mode: $('#access_mode').val() || '',
+                template_id: $('#template_id').val() || '',
+                is_demo: $('#is_demo').is(':checked') ? 1 : 0,
+                is_paid: $('#is_paid').is(':checked') ? 1 : 0,
+                paid_until: $('#paid_until').is(':disabled') ? '' : ($('#paid_until').val() || ''),
+                [csrfInput.attr('name')]: csrfInput.val()
+            };
+        }
+
+        function saveConfigurationRealtime() {
+            if (configAutosaveRequest && typeof configAutosaveRequest.abort === 'function') {
+                configAutosaveRequest.abort();
+            }
+
+            setConfigAutosaveStatus('Guardando configuración...', 'text-muted');
+
+            configAutosaveRequest = $.ajax({
+                url: '<?= base_url('admin/events/update-settings/' . $event['id']) ?>',
+                method: 'POST',
+                data: buildConfigAutosavePayload(),
+                dataType: 'json'
+            }).done(function(response) {
+                if (!response.success) {
+                    setConfigAutosaveStatus(response.message || 'Error al guardar configuración.', 'text-danger');
+                    return;
+                }
+
+                setConfigAutosaveStatus('Configuración guardada en tiempo real.', 'text-success');
+            }).fail(function(xhr, status) {
+                if (status === 'abort') {
+                    return;
+                }
+                setConfigAutosaveStatus('No se pudo guardar la configuración.', 'text-danger');
+            });
+        }
+
+        function triggerConfigAutosave() {
+            clearTimeout(configAutosaveTimeout);
+            configAutosaveTimeout = setTimeout(saveConfigurationRealtime, 450);
+        }
+
+        $('.js-config-autosave').on('change', triggerConfigAutosave);
+        $('#paid_until').on('blur', triggerConfigAutosave);
 
         // Guardar formulario
         $('#eventForm').on('submit', function(e) {
