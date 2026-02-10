@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="<?= base_url('assets/css/checkout.css') ?>">
-    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body class="checkout-page">
     <main class="checkout-wrapper container py-4 py-md-5">
@@ -58,7 +57,6 @@
     <script>
         window.checkoutConfig = {
             createSessionUrl: '<?= site_url(route_to('checkout.create_session', $event['id'])) ?>',
-            publicKey: '<?= esc((string) env('STRIPE_PUBLISHABLE_KEY', '')) ?>',
             csrfTokenName: '<?= esc(csrf_token()) ?>',
             csrfHash: '<?= esc(csrf_hash()) ?>',
         };

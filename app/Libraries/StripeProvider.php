@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use CodeIgniter\HTTP\URI;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\StripeClient;
 use Stripe\Webhook;
@@ -12,6 +13,8 @@ class StripeProvider implements PaymentProviderInterface
 {
     private StripeClient $stripe;
     private string $webhookSecret;
+    private string $successUrl;
+    private string $cancelUrl;
 
     public function __construct()
     {
@@ -19,8 +22,20 @@ class StripeProvider implements PaymentProviderInterface
             throw new \RuntimeException('Stripe SDK no está instalado. Ejecuta: composer install (o composer require stripe/stripe-php).');
         }
 
-        $this->stripe = new StripeClient((string) env('STRIPE_SECRET_KEY', ''));
-        $this->webhookSecret = (string) env('STRIPE_WEBHOOK_SECRET', '');
+        $secretKey = trim((string) env('STRIPE_SECRET_KEY', ''));
+        if ($secretKey === '') {
+            throw new \RuntimeException('Falta STRIPE_SECRET_KEY en tu .env para crear sesiones de Stripe.');
+        }
+
+        $this->stripe = new StripeClient($secretKey);
+        $this->webhookSecret = trim((string) env('STRIPE_WEBHOOK_SECRET', ''));
+
+        $this->successUrl = $this->resolveAbsoluteUrl(
+            trim((string) env('STRIPE_SUCCESS_URL', route_to('checkout.success') !== '' ? site_url(route_to('checkout.success')) : base_url('checkout/success')))
+        );
+        $this->cancelUrl = $this->resolveAbsoluteUrl(
+            trim((string) env('STRIPE_CANCEL_URL', route_to('checkout.cancel') !== '' ? site_url(route_to('checkout.cancel')) : base_url('checkout/cancel')))
+        );
     }
 
     public function createCheckoutSession(array $data): array
@@ -39,8 +54,8 @@ class StripeProvider implements PaymentProviderInterface
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => (string) env('STRIPE_SUCCESS_URL', base_url('checkout/success')) . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => (string) env('STRIPE_CANCEL_URL', base_url('checkout/cancel')),
+            'success_url' => $this->successUrl . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => $this->cancelUrl,
             'customer_email' => $data['customer_email'] ?? null,
             'metadata' => [
                 'event_id' => (string) $data['event_id'],
@@ -58,6 +73,10 @@ class StripeProvider implements PaymentProviderInterface
 
     public function verifyWebhook(string $payload, string $signature): bool
     {
+        if ($this->webhookSecret === '') {
+            throw new \RuntimeException('Falta STRIPE_WEBHOOK_SECRET en tu .env para validar webhooks de Stripe.');
+        }
+
         try {
             Webhook::constructEvent($payload, $signature, $this->webhookSecret);
             return true;
@@ -65,6 +84,20 @@ class StripeProvider implements PaymentProviderInterface
             log_message('error', 'Stripe webhook signature verification failed: {message}', ['message' => $exception->getMessage()]);
             return false;
         }
+    }
+
+    private function resolveAbsoluteUrl(string $url): string
+    {
+        if ($url === '') {
+            throw new \RuntimeException('Configura STRIPE_SUCCESS_URL y STRIPE_CANCEL_URL con URLs válidas en tu .env.');
+        }
+
+        $uri = new URI($url);
+        if ($uri->getScheme() === '' || $uri->getHost() === '') {
+            throw new \RuntimeException('Las URLs de Stripe deben ser absolutas (https://dominio/ruta). Revisa tu .env.');
+        }
+
+        return $url;
     }
 
     public function processPayment(string $payload): array

@@ -56,7 +56,11 @@ class Checkout extends BaseController
             ]);
         } catch (\Throwable $exception) {
             log_message('error', 'Checkout::createSession error: {message}', ['message' => $exception->getMessage()]);
-            return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => $exception->getMessage()]);
+
+            return $this->response->setStatusCode(400)->setJSON([
+                'success' => false,
+                'message' => 'No fue posible inicializar el pago. Verifica la configuración de Stripe.',
+            ]);
         }
     }
 

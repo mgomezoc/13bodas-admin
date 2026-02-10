@@ -54,6 +54,22 @@ Configura la API y el remitente verificado en `app/Config/Resend.php`:
 - `fromEmail`: correo verificado en Resend.
 - `fromName`: nombre visible del remitente.
 
+## Stripe (checkout y webhook)
+Para habilitar pagos con Stripe configura estas variables en `.env`:
+
+```ini
+PAYMENT_DEFAULT_PROVIDER=stripe
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+STRIPE_CURRENCY=MXN
+STRIPE_SUCCESS_URL=https://tu-dominio.com/checkout/success
+STRIPE_CANCEL_URL=https://tu-dominio.com/checkout/cancel
+```
+
+Notas:
+- `STRIPE_SUCCESS_URL` y `STRIPE_CANCEL_URL` deben ser URLs absolutas.
+- El webhook de Stripe debe apuntar a `POST /webhooks/stripe`.
+
 ## Documentación adicional
 - `agentes.md` contiene el inventario de roles funcionales y flujos principales.
 
