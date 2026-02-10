@@ -14,6 +14,7 @@ use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\AuthFilter;
 use App\Filters\ClientFilter;
+use App\Filters\EventPaymentFilter;
 
 class Filters extends BaseFilters
 {
@@ -32,6 +33,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'auth'          => AuthFilter::class,
         'client'        => ClientFilter::class,
+        'eventpayment'  => EventPaymentFilter::class,
     ];
 
     /**

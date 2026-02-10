@@ -21,10 +21,26 @@ $routes->get('sitemap.xml', 'Sitemap::index');
 // RUTAS DE AUTENTICACIÓN (Admin)
 // =============================================================================
 $routes->group('admin', function ($routes) {
-    $routes->get('login', 'Admin\Auth::login');
+    $routes->get('login', 'Admin\Auth::login', ['as' => 'admin.login']);
     $routes->post('login', 'Admin\Auth::attemptLogin');
     $routes->get('logout', 'Admin\Auth::logout');
 });
+
+
+// Registro público
+$routes->get('register', 'Auth::register', ['as' => 'register.index']);
+$routes->post('register', 'Auth::processRegister', ['as' => 'register.store']);
+
+// Checkout
+$routes->group('checkout', static function ($routes) {
+    $routes->get('(:segment)', 'Checkout::index/$1', ['filter' => 'auth', 'as' => 'checkout.index']);
+    $routes->post('create-session/(:segment)', 'Checkout::createSession/$1', ['filter' => 'auth', 'as' => 'checkout.create_session']);
+    $routes->get('success', 'Checkout::success', ['as' => 'checkout.success']);
+    $routes->get('cancel', 'Checkout::cancel', ['as' => 'checkout.cancel']);
+});
+
+// Webhook Stripe (sin CSRF)
+$routes->post('webhooks/stripe', 'Webhooks\StripeWebhook::handle', ['as' => 'webhooks.stripe']);
 
 // =============================================================================
 // RUTAS DEL PANEL DE ADMINISTRACIÓN (Protegidas)
@@ -32,8 +48,8 @@ $routes->group('admin', function ($routes) {
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
     // Dashboard
-    $routes->get('/', 'Admin\Dashboard::index');
-    $routes->get('dashboard', 'Admin\Dashboard::index');
+    $routes->get('/', 'Admin\Dashboard::index', ['as' => 'admin.dashboard']);
+    $routes->get('dashboard', 'Admin\Dashboard::index', ['as' => 'admin.dashboard.alt']);
 
     // ---------------------------------------------------------------------
     // USUARIOS (Solo admin/superadmin)
@@ -67,7 +83,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     // EVENTOS
     // ---------------------------------------------------------------------
     $routes->group('events', function ($routes) {
-        $routes->get('/', 'Admin\Events::index');
+        $routes->get('/', 'Admin\Events::index', ['as' => 'admin.events.index']);
         $routes->get('list', 'Admin\Events::list');
         $routes->get('create', 'Admin\Events::create');
         $routes->post('store', 'Admin\Events::store');

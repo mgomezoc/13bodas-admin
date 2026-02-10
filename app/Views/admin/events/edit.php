@@ -1,11 +1,24 @@
 <?php declare(strict_types=1); ?>
 <!-- ✅ app/Views/admin/events/edit.php (COMPLETO) -->
 <?= $this->extend('layouts/admin') ?>
+<?php $highlightTemplateSelection = (string) service('request')->getGet('highlight') === 'template'; ?>
 
 <?= $this->section('title') ?><?= esc($event['couple_title']) ?><?= $this->endSection() ?>
 
 <?= $this->section('styles') ?>
 <link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<style>
+.template-highlight {
+    border: 2px solid #c89d67;
+    border-radius: 12px;
+    box-shadow: 0 0 0 0 rgba(200,157,103,.45);
+    animation: templatePulse 1.8s ease-in-out infinite;
+}
+@keyframes templatePulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(200,157,103,.05); }
+    50% { box-shadow: 0 0 0 8px rgba(200,157,103,.2); }
+}
+</style>
 <?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
@@ -282,8 +295,13 @@
                                     <div class="form-text">Controla el acceso a la invitación</div>
                                 </div>
 
-                                <div class="mb-3">
+                                <div id="templateSelectionCard" class="mb-3 <?= $highlightTemplateSelection ? 'template-highlight p-3' : '' ?>">
                                     <label class="form-label" for="template_id">Template</label>
+                                    <?php if ($highlightTemplateSelection): ?>
+                                        <div class="alert alert-warning py-2" role="alert">
+                                            <i class="bi bi-palette me-1"></i>Selecciona la plantilla de tu invitación para continuar.
+                                        </div>
+                                    <?php endif; ?>
                                     <select id="template_id" name="template_id" class="form-select js-config-autosave">
                                         <option value="">Selecciona un template</option>
                                         <?php foreach (($templates ?? []) as $template): ?>
@@ -316,6 +334,32 @@
 
                                 <div id="configAutosaveStatus" class="small text-muted" aria-live="polite"></div>
 
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+
+                    <?php if (!empty($isClient)): ?>
+                        <div class="card mb-4" id="templateSelectionCard">
+                            <div class="card-header">
+                                <i class="bi bi-palette"></i> Template de Invitación
+                            </div>
+                            <div class="card-body <?= $highlightTemplateSelection ? 'template-highlight p-3' : '' ?>">
+                                <?php if ($highlightTemplateSelection): ?>
+                                    <div class="alert alert-warning py-2" role="alert">
+                                        <i class="bi bi-palette me-1"></i>Selecciona la plantilla de tu invitación y presiona "Guardar Cambios".
+                                    </div>
+                                <?php endif; ?>
+                                <label class="form-label" for="template_id">Template</label>
+                                <select id="template_id" name="template_id" class="form-select">
+                                    <option value="">Selecciona un template</option>
+                                    <?php foreach (($templates ?? []) as $template): ?>
+                                        <option value="<?= (int) ($template['id'] ?? 0) ?>" <?= (string) ($event['template_id'] ?? '') === (string) ($template['id'] ?? '') ? 'selected' : '' ?>>
+                                            <?= esc($template['name'] ?? 'Sin nombre') ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Puedes cambiar tu template cuando lo necesites.</div>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -589,5 +633,13 @@
             }
         });
     }
+    <?php if ($highlightTemplateSelection): ?>
+    const templateCard = document.getElementById('templateSelectionCard');
+    if (templateCard) {
+        setTimeout(() => {
+            templateCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }
+    <?php endif; ?>
 </script>
 <?= $this->endSection() ?>

@@ -461,7 +461,6 @@ class Events extends BaseController
             'client_id',
             'service_status',
             'visibility',
-            'template_id',
 
             // Paso 2: directos en events (admin-only)
             'access_mode',
@@ -540,14 +539,24 @@ class Events extends BaseController
             return $this->jsonOrRedirect(false, 'No se pudo actualizar el evento.', null, $this->eventModel->errors());
         }
 
-        // 2) Guardar plantilla activa (EN PIVOTE) si es admin y viene template_id
-        if ($isAdmin) {
-            $templateId = $this->request->getPost('template_id');
-            if ($templateId !== null && $templateId !== '') {
-                $ok = $this->eventTemplateModel->setActiveTemplate($id, (int)$templateId);
-                if (!$ok) {
-                    return $this->jsonOrRedirect(false, 'El evento se guardó, pero falló la actualización de la plantilla.');
-                }
+        // 2) Guardar plantilla activa (EN PIVOTE) para admin o cliente dueño del evento
+        $templateId = $this->request->getPost('template_id');
+        if ($templateId !== null && $templateId !== '') {
+            $template = $this->templateModel->find((int) $templateId);
+            if (!$template) {
+                return $this->jsonOrRedirect(false, 'Template no encontrado.');
+            }
+
+            $isTemplateAssignable = (int) ($template['is_active'] ?? 0) === 1
+                && ($isAdmin || (int) ($template['is_public'] ?? 0) === 1);
+
+            if (!$isTemplateAssignable) {
+                return $this->jsonOrRedirect(false, 'No tienes permisos para asignar este template.');
+            }
+
+            $ok = $this->eventTemplateModel->setActiveTemplate($id, (int) $templateId);
+            if (!$ok) {
+                return $this->jsonOrRedirect(false, 'El evento se guardó, pero falló la actualización de la plantilla.');
             }
         }
 

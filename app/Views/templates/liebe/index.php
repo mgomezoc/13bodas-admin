@@ -477,9 +477,16 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
     <link rel="alternate stylesheet" type="text/css" href="<?= $assetsBase ?>/styles/serenity.css" title="serenity" media="all" />
     <link rel="alternate stylesheet" type="text/css" href="<?= $assetsBase ?>/styles/lavender.css" title="lavender" media="all" />
     <!-- END Demo Examples -->
+<?php if (!empty($isDemoMode)): ?>
+    <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
+<?php endif; ?>
 </head>
 
 <body id="page-top" data-spy="scroll" data-target=".navbar-custom">
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-banner">🚀 Evento DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar por $800 MXN</a></div>
+<?php endif; ?>
+
     <!-- Start Switcher -->
 
     <!-- Preloader -->
@@ -1298,6 +1305,9 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
             })();
         </script>
     <?php endif; ?>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-watermark">DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar</a></div>
+<?php endif; ?>
 </body>
 
 </html>

@@ -262,8 +262,15 @@ if ($hasNews) {
             rsvpUrl: <?= json_encode($rsvpUrl) ?>
         };
     </script>
+<?php if (!empty($isDemoMode)): ?>
+    <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
+<?php endif; ?>
 </head>
 <body class="sukun">
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-banner">🚀 Evento DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar por $800 MXN</a></div>
+<?php endif; ?>
+
 <header class="sk-header" data-header>
     <div class="sk-container sk-header__inner">
         <a class="sk-brand" href="#hero">Feelings</a>
@@ -773,5 +780,8 @@ if ($hasNews) {
 </div>
 
 <script src="<?= base_url('templates/sukun/js/main.js') ?>" defer></script>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-watermark">DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar</a></div>
+<?php endif; ?>
 </body>
 </html>

@@ -358,9 +358,16 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/owl.carousel.min.css">
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/owl.theme.default.min.css">
     <link rel="stylesheet" href="<?= $assetsBase ?>/css/style.css">
+<?php if (!empty($isDemoMode)): ?>
+    <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
+<?php endif; ?>
 </head>
 
 <body>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-banner">🚀 Evento DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar por $800 MXN</a></div>
+<?php endif; ?>
+
     <!-- Preloader -->
     <div class="preloader">
         <div class="lds-heart">
@@ -864,6 +871,9 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
             </script>
         <?php endif; ?>
     </div>
+<?php if (!empty($isDemoMode)): ?>
+    <div class="demo-watermark">DEMO · <a class="text-warning" href="<?= base_url('checkout/' . ($event['id'] ?? '')) ?>">Activar</a></div>
+<?php endif; ?>
 </body>
 
 <!-- Mirrored from duruthemes.com/demo/html/olivia-enrico/demo1/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 08 Feb 2026 07:57:23 GMT -->

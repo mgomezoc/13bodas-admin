@@ -39,6 +39,8 @@ class EventModel extends Model
         'service_status',
         'is_paid',
         'paid_until',
+        'payment_provider',
+        'payment_reference',
     ];
 
     protected $useTimestamps = true;
