@@ -338,6 +338,32 @@
                         </div>
                     <?php endif; ?>
 
+
+                    <?php if (!empty($isClient)): ?>
+                        <div class="card mb-4" id="templateSelectionCard">
+                            <div class="card-header">
+                                <i class="bi bi-palette"></i> Template de Invitación
+                            </div>
+                            <div class="card-body <?= $highlightTemplateSelection ? 'template-highlight p-3' : '' ?>">
+                                <?php if ($highlightTemplateSelection): ?>
+                                    <div class="alert alert-warning py-2" role="alert">
+                                        <i class="bi bi-palette me-1"></i>Selecciona la plantilla de tu invitación y presiona "Guardar Cambios".
+                                    </div>
+                                <?php endif; ?>
+                                <label class="form-label" for="template_id">Template</label>
+                                <select id="template_id" name="template_id" class="form-select">
+                                    <option value="">Selecciona un template</option>
+                                    <?php foreach (($templates ?? []) as $template): ?>
+                                        <option value="<?= (int) ($template['id'] ?? 0) ?>" <?= (string) ($event['template_id'] ?? '') === (string) ($template['id'] ?? '') ? 'selected' : '' ?>>
+                                            <?= esc($template['name'] ?? 'Sin nombre') ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Puedes cambiar tu template cuando lo necesites.</div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- URL de la Invitación -->
                     <div class="card mb-4">
                         <div class="card-header">
