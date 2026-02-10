@@ -77,6 +77,8 @@ class PaymentService
         }
 
         if ($this->paymentModel->existsByReference($provider, $reference)) {
+            $this->ensureEventActivated($eventId, $provider, $reference);
+
             return [
                 'is_paid' => true,
                 'event_id' => $eventId,
@@ -133,6 +135,8 @@ class PaymentService
         $provider = $this->currentProviderName();
         $reference = (string) $paymentData['payment_reference'];
         if ($this->paymentModel->existsByReference($provider, $reference)) {
+            $this->ensureEventActivated($eventId, $provider, $reference);
+
             return true;
         }
 
@@ -180,6 +184,20 @@ class PaymentService
             'payment_reference' => $reference,
             'paid_until' => $paidUntil,
         ]);
+    }
+
+    private function ensureEventActivated(string $eventId, string $provider, string $reference): void
+    {
+        $event = $this->eventModel->find($eventId);
+        if (!$event) {
+            throw new \RuntimeException('Event not found: ' . $eventId);
+        }
+
+        if ((int) ($event['is_paid'] ?? 0) === 1 && (int) ($event['is_demo'] ?? 1) === 0) {
+            return;
+        }
+
+        $this->activateEvent($eventId, $provider, $reference);
     }
 
     private function currentProviderName(): string

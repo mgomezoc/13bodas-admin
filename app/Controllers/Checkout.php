@@ -50,6 +50,11 @@ class Checkout extends BaseController
 
             $session = $this->paymentService()->createCheckout($eventId);
 
+            log_message('info', 'Checkout::createSession event={eventId} session={sessionId}', [
+                'eventId' => $eventId,
+                'sessionId' => $session['session_id'] ?? '',
+            ]);
+
             return $this->response->setJSON([
                 'success' => true,
                 'session_id' => $session['session_id'],
@@ -91,12 +96,14 @@ class Checkout extends BaseController
             $finalization = $this->paymentService()->finalizeCheckoutSession($sessionId);
             $eventId = (string) ($finalization['event_id'] ?? $eventIdFromQuery);
 
-            if (($finalization['is_paid'] ?? false) === true) {
-                if ($eventId !== '' && $this->canAccessEvent($eventId)) {
-                    return redirect()->to(site_url(route_to('admin.events.view', $eventId)))
-                        ->with('success', 'Pago confirmado. Tu evento fue activado correctamente.');
-                }
+            log_message('info', 'Checkout::success session={sessionId} event={eventId} paid={paid} processed={processed}', [
+                'sessionId' => $sessionId,
+                'eventId' => $eventId,
+                'paid' => ($finalization['is_paid'] ?? false) ? '1' : '0',
+                'processed' => ($finalization['already_processed'] ?? false) ? '1' : '0',
+            ]);
 
+            if (($finalization['is_paid'] ?? false) === true) {
                 return redirect()->route('admin.events.index')
                     ->with('success', 'Pago confirmado. Tu evento fue activado correctamente.');
             }
