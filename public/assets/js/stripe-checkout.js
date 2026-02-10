@@ -50,7 +50,9 @@
             const payload = await response.json();
 
             if (!response.ok || !payload.success || !payload.checkout_url) {
-                throw new Error(payload.message || 'No fue posible crear la sesión de pago.');
+                const debugSuffix = payload.error_id ? ` (Ref: ${payload.error_id})` : '';
+                const detailSuffix = payload.debug_detail ? ` · ${payload.debug_detail}` : '';
+                throw new Error((payload.message || 'No fue posible crear la sesión de pago.') + debugSuffix + detailSuffix);
             }
 
             showFeedback('Redirigiendo a Stripe...');

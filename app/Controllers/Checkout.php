@@ -8,6 +8,7 @@ use App\Libraries\PaymentService;
 use App\Models\EventModel;
 use App\Models\PaymentSettingModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use Throwable;
 
 class Checkout extends BaseController
 {
@@ -54,13 +55,26 @@ class Checkout extends BaseController
                 'session_id' => $session['session_id'],
                 'checkout_url' => $session['checkout_url'],
             ]);
-        } catch (\Throwable $exception) {
-            log_message('error', 'Checkout::createSession error: {message}', ['message' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            $errorId = bin2hex(random_bytes(6));
+            $isDebugEnabled = ENVIRONMENT !== 'production';
 
-            return $this->response->setStatusCode(400)->setJSON([
+            log_message('error', '[{errorId}] Checkout::createSession error: {message}', [
+                'errorId' => $errorId,
+                'message' => $exception->getMessage(),
+            ]);
+
+            $response = [
                 'success' => false,
                 'message' => 'No fue posible inicializar el pago. Verifica la configuración de Stripe.',
-            ]);
+                'error_id' => $errorId,
+            ];
+
+            if ($isDebugEnabled) {
+                $response['debug_detail'] = $exception->getMessage();
+            }
+
+            return $this->response->setStatusCode(400)->setJSON($response);
         }
     }
 

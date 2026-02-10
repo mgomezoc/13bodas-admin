@@ -69,6 +69,7 @@ STRIPE_CANCEL_URL=https://tu-dominio.com/checkout/cancel
 Notas:
 - `STRIPE_SUCCESS_URL` y `STRIPE_CANCEL_URL` deben ser URLs absolutas.
 - El webhook de Stripe debe apuntar a `POST /webhooks/stripe`.
+- Si falla `create-session`, la API devuelve `error_id` y (en desarrollo) `debug_detail`. Revisa el log de CI4 en `writable/logs/log-YYYY-MM-DD.php` buscando ese `error_id` para ver el detalle exacto del backend.
 
 ## Documentación adicional
 - `agentes.md` contiene el inventario de roles funcionales y flujos principales.
