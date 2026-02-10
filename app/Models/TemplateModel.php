@@ -59,8 +59,10 @@ class TemplateModel extends Model
     public function isTemplateInUse(int $templateId): array
     {
         $db = \Config\Database::connect();
-        $count = $db->table('event_templates')
-            ->where('template_id', $templateId)
+        $count = $db->table('event_templates et')
+            ->join('events e', 'e.id = et.event_id', 'inner')
+            ->where('et.template_id', $templateId)
+            ->where('et.is_active', 1)
             ->countAllResults();
 
         return [
