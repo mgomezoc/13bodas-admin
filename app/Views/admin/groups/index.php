@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Grupos<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -14,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'grupos', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Grupos de Invitados</h1>
@@ -24,8 +30,8 @@
     </button>
 </div>
 
-<?php $activeTab = 'groups'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_section_help', ['message' => 'Los grupos te ayudan a organizar familias o mesas y controlar códigos de acceso, estados RSVP y acompañantes permitidos.']) ?>
+
 
 <div class="card">
     <div class="card-body">
@@ -61,7 +67,11 @@
 <div class="modal fade" id="groupModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="groupForm">
+            <form id="groupForm"
+                class="modal-ajax-form"
+                data-table-id="groupsTable"
+                action="<?= base_url('admin/events/' . $event['id'] . '/groups/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-collection me-2"></i><span id="groupModalTitle">Nuevo Grupo</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -128,6 +138,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -147,12 +158,19 @@ function statusFormatter(value) {
 }
 
 function actionsFormatter(value, row) {
+    const groupName = (row.group_name || 'este grupo').toString().replace(/"/g, '&quot;');
     return `
         <div class="action-buttons">
             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openGroupModal(${JSON.stringify(row)})' title="Editar">
                 <i class="bi bi-pencil"></i>
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteGroup('${row.id}')" title="Eliminar">
+            <button type="button"
+                class="btn btn-sm btn-outline-danger delete-item"
+                data-id="${row.id}"
+                data-name="${groupName}"
+                data-endpoint="${BASE_URL}admin/events/${eventId}/groups/delete/${row.id}"
+                data-table-id="groupsTable"
+                title="Eliminar">
                 <i class="bi bi-trash"></i>
             </button>
         </div>
@@ -163,6 +181,10 @@ function openGroupModal(group = null) {
     $('#groupForm')[0].reset();
     $('#group_id').val('');
     $('#groupModalTitle').text(group ? 'Editar Grupo' : 'Nuevo Grupo');
+    const form = document.getElementById('groupForm');
+    form.action = group
+        ? `${BASE_URL}admin/events/${eventId}/groups/update/${group.id}`
+        : `${BASE_URL}admin/events/${eventId}/groups/store`;
 
     if (group) {
         $('#group_id').val(group.id);
@@ -181,50 +203,5 @@ function openGroupModal(group = null) {
     modal.show();
 }
 
-$('#groupForm').on('submit', function(e) {
-    e.preventDefault();
-    const groupId = $('#group_id').val();
-    const url = groupId
-        ? `${BASE_URL}admin/events/${eventId}/groups/update/${groupId}`
-        : `${BASE_URL}admin/events/${eventId}/groups/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                $('#groupsTable').bootstrapTable('refresh');
-                bootstrap.Modal.getInstance(document.getElementById('groupModal')).hide();
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteGroup(groupId) {
-    Swal.fire({
-        title: '¿Eliminar grupo?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/groups/delete/${groupId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        $('#groupsTable').bootstrapTable('refresh');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>

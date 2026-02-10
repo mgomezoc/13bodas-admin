@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>FAQ<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -14,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'faq', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Preguntas Frecuentes</h1>
@@ -24,8 +30,8 @@
     </button>
 </div>
 
-<?php $activeTab = 'faq'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_section_help', ['message' => 'Agrega respuestas rápidas a dudas frecuentes de invitados para reducir mensajes y aclarar logística.']) ?>
+
 
 <div id="faqList" class="card">
     <div class="card-body">
@@ -44,7 +50,12 @@
                                 <button type="button" class="btn btn-sm btn-outline-primary" onclick='openFaqModal(<?= json_encode($item) ?>)'>
                                     <i class="bi bi-pencil"></i> Editar
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteFaq('<?= $item['id'] ?>')">
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-danger delete-item"
+                                    data-id="<?= $item['id'] ?>"
+                                    data-name="<?= esc($item['question']) ?>"
+                                    data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/faq/delete/' . $item['id']) ?>"
+                                    data-refresh-target="#faqList">
                                     <i class="bi bi-trash"></i> Eliminar
                                 </button>
                             </div>
@@ -59,7 +70,11 @@
 <div class="modal fade" id="faqModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="faqForm">
+            <form id="faqForm"
+                class="modal-ajax-form"
+                data-refresh-target="#faqList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/faq/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i><span id="faqModalTitle">Nueva Pregunta</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -101,6 +116,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -109,6 +125,10 @@ function openFaqModal(item = null) {
     $('#item_id').val('');
     $('#faqModalTitle').text(item ? 'Editar Pregunta' : 'Nueva Pregunta');
     $('#is_visible').prop('checked', true);
+    const form = document.getElementById('faqForm');
+    form.action = item
+        ? `${BASE_URL}admin/events/${eventId}/faq/update/${item.id}`
+        : `${BASE_URL}admin/events/${eventId}/faq/store`;
 
     if (item) {
         $('#item_id').val(item.id);
@@ -122,49 +142,5 @@ function openFaqModal(item = null) {
     modal.show();
 }
 
-$('#faqForm').on('submit', function(e) {
-    e.preventDefault();
-    const itemId = $('#item_id').val();
-    const url = itemId
-        ? `${BASE_URL}admin/events/${eventId}/faq/update/${itemId}`
-        : `${BASE_URL}admin/events/${eventId}/faq/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#faqList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteFaq(itemId) {
-    Swal.fire({
-        title: '¿Eliminar pregunta?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/faq/delete/${itemId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#faqList');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>

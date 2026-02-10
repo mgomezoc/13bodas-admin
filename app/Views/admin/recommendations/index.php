@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Recomendaciones<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -14,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'recomendaciones', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Recomendaciones</h1>
@@ -24,8 +30,8 @@
     </button>
 </div>
 
-<?php $activeTab = 'recommendations'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_section_help', ['message' => 'Comparte sugerencias útiles como hoteles, transporte o restaurantes para invitados foráneos.']) ?>
+
 
 <div id="recommendationsList" class="card">
     <div class="card-body">
@@ -54,7 +60,13 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openRecModal(<?= json_encode($item) ?>)' title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteRec('<?= $item['id'] ?>')" title="Eliminar">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-item"
+                                data-id="<?= $item['id'] ?>"
+                                data-name="<?= esc($item['title']) ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/recommendations/delete/' . $item['id']) ?>"
+                                data-refresh-target="#recommendationsList"
+                                title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -69,7 +81,11 @@
 <div class="modal fade" id="recModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="recForm">
+            <form id="recForm"
+                class="modal-ajax-form"
+                data-refresh-target="#recommendationsList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/recommendations/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-star me-2"></i><span id="recModalTitle">Nueva Recomendación</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -128,6 +144,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -136,6 +153,10 @@ function openRecModal(item = null) {
     $('#item_id').val('');
     $('#recModalTitle').text(item ? 'Editar Recomendación' : 'Nueva Recomendación');
     $('#is_visible').prop('checked', true);
+    const form = document.getElementById('recForm');
+    form.action = item
+        ? `${BASE_URL}admin/events/${eventId}/recommendations/update/${item.id}`
+        : `${BASE_URL}admin/events/${eventId}/recommendations/store`;
 
     if (item) {
         $('#item_id').val(item.id);
@@ -152,49 +173,5 @@ function openRecModal(item = null) {
     modal.show();
 }
 
-$('#recForm').on('submit', function(e) {
-    e.preventDefault();
-    const itemId = $('#item_id').val();
-    const url = itemId
-        ? `${BASE_URL}admin/events/${eventId}/recommendations/update/${itemId}`
-        : `${BASE_URL}admin/events/${eventId}/recommendations/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#recommendationsList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteRec(itemId) {
-    Swal.fire({
-        title: '¿Eliminar recomendación?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/recommendations/delete/${itemId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#recommendationsList');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>

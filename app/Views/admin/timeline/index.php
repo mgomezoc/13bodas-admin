@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?><?= esc($pageTitle) ?><?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -13,12 +18,13 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'timeline', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title"><?= esc($pageTitle) ?></h1>
         <p class="page-subtitle">Gestiona los hitos de la historia del evento</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
         <a href="<?= base_url('admin/events/edit/' . $event['id']) ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Volver al Evento
         </a>
@@ -27,6 +33,9 @@
         </a>
     </div>
 </div>
+
+<?= view('admin/events/partials/_section_help', ['message' => 'Cuenta la historia de la pareja con hitos cronológicos, imágenes y descripciones breves.']) ?>
+
 
 <div class="card">
     <div class="card-body">
@@ -69,10 +78,10 @@
                                         </a>
                                         <button
                                             type="button"
-                                            class="btn btn-sm btn-outline-danger"
-                                            data-delete-url="<?= url_to('admin.timeline.delete', $event['id'], $item['id']) ?>"
-                                            data-item-title="<?= esc($item['title'] ?? '') ?>"
-                                            onclick="confirmDelete(this)"
+                                            class="btn btn-sm btn-outline-danger delete-item"
+                                            data-id="<?= $item['id'] ?>"
+                                            data-name="<?= esc($item['title'] ?? 'este hito') ?>"
+                                            data-endpoint="<?= url_to('admin.timeline.delete', $event['id'], $item['id']) ?>"
                                             title="Eliminar">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -95,70 +104,5 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script>
-function confirmDelete(button) {
-    const deleteUrl = button.dataset.deleteUrl;
-    const itemTitle = button.dataset.itemTitle || 'este hito';
-
-    Swal.fire({
-        title: '¿Eliminar hito?',
-        text: `Se eliminará ${itemTitle}. Esta acción no se puede deshacer.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
-        reverseButtons: true
-    }).then((result) => {
-        if (!result.isConfirmed) {
-            return;
-        }
-
-        Swal.fire({
-            title: 'Eliminando...',
-            text: 'Por favor espera',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        fetch(deleteUrl, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Eliminado!',
-                    text: data.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message
-                });
-            }
-        })
-        .catch(() => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error de conexión',
-                text: 'No se pudo conectar con el servidor'
-            });
-        });
-    });
-}
-</script>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <?= $this->endSection() ?>

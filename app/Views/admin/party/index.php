@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Cortejo<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -14,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'cortejo', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Cortejo Nupcial</h1>
@@ -24,8 +30,8 @@
     </button>
 </div>
 
-<?php $activeTab = 'party'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_section_help', ['message' => 'Registra a los integrantes del cortejo con su rol, categoría y orden para mostrarlos correctamente en la invitación.']) ?>
+
 
 <div id="partyList">
 <?php if (empty($members)): ?>
@@ -71,7 +77,13 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openMemberModal(<?= json_encode($member) ?>)' title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteMember('<?= $member['id'] ?>')" title="Eliminar">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-item"
+                                data-id="<?= $member['id'] ?>"
+                                data-name="<?= esc($member['full_name']) ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/party/delete/' . $member['id']) ?>"
+                                data-refresh-target="#partyList"
+                                title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -88,7 +100,11 @@
 <div class="modal fade" id="memberModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="memberForm">
+            <form id="memberForm"
+                class="modal-ajax-form"
+                data-refresh-target="#partyList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/party/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-hearts me-2"></i><span id="memberModalTitle">Nuevo Miembro</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -143,6 +159,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -150,6 +167,10 @@ function openMemberModal(member = null) {
     $('#memberForm')[0].reset();
     $('#member_id').val('');
     $('#memberModalTitle').text(member ? 'Editar Miembro' : 'Nuevo Miembro');
+    const form = document.getElementById('memberForm');
+    form.action = member
+        ? `${BASE_URL}admin/events/${eventId}/party/update/${member.id}`
+        : `${BASE_URL}admin/events/${eventId}/party/store`;
 
     if (member) {
         $('#member_id').val(member.id);
@@ -166,49 +187,5 @@ function openMemberModal(member = null) {
     modal.show();
 }
 
-$('#memberForm').on('submit', function(e) {
-    e.preventDefault();
-    const memberId = $('#member_id').val();
-    const url = memberId
-        ? `${BASE_URL}admin/events/${eventId}/party/update/${memberId}`
-        : `${BASE_URL}admin/events/${eventId}/party/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#partyList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteMember(memberId) {
-    Swal.fire({
-        title: '¿Eliminar miembro?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/party/delete/${memberId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#partyList');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>

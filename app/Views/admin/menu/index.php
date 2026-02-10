@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Opciones de Menú<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -13,6 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'menu', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Opciones de Menú</h1>
@@ -23,8 +29,8 @@
     </button>
 </div>
 
-<?php $activeTab = 'menu'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_section_help', ['message' => 'Define las opciones de menú disponibles para invitados, incluyendo características como vegano o sin gluten.']) ?>
+
 
 <div id="menuList" class="card">
     <div class="card-body">
@@ -81,7 +87,12 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="editOption(<?= htmlspecialchars(json_encode($option)) ?>)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteOption(<?= $option['id'] ?>)">
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-danger delete-item"
+                                        data-id="<?= $option['id'] ?>"
+                                        data-name="<?= esc($option['name']) ?>"
+                                        data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/menu/delete/' . $option['id']) ?>"
+                                        data-refresh-target="#menuList">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -99,7 +110,11 @@
 <div class="modal fade" id="addOptionModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="optionForm">
+            <form id="optionForm"
+                class="modal-ajax-form"
+                data-refresh-target="#menuList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/menu/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Agregar Opción</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -153,6 +168,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 const modal = new bootstrap.Modal(document.getElementById('addOptionModal'));
@@ -163,26 +179,7 @@ $('#addOptionModal').on('show.bs.modal', function(e) {
     $('#optionId').val('');
     $('#modalTitle').text('Agregar Opción');
     $('#activeField').hide();
-});
-
-$('#optionForm').on('submit', function(e) {
-    e.preventDefault();
-    
-    const optionId = $('#optionId').val();
-    const url = optionId 
-        ? `${BASE_URL}admin/events/${eventId}/menu/update/${optionId}`
-        : `${BASE_URL}admin/events/${eventId}/menu/store`;
-    
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                modal.hide();
-                refreshModuleSection('#menuList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message });
-            }
-        });
+    document.getElementById('optionForm').action = `${BASE_URL}admin/events/${eventId}/menu/store`;
 });
 
 function editOption(option) {
@@ -195,28 +192,8 @@ function editOption(option) {
     $('#isActive').prop('checked', option.is_active == 1);
     $('#modalTitle').text('Editar Opción');
     $('#activeField').show();
+    document.getElementById('optionForm').action = `${BASE_URL}admin/events/${eventId}/menu/update/${option.id}`;
     modal.show();
-}
-
-function deleteOption(optionId) {
-    Swal.fire({
-        title: '¿Eliminar opción?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/menu/delete/${optionId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#menuList');
-                    }
-                });
-        }
-    });
 }
 </script>
 <?= $this->endSection() ?>

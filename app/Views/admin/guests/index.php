@@ -3,6 +3,10 @@
 
 <?= $this->section('title') ?>Invitados<?= $this->endSection() ?>
 
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
+
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mb-0">
@@ -15,12 +19,13 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'invitados', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Invitados</h1>
         <p class="page-subtitle"><?= esc($event['couple_title']) ?></p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
         <a href="<?= base_url('admin/events/' . $event['id'] . '/guests/import') ?>" class="btn btn-outline-secondary">
             <i class="bi bi-upload me-2"></i>Importar
         </a>
@@ -32,6 +37,8 @@
         </a>
     </div>
 </div>
+
+<?= view('admin/events/partials/_section_help', ['message' => 'Administra la lista de invitados: altas, edición, importación y envío de enlaces personalizados para confirmar asistencia.']) ?>
 
 <!-- Stats -->
 <div class="row g-3 mb-4">
@@ -73,8 +80,6 @@
     </div>
 </div>
 
-<?php $activeTab = 'guests'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <div class="card">
     <div class="card-body">
@@ -129,6 +134,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 const inviteLinkModal = document.getElementById('inviteLinkModal');
@@ -178,42 +184,23 @@ function invitationFormatter(value, row) {
 }
 
 function actionsFormatter(value, row) {
+    const guestName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'este invitado';
     return `
         <div class="action-buttons">
             <a href="${BASE_URL}admin/events/${eventId}/guests/edit/${row.id}" class="btn btn-sm btn-outline-primary" title="Editar">
                 <i class="bi bi-pencil"></i>
             </a>
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteGuest('${row.id}')" title="Eliminar">
+            <button type="button"
+                class="btn btn-sm btn-outline-danger delete-item"
+                data-id="${row.id}"
+                data-name="${guestName.replace(/"/g, '&quot;')}"
+                data-endpoint="${BASE_URL}admin/events/${eventId}/guests/delete/${row.id}"
+                data-table-id="guestsTable"
+                title="Eliminar">
                 <i class="bi bi-trash"></i>
             </button>
         </div>
     `;
-}
-
-function deleteGuest(guestId) {
-    Swal.fire({
-        title: '¿Eliminar invitado?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/guests/delete/${guestId}`, {
-                [CSRF_NAME]: CSRF_TOKEN
-            })
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        $('#guestsTable').bootstrapTable('refresh');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
 }
 
 function fetchInviteLink(guestId) {

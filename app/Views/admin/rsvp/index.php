@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Confirmaciones<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -13,6 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'confirmaciones', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Confirmaciones de Asistencia</h1>
@@ -32,12 +38,8 @@
     </div>
 </div>
 
-<!-- Info Box -->
-<div class="info-box mb-4">
-    <h6><i class="bi bi-info-circle me-2"></i>¿Cómo funciona?</h6>
-    <p>Cuando compartes el enlace de la invitación, los invitados pueden confirmar su asistencia desde ahí. 
-    Aquí verás en tiempo real quién confirmó, quién no asistirá y quién aún no ha respondido.</p>
-</div>
+<?= view('admin/events/partials/_section_help', ['message' => 'Revisa quién confirmó, quién declinó y quién sigue pendiente. También puedes actualizar el estado manualmente cuando sea necesario.']) ?>
+
 
 <div id="rsvpSection">
 <!-- Stats -->
@@ -104,8 +106,6 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
     </div>
 </div>
 
-<?php $activeTab = 'rsvp'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
 
 <!-- Lista de respuestas -->
 <div class="card">
@@ -183,6 +183,7 @@ $confirmedRate = $stats['total'] > 0 ? round(($stats['accepted'] / $stats['total
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 let currentFilter = '';

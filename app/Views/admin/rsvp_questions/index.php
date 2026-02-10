@@ -1,6 +1,11 @@
+<?php declare(strict_types=1); ?>
 <?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('title') ?>Preguntas RSVP<?= $this->endSection() ?>
+
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('assets/admin/css/events.css') ?>">
+<?= $this->endSection() ?>
 
 <?= $this->section('breadcrumb') ?>
 <nav aria-label="breadcrumb">
@@ -14,6 +19,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?= view('admin/events/partials/_event_navigation', ['active' => 'preguntas-rsvp', 'event_id' => $event['id']]) ?>
 <div class="page-header">
     <div>
         <h1 class="page-title">Preguntas RSVP</h1>
@@ -24,8 +30,8 @@
     </button>
 </div>
 
-<?php $activeTab = 'rsvp-questions'; ?>
-<?= $this->include('admin/events/partials/modules_tabs') ?>
+<?= view('admin/events/partials/_section_help', ['message' => 'Personaliza preguntas adicionales que verán los invitados al confirmar su asistencia.']) ?>
+
 
 <div id="rsvpQuestionsList" class="card">
     <div class="card-body">
@@ -53,7 +59,13 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" onclick='openQuestionModal(<?= json_encode($question) ?>)' title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteQuestion('<?= $question['id'] ?>')" title="Eliminar">
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-item"
+                                data-id="<?= $question['id'] ?>"
+                                data-name="<?= esc($question['label']) ?>"
+                                data-endpoint="<?= base_url('admin/events/' . $event['id'] . '/rsvp-questions/delete/' . $question['id']) ?>"
+                                data-refresh-target="#rsvpQuestionsList"
+                                title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
@@ -68,7 +80,11 @@
 <div class="modal fade" id="questionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="questionForm">
+            <form id="questionForm"
+                class="modal-ajax-form"
+                data-refresh-target="#rsvpQuestionsList"
+                action="<?= base_url('admin/events/' . $event['id'] . '/rsvp-questions/store') ?>">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-ui-checks me-2"></i><span id="questionModalTitle">Nueva Pregunta</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -132,6 +148,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="<?= base_url('assets/admin/js/events-crud.js') ?>"></script>
 <script>
 const eventId = '<?= $event['id'] ?>';
 
@@ -140,6 +157,10 @@ function openQuestionModal(question = null) {
     $('#question_id').val('');
     $('#questionModalTitle').text(question ? 'Editar Pregunta' : 'Nueva Pregunta');
     $('#is_active').prop('checked', true);
+    const form = document.getElementById('questionForm');
+    form.action = question
+        ? `${BASE_URL}admin/events/${eventId}/rsvp-questions/update/${question.id}`
+        : `${BASE_URL}admin/events/${eventId}/rsvp-questions/store`;
 
     if (question) {
         $('#question_id').val(question.id);
@@ -156,49 +177,5 @@ function openQuestionModal(question = null) {
     modal.show();
 }
 
-$('#questionForm').on('submit', function(e) {
-    e.preventDefault();
-    const questionId = $('#question_id').val();
-    const url = questionId
-        ? `${BASE_URL}admin/events/${eventId}/rsvp-questions/update/${questionId}`
-        : `${BASE_URL}admin/events/${eventId}/rsvp-questions/store`;
-
-    $.post(url, $(this).serialize())
-        .done(function(response) {
-            if (response.success) {
-                Toast.fire({ icon: 'success', title: response.message });
-                refreshModuleSection('#rsvpQuestionsList');
-            } else {
-                Toast.fire({ icon: 'error', title: response.message || 'Error al guardar' });
-            }
-        })
-        .fail(function() {
-            Toast.fire({ icon: 'error', title: 'Error de conexión' });
-        });
-});
-
-function deleteQuestion(questionId) {
-    Swal.fire({
-        title: '¿Eliminar pregunta?',
-        text: 'Esta acción no se puede deshacer.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post(`${BASE_URL}admin/events/${eventId}/rsvp-questions/delete/${questionId}`)
-                .done(function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message });
-                        refreshModuleSection('#rsvpQuestionsList');
-                    } else {
-                        Toast.fire({ icon: 'error', title: response.message });
-                    }
-                });
-        }
-    });
-}
 </script>
 <?= $this->endSection() ?>
