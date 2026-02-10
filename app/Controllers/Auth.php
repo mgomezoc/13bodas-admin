@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\WelcomeMailer;
 use App\Models\ClientModel;
 use App\Models\ContentModuleModel;
 use App\Models\EventModel;
@@ -17,6 +18,7 @@ class Auth extends BaseController
         private readonly EventModel $eventModel = new EventModel(),
         private readonly ClientModel $clientModel = new ClientModel(),
         private readonly ContentModuleModel $contentModuleModel = new ContentModuleModel(),
+        private readonly WelcomeMailer $welcomeMailer = new WelcomeMailer(),
     ) {
     }
 
@@ -143,6 +145,20 @@ class Auth extends BaseController
                 'client_id' => $clientId,
                 'isLoggedIn' => true,
             ]);
+
+            $welcomeResult = $this->welcomeMailer->sendRegistrationWelcome([
+                'email' => (string) $this->request->getPost('email'),
+                'name' => (string) $this->request->getPost('name'),
+                'event_title' => (string) $this->request->getPost('couple_title'),
+                'event_date' => (string) $this->request->getPost('event_date'),
+                'dashboard_url' => base_url('admin/dashboard'),
+                'event_edit_url' => base_url('admin/events/edit/' . $eventId . '?highlight=template'),
+                'checkout_url' => base_url('checkout/' . $eventId),
+            ]);
+
+            if (!$welcomeResult['success']) {
+                log_message('warning', 'Welcome email could not be sent: {message}', ['message' => $welcomeResult['message']]);
+            }
 
             return redirect()->to(base_url('admin/events/edit/' . $eventId . '?highlight=template'))
                 ->with('success', '¡Bienvenido! Tu evento se creó en modo DEMO. Elige tu template para continuar.');
