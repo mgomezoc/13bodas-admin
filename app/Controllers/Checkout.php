@@ -11,8 +11,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class Checkout extends BaseController
 {
+    private ?PaymentService $paymentService = null;
+
     public function __construct(
-        private readonly PaymentService $paymentService = new PaymentService(),
         private readonly EventModel $eventModel = new EventModel(),
         private readonly PaymentSettingModel $settingModel = new PaymentSettingModel(),
     ) {
@@ -46,7 +47,7 @@ class Checkout extends BaseController
                 return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Sin acceso.']);
             }
 
-            $session = $this->paymentService->createCheckout($eventId);
+            $session = $this->paymentService()->createCheckout($eventId);
 
             return $this->response->setJSON([
                 'success' => true,
@@ -85,5 +86,14 @@ class Checkout extends BaseController
         $event = $this->eventModel->find($eventId);
 
         return $event && (string) $event['client_id'] === $clientId;
+    }
+
+    private function paymentService(): PaymentService
+    {
+        if ($this->paymentService === null) {
+            $this->paymentService = new PaymentService();
+        }
+
+        return $this->paymentService;
     }
 }

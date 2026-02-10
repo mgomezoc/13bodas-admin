@@ -10,9 +10,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class StripeWebhook extends BaseController
 {
-    public function __construct(private readonly PaymentService $paymentService = new PaymentService(providerName: 'stripe'))
-    {
-    }
+    private ?PaymentService $paymentService = null;
 
     public function handle(): ResponseInterface
     {
@@ -24,7 +22,7 @@ class StripeWebhook extends BaseController
         }
 
         try {
-            if ($this->paymentService->processWebhook($payload, $signature)) {
+            if ($this->paymentService()->processWebhook($payload, $signature)) {
                 return $this->response->setStatusCode(200)->setBody('OK');
             }
 
@@ -33,5 +31,14 @@ class StripeWebhook extends BaseController
             log_message('error', 'Stripe webhook error: {message}', ['message' => $exception->getMessage()]);
             return $this->response->setStatusCode(500)->setBody('Internal Server Error');
         }
+    }
+
+    private function paymentService(): PaymentService
+    {
+        if ($this->paymentService === null) {
+            $this->paymentService = new PaymentService(providerName: 'stripe');
+        }
+
+        return $this->paymentService;
     }
 }

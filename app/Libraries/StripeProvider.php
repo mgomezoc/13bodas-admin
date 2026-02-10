@@ -15,6 +15,10 @@ class StripeProvider implements PaymentProviderInterface
 
     public function __construct()
     {
+        if (!class_exists(StripeClient::class)) {
+            throw new \RuntimeException('Stripe SDK no está instalado. Ejecuta: composer install (o composer require stripe/stripe-php).');
+        }
+
         $this->stripe = new StripeClient((string) env('STRIPE_SECRET_KEY', ''));
         $this->webhookSecret = (string) env('STRIPE_WEBHOOK_SECRET', '');
     }
