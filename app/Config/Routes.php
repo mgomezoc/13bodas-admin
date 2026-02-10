@@ -177,11 +177,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->post('(:segment)/modules/update/(:segment)', 'Admin\ContentModules::update/$1/$2');
         $routes->post('(:segment)/modules/reorder', 'Admin\ContentModules::reorder/$1');
 
-        // Dominios personalizados
-        $routes->get('(:segment)/domains', 'Admin\EventCustomDomains::index/$1');
-        $routes->post('(:segment)/domains/store', 'Admin\EventCustomDomains::store/$1');
-        $routes->post('(:segment)/domains/update/(:segment)', 'Admin\EventCustomDomains::update/$1/$2');
-        $routes->post('(:segment)/domains/delete/(:segment)', 'Admin\EventCustomDomains::delete/$1/$2');
+        // Dominios personalizados (solicitud manual)
+        $routes->get('(:segment)/domains', 'Admin\EventDomainsController::index/$1', ['as' => 'admin.events.domains.index']);
+        $routes->post('(:segment)/domains/request', 'Admin\EventDomainsController::request/$1', ['as' => 'admin.events.domains.request']);
+        $routes->post('(:segment)/domains/update', 'Admin\EventDomainsController::update/$1', ['as' => 'admin.events.domains.update']);
+        $routes->post('(:segment)/domains/cancel', 'Admin\EventDomainsController::cancel/$1', ['as' => 'admin.events.domains.cancel']);
     });
 
     // ---------------------------------------------------------------------
