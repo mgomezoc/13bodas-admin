@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Entities\EventPayment;
+use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Model;
 
 class EventPaymentModel extends Model
@@ -31,6 +32,7 @@ class EventPaymentModel extends Model
         'expires_at',
         'webhook_received_at',
         'webhook_payload',
+        'provider_event_id',
         'notes',
     ];
 
@@ -49,36 +51,87 @@ class EventPaymentModel extends Model
 
     public function existsByReference(string $provider, string $reference): bool
     {
-        return $this->where('payment_provider', $provider)
+        return $this->select('id')
+            ->where('payment_provider', $provider)
             ->where('payment_reference', $reference)
-            ->countAllResults() > 0;
+            ->first() !== null;
     }
 
-    public function createFromWebhook(array $data): bool|string
+    public function findIdByReference(string $provider, string $reference): ?string
     {
-        if ($this->existsByReference((string) $data['payment_provider'], (string) $data['payment_reference'])) {
-            log_message('info', 'Payment already processed: {reference}', ['reference' => $data['payment_reference']]);
-            return false;
+        $payment = $this->select('id')
+            ->where('payment_provider', $provider)
+            ->where('payment_reference', $reference)
+            ->first();
+
+        if ($payment instanceof EventPayment) {
+            return (string) ($payment->id ?? '');
         }
 
-        // FIX: Usar método local en lugar de UserModel::generateUUID()
-        $data['id'] = $data['id'] ?? $this->generateUUID();
-
-        return $this->insert($data) ? (string) $data['id'] : false;
+        return null;
     }
 
-    /**
-     * Genera un UUID v4
-     */
-    protected function generateUUID(): string
+    public function createFromWebhook(array $data): string
     {
+        $provider = (string) ($data['payment_provider'] ?? '');
+        $reference = (string) ($data['payment_reference'] ?? '');
+
+        if ($provider === '' || $reference === '') {
+            throw new \InvalidArgumentException('payment_provider y payment_reference son obligatorios.');
+        }
+
+        if ($this->existsByReference($provider, $reference)) {
+            $existingId = $this->findIdByReference($provider, $reference);
+            if ($existingId !== null && $existingId !== '') {
+                return $existingId;
+            }
+
+            throw new \RuntimeException('Duplicate payment reference without retrievable ID.');
+        }
+
+        $data['id'] = $data['id'] ?? $this->generateUUIDv4();
+
+        try {
+            if (!$this->insert($data)) {
+                throw new \RuntimeException('Failed to insert payment: ' . json_encode($this->errors(), JSON_UNESCAPED_UNICODE));
+            }
+
+            return (string) $data['id'];
+        } catch (DatabaseException $exception) {
+            if ($this->isDuplicateKeyException($exception)) {
+                $existingId = $this->findIdByReference($provider, $reference);
+                if ($existingId !== null && $existingId !== '') {
+                    return $existingId;
+                }
+
+                throw new \RuntimeException('Duplicate payment detected.', previous: $exception);
+            }
+
+            throw new \RuntimeException('Database error inserting payment.', previous: $exception);
+        }
+    }
+
+    private function generateUUIDv4(): string
+    {
+        $bytes = random_bytes(16);
+        $bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
+        $bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
+
+        $hex = bin2hex($bytes);
+
         return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            '%s-%s-%s-%s-%s',
+            substr($hex, 0, 8),
+            substr($hex, 8, 4),
+            substr($hex, 12, 4),
+            substr($hex, 16, 4),
+            substr($hex, 20, 12)
         );
+    }
+
+    private function isDuplicateKeyException(DatabaseException $exception): bool
+    {
+        return str_contains(strtolower($exception->getMessage()), 'duplicate')
+            || str_contains((string) $exception->getCode(), '1062');
     }
 }

@@ -88,6 +88,7 @@ class Auth extends BaseController
             'isLoggedIn'  => true
         ];
 
+        session()->regenerate();
         session()->set($sessionData);
 
         // Actualizar último login

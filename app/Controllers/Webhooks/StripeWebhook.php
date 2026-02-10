@@ -14,21 +14,39 @@ class StripeWebhook extends BaseController
 
     public function handle(): ResponseInterface
     {
+        $correlationId = bin2hex(random_bytes(8));
         $payload = $this->request->getBody();
-        $signature = (string) $this->request->getHeaderLine('Stripe-Signature');
+        $signature = trim($this->request->getHeaderLine('Stripe-Signature'));
 
         if ($payload === '' || $signature === '') {
+            log_message('warning', '[{correlationId}] Stripe webhook missing payload/signature', [
+                'correlationId' => $correlationId,
+            ]);
+
             return $this->response->setStatusCode(400)->setBody('Bad Request');
         }
 
         try {
-            if ($this->paymentService()->processWebhook($payload, $signature)) {
+            $processed = $this->paymentService()->processWebhook($payload, $signature, $correlationId);
+
+            if ($processed) {
                 return $this->response->setStatusCode(200)->setBody('OK');
             }
 
             return $this->response->setStatusCode(400)->setBody('Invalid signature');
+        } catch (\InvalidArgumentException $exception) {
+            log_message('warning', '[{correlationId}] Stripe webhook validation failed: {message}', [
+                'correlationId' => $correlationId,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return $this->response->setStatusCode(400)->setBody('Bad Request');
         } catch (\Throwable $exception) {
-            log_message('error', 'Stripe webhook error: {message}', ['message' => $exception->getMessage()]);
+            log_message('error', '[{correlationId}] Stripe webhook internal error: {message}', [
+                'correlationId' => $correlationId,
+                'message' => $exception->getMessage(),
+            ]);
+
             return $this->response->setStatusCode(500)->setBody('Internal Server Error');
         }
     }

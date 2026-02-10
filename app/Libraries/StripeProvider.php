@@ -113,12 +113,17 @@ class StripeProvider implements PaymentProviderInterface
         $eventType = (string) ($eventData['type'] ?? '');
 
         if ($eventType !== 'checkout.session.completed') {
-            throw new \RuntimeException('Unsupported event type: ' . $eventType);
+            return [
+                'should_process' => false,
+                'provider_event_id' => (string) ($eventData['id'] ?? ''),
+            ];
         }
 
         $sessionData = $eventData['data']['object'] ?? [];
 
         return [
+            'should_process' => true,
+            'provider_event_id' => (string) ($eventData['id'] ?? ''),
             'event_id' => $sessionData['metadata']['event_id'] ?? null,
             'payment_reference' => (string) ($sessionData['payment_intent'] ?? ($sessionData['id'] ?? '')),
             'amount' => ((int) ($sessionData['amount_total'] ?? 0)) / 100,
