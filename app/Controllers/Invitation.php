@@ -163,7 +163,6 @@ class Invitation extends BaseController
                 else $registryStats['available']++;
             }
         } catch (\Throwable $e) {
-            $registryItems = [];
             $registryStats = ['total' => 0, 'claimed' => 0, 'available' => 0, 'total_value' => 0.0];
         }
 
@@ -353,7 +352,6 @@ class Invitation extends BaseController
             $demoLimits = $paymentSettingModel->getDemoLimits();
             $galleryAssets = array_slice($galleryAssets, 0, (int) $demoLimits['gallery']);
             $timelineItems = array_slice($timelineItems, 0, (int) $demoLimits['timeline']);
-            $registryItems = [];
         }
 
         // Preparar datos para la vista
