@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Centraliza direcciones y mapas de ceremonia, recepción u otros puntos clave del evento.']) ?>
+
 
 <div id="locationsList" class="card">
     <div class="card-body">

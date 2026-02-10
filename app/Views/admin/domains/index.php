@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Administra dominios personalizados para publicar la invitación con una URL propia y profesional.']) ?>
+
 
 <div id="domainsList" class="card">
     <div class="card-body">

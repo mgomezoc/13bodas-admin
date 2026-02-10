@@ -38,6 +38,8 @@
     </div>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Administra la lista de invitados: altas, edición, importación y envío de enlaces personalizados para confirmar asistencia.']) ?>
+
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">

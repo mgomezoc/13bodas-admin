@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Comparte sugerencias útiles como hoteles, transporte o restaurantes para invitados foráneos.']) ?>
+
 
 <div id="recommendationsList" class="card">
     <div class="card-body">

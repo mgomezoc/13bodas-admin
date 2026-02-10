@@ -38,12 +38,8 @@
     </div>
 </div>
 
-<!-- Info Box -->
-<div class="info-box mb-4">
-    <h6><i class="bi bi-info-circle me-2"></i>¿Cómo funciona?</h6>
-    <p>Cuando compartes el enlace de la invitación, los invitados pueden confirmar su asistencia desde ahí. 
-    Aquí verás en tiempo real quién confirmó, quién no asistirá y quién aún no ha respondido.</p>
-</div>
+<?= view('admin/events/partials/_section_help', ['message' => 'Revisa quién confirmó, quién declinó y quién sigue pendiente. También puedes actualizar el estado manualmente cuando sea necesario.']) ?>
+
 
 <div id="rsvpSection">
 <!-- Stats -->

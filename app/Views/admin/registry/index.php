@@ -29,6 +29,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Gestiona la mesa de regalos y fondos para que los invitados sepan qué opciones tienen para obsequiar.']) ?>
+
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">

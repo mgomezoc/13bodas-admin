@@ -99,3 +99,30 @@
         font-size: 1.25rem;
     }
 }
+
+/* Ayudas contextuales por sección */
+.event-help-callout {
+    border: 1px solid rgba(212, 165, 116, 0.35);
+    background: rgba(212, 165, 116, 0.08);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.event-help-callout i {
+    color: #d4a574;
+    font-size: 1.05rem;
+    margin-top: 0.1rem;
+}
+
+.event-help-title {
+    color: #d4a574;
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.event-help-text {
+    color: #b9c0ca;
+    font-size: 0.86rem;
+    line-height: 1.35;
+}

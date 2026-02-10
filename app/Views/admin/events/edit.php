@@ -46,6 +46,8 @@
     </div>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Aquí configuras los datos base del evento: nombres, fechas, ubicación, visibilidad y ajustes generales de la invitación.']) ?>
+
 <!-- Stats rápidas -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">

@@ -29,6 +29,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Define las opciones de menú disponibles para invitados, incluyendo características como vegano o sin gluten.']) ?>
+
 
 <div id="menuList" class="card">
     <div class="card-body">

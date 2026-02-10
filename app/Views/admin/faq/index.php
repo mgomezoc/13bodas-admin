@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Agrega respuestas rápidas a dudas frecuentes de invitados para reducir mensajes y aclarar logística.']) ?>
+
 
 <div id="faqList" class="card">
     <div class="card-body">

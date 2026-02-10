@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Personaliza preguntas adicionales que verán los invitados al confirmar su asistencia.']) ?>
+
 
 <div id="rsvpQuestionsList" class="card">
     <div class="card-body">

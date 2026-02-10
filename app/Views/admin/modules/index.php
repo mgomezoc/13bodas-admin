@@ -27,6 +27,8 @@
     </div>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Activa, desactiva y ordena módulos del template para definir qué secciones verá el invitado final.']) ?>
+
 
 <div id="modulesList" class="card">
     <div class="card-body">

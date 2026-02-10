@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Crea la agenda del evento con horarios, iconos y ubicaciones para guiar a los invitados durante el día.']) ?>
+
 
 <div id="scheduleList" class="card">
     <div class="card-body">

@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Los grupos te ayudan a organizar familias o mesas y controlar códigos de acceso, estados RSVP y acompañantes permitidos.']) ?>
+
 
 <div class="card">
     <div class="card-body">

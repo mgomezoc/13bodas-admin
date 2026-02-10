@@ -34,6 +34,8 @@
     </div>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Cuenta la historia de la pareja con hitos cronológicos, imágenes y descripciones breves.']) ?>
+
 
 <div class="card">
     <div class="card-body">

@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Registra a los integrantes del cortejo con su rol, categoría y orden para mostrarlos correctamente en la invitación.']) ?>
+
 
 <div id="partyList">
 <?php if (empty($members)): ?>

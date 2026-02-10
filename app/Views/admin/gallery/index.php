@@ -30,6 +30,8 @@
     </button>
 </div>
 
+<?= view('admin/events/partials/_section_help', ['message' => 'Sube y organiza imágenes que se mostrarán en la galería pública de la invitación.']) ?>
+
 <!-- Input oculto para subir -->
 <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
 
