@@ -11,6 +11,7 @@ $eventId = $event_id ?? null;
 $session = session();
 $userRoles = $session->get('user_roles') ?? [];
 $isAdmin = in_array('superadmin', $userRoles, true) || in_array('admin', $userRoles, true);
+$isClient = in_array('client', $userRoles, true) && !$isAdmin;
 
 $tabs = [
     'informacion' => ['icon' => 'bi-info-circle', 'label' => 'Información', 'priority' => 1, 'url' => base_url("admin/events/edit/{$eventId}")],
@@ -30,8 +31,12 @@ $tabs = [
     'modulos' => ['icon' => 'bi-grid', 'label' => 'Módulos', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/modules")],
 ];
 
-if ($isAdmin) {
+if ($isAdmin || $isClient) {
     $tabs['dominios'] = ['icon' => 'bi-globe2', 'label' => 'Dominios', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/domains")];
+}
+
+if ($isClient) {
+    unset($tabs['recomendaciones'], $tabs['preguntas-rsvp'], $tabs['modulos']);
 }
 
 $orderedTabs = array_filter(
