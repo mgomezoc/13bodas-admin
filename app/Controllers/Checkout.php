@@ -8,6 +8,7 @@ use App\Libraries\PaymentService;
 use App\Models\EventModel;
 use App\Models\PaymentSettingModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use Throwable;
 
 class Checkout extends BaseController
 {
@@ -31,7 +32,7 @@ class Checkout extends BaseController
         }
 
         if ((int) $event['is_paid'] === 1) {
-            return redirect()->to(base_url('admin/events/view/' . $eventId))->with('info', 'Este evento ya está activado.');
+            return redirect()->to(site_url(route_to('admin.events.view', $eventId)))->with('info', 'Este evento ya está activado.');
         }
 
         return view('checkout/index', [
@@ -49,25 +50,95 @@ class Checkout extends BaseController
 
             $session = $this->paymentService()->createCheckout($eventId);
 
+            log_message('info', 'Checkout::createSession event={eventId} session={sessionId}', [
+                'eventId' => $eventId,
+                'sessionId' => $session['session_id'] ?? '',
+            ]);
+
             return $this->response->setJSON([
                 'success' => true,
                 'session_id' => $session['session_id'],
                 'checkout_url' => $session['checkout_url'],
             ]);
-        } catch (\Throwable $exception) {
-            log_message('error', 'Checkout::createSession error: {message}', ['message' => $exception->getMessage()]);
-            return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            $errorId = bin2hex(random_bytes(6));
+            $isDebugEnabled = ENVIRONMENT !== 'production';
+
+            log_message('error', '[{errorId}] Checkout::createSession error: {message}', [
+                'errorId' => $errorId,
+                'message' => $exception->getMessage(),
+            ]);
+
+            $response = [
+                'success' => false,
+                'message' => 'No fue posible inicializar el pago. Verifica la configuración de Stripe.',
+                'error_id' => $errorId,
+            ];
+
+            if ($isDebugEnabled) {
+                $response['debug_detail'] = $exception->getMessage();
+            }
+
+            return $this->response->setStatusCode(400)->setJSON($response);
         }
     }
 
-    public function success(): string
+    public function success(): string|ResponseInterface
     {
-        return view('checkout/success', ['sessionId' => (string) $this->request->getGet('session_id')]);
+        $sessionId = trim((string) $this->request->getGet('session_id'));
+        $eventIdFromQuery = trim((string) $this->request->getGet('event_id'));
+
+        if ($sessionId === '') {
+            return redirect()->route('admin.events.index')->with('error', 'No se recibió el identificador de sesión de Stripe.');
+        }
+
+        try {
+            $finalization = $this->paymentService()->finalizeCheckoutSession($sessionId);
+            $eventId = (string) ($finalization['event_id'] ?? $eventIdFromQuery);
+
+            log_message('info', 'Checkout::success session={sessionId} event={eventId} paid={paid} processed={processed}', [
+                'sessionId' => $sessionId,
+                'eventId' => $eventId,
+                'paid' => ($finalization['is_paid'] ?? false) ? '1' : '0',
+                'processed' => ($finalization['already_processed'] ?? false) ? '1' : '0',
+            ]);
+
+            if (($finalization['is_paid'] ?? false) === true) {
+                return redirect()->route('admin.events.index')
+                    ->with('success', 'Pago confirmado. Tu evento fue activado correctamente.');
+            }
+
+            return view('checkout/success', [
+                'sessionId' => $sessionId,
+                'isPaid' => false,
+                'paymentStatus' => (string) ($finalization['payment_status'] ?? 'unknown'),
+                'eventId' => $eventId,
+                'errorMessage' => 'Stripe aún no confirma el pago. Si ya pagaste, recarga esta página en unos segundos.',
+            ]);
+        } catch (\Throwable $exception) {
+            log_message('error', 'Checkout::success validation error: {message}', ['message' => $exception->getMessage()]);
+
+            return view('checkout/success', [
+                'sessionId' => $sessionId,
+                'isPaid' => false,
+                'paymentStatus' => 'unknown',
+                'eventId' => $eventIdFromQuery,
+                'errorMessage' => 'No fue posible verificar el estado del pago en este momento.',
+            ]);
+        }
     }
 
-    public function cancel(): string
+    public function cancel(): string|ResponseInterface
     {
-        return view('checkout/cancel');
+        $eventId = trim((string) $this->request->getGet('event_id'));
+
+        if ($eventId !== '' && $this->canAccessEvent($eventId)) {
+            return redirect()->to(site_url(route_to('checkout.index', $eventId)))->with('info', 'El pago fue cancelado. Puedes intentarlo de nuevo cuando gustes.');
+        }
+
+        return view('checkout/cancel', [
+            'eventId' => $eventId,
+        ]);
     }
 
     private function canAccessEvent(string $eventId): bool

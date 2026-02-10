@@ -35,8 +35,8 @@ $routes->post('register', 'Auth::processRegister', ['as' => 'register.store']);
 $routes->group('checkout', static function ($routes) {
     $routes->get('(:segment)', 'Checkout::index/$1', ['filter' => 'auth', 'as' => 'checkout.index']);
     $routes->post('create-session/(:segment)', 'Checkout::createSession/$1', ['filter' => 'auth', 'as' => 'checkout.create_session']);
-    $routes->get('success', 'Checkout::success', ['as' => 'checkout.success']);
-    $routes->get('cancel', 'Checkout::cancel', ['as' => 'checkout.cancel']);
+    $routes->get('success', 'Checkout::success', ['filter' => 'auth', 'as' => 'checkout.success']);
+    $routes->get('cancel', 'Checkout::cancel', ['filter' => 'auth', 'as' => 'checkout.cancel']);
 });
 
 // Webhook Stripe (sin CSRF)
@@ -87,7 +87,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('list', 'Admin\Events::list');
         $routes->get('create', 'Admin\Events::create');
         $routes->post('store', 'Admin\Events::store');
-        $routes->get('view/(:segment)', 'Admin\Events::view/$1');
+        $routes->get('view/(:segment)', 'Admin\Events::view/$1', ['as' => 'admin.events.view']);
         $routes->get('edit/(:segment)', 'Admin\Events::edit/$1');
         $routes->post('update/(:segment)', 'Admin\Events::update/$1');
         $routes->post('update-settings/(:segment)', 'Admin\Events::updateSettings/$1', ['as' => 'admin.events.update_settings']);
