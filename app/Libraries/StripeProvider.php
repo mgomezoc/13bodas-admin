@@ -82,11 +82,17 @@ class StripeProvider implements PaymentProviderInterface
 
         foreach ($this->webhookSecrets as $webhookSecret) {
             try {
+                // Intenta construir el evento. Si la firma es válida, esto pasará.
                 Webhook::constructEvent($payload, $signature, $webhookSecret);
 
                 return true;
-            } catch (SignatureVerificationException|\UnexpectedValueException) {
-                // try next secret
+            } catch (SignatureVerificationException | \UnexpectedValueException $e) {
+                // CORRECCIÓN: Logueamos el mensaje exacto de la excepción para saber POR QUÉ falló
+                // Ej: "No signatures found matching..." o "Timestamp outside tolerance..."
+                log_message('error', 'Stripe Signature Error con secreto [...' . substr($webhookSecret, -4) . ']: ' . $e->getMessage());
+
+                // Continuamos al siguiente secreto si hay más configurados
+                continue;
             }
         }
 
