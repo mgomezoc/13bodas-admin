@@ -1,0 +1,39 @@
+# 13Bodas - llms-full.txt
+
+## Company
+13Bodas es una plataforma SaaS para crear invitaciones digitales y administrar confirmaciones RSVP.
+
+## Positioning
+- Category: Event invitation and RSVP management software
+- Language: Spanish-first (es-MX)
+- Delivery: 100% web
+- Geography: Global
+
+## What users can do
+1) Registrarse y crear su evento demo.
+2) Personalizar contenido de invitación.
+3) Compartir enlace y recibir confirmaciones RSVP.
+4) Organizar invitados y preparar logística.
+
+## Who should use it
+- Parejas que organizan boda o XV.
+- Event planners con múltiples eventos.
+- Equipos de marketing para activaciones o eventos corporativos.
+
+## Related product
+- MagicCam: https://magiccam.13bodas.com
+
+## Important URLs
+- https://13bodas.com/
+- https://13bodas.com/register
+- https://13bodas.com/login
+- https://13bodas.com/terminos
+- https://13bodas.com/privacidad
+- https://13bodas.com/sitemap.xml
+
+## Trust and policy URLs
+- Términos: https://13bodas.com/terminos
+- Privacidad: https://13bodas.com/privacidad
+
+## Contact
+- hola@13bodas.com

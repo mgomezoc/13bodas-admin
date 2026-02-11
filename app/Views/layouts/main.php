@@ -12,7 +12,10 @@
     
     <meta name="author" content="13Bodas">
     <meta name="robots" content="<?= $this->renderSection('robots') ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' ?>">
-    <link rel="canonical" href="<?= current_url() ?>">
+    <link rel="canonical" href="<?= esc(current_url()) ?>">
+    <link rel="alternate" hreflang="es-MX" href="<?= esc(current_url()) ?>">
+    <link rel="alternate" hreflang="x-default" href="<?= esc(base_url()) ?>">
+    <link rel="alternate" type="text/plain" title="LLMs" href="<?= esc(base_url('llms.txt')) ?>">
 
     <!-- Geo Tags -->
     <meta name="geo.region" content="MX">
@@ -23,8 +26,9 @@
     <meta property="og:site_name" content="13Bodas">
     <meta property="og:title" content="<?= $this->renderSection('og_title') ?? $this->renderSection('title') . ' | 13Bodas' ?>">
     <meta property="og:description" content="<?= $this->renderSection('og_description') ?? 'Invitaciones web y filtros de realidad aumentada personalizados para bodas, XV años y eventos.' ?>">
-    <meta property="og:url" content="<?= current_url() ?>">
-    <meta property="og:image" content="<?= base_url('img/og-image-13bodas.jpg') ?>">
+    <meta property="og:url" content="<?= esc(current_url()) ?>">
+    <meta property="og:image" content="<?= esc(base_url('img/og-image-13bodas.jpg')) ?>">
+    <meta property="og:image:alt" content="13Bodas plataforma para invitaciones digitales y RSVP">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="es_MX">
@@ -33,15 +37,16 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= $this->renderSection('twitter_title') ?? '13Bodas | Invitaciones Digitales y Filtros AR' ?>">
     <meta name="twitter:description" content="<?= $this->renderSection('twitter_description') ?? 'Invitaciones web y filtros AR personalizados para bodas, XV años y eventos.' ?>">
-    <meta name="twitter:image" content="<?= base_url('img/og-image-13bodas.jpg') ?>">
+    <meta name="twitter:image" content="<?= esc(base_url('img/og-image-13bodas.jpg')) ?>">
+    <meta name="twitter:site" content="@13bodas">
 
     <!-- Favicons -->
-    <link rel="icon" type="image/png" href="<?= base_url('favicon-96x96.png') ?>" sizes="96x96">
-    <link rel="icon" type="image/svg+xml" href="<?= base_url('favicon.svg') ?>">
-    <link rel="shortcut icon" href="<?= base_url('favicon.ico') ?>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('apple-touch-icon.png') ?>">
+    <link rel="icon" type="image/png" href="<?= esc(base_url('favicon-96x96.png')) ?>" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="<?= esc(base_url('favicon.svg')) ?>">
+    <link rel="shortcut icon" href="<?= esc(base_url('favicon.ico')) ?>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= esc(base_url('apple-touch-icon.png')) ?>">
     <meta name="apple-mobile-web-app-title" content="13Bodas">
-    <link rel="manifest" href="<?= base_url('site.webmanifest') ?>">
+    <link rel="manifest" href="<?= esc(base_url('site.webmanifest')) ?>">
     <meta name="theme-color" content="#0a0510">
 
     <!-- Preconnect -->
@@ -68,7 +73,7 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= esc(base_url('css/style.css')) ?>">
     
     <?= $this->renderSection('styles') ?>
 
@@ -95,7 +100,7 @@
     <?= $this->renderSection('footer') ?>
 
     <!-- Scripts -->
-    <script src="<?= base_url('js/app.js') ?>"></script>
+    <script src="<?= esc(base_url('js/app.js')) ?>"></script>
     <?= $this->renderSection('scripts') ?>
 </body>
 </html>

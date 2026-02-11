@@ -63,15 +63,28 @@
             </div>
 
             <div class="contact-form-wrapper" data-aos="fade-left">
+                <?php if (session()->getFlashdata('contact_error')): ?>
+                    <div class="alert alert-danger" role="alert" style="margin-bottom: 16px;">
+                        <?= esc((string) session()->getFlashdata('contact_error')) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (session()->getFlashdata('contact_success')): ?>
+                    <div class="alert alert-success" role="alert" style="margin-bottom: 16px;">
+                        <?= esc((string) session()->getFlashdata('contact_success')) ?>
+                    </div>
+                <?php endif; ?>
+
                 <form
-                    action="https://formspree.io/f/movzlzwa"
+                    action="<?= site_url(route_to('api.leads.store')) ?>"
                     method="POST"
                     class="contact-form"
                     id="contactForm"
                 >
+                    <?= csrf_field() ?>
                     <input type="hidden" name="_subject" value="Nueva solicitud desde 13Bodas.com">
                     <input type="hidden" name="_language" value="es">
-                    <input type="hidden" name="_next" value="<?= base_url('gracias') ?>">
+                    <input type="hidden" name="_next" value="<?= esc(base_url('gracias')) ?>">
 
                     <div class="form-group">
                         <label for="nombre">Nombre completo <span class="required">*</span></label>
@@ -139,7 +152,7 @@
                             Te responderemos en menos de 24 horas
                         </p>
                         <button type="submit" class="btn btn-primary btn-submit">
-                            Enviar Solicitud
+                            Solicitar asesoría
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M2 3l16 7-16 7V3zm2 11.5l9-4.5-9-4.5v9z"/>
                             </svg>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\PublicLeadMailer;
 use App\Libraries\WelcomeMailer;
 use App\Models\ClientModel;
 use App\Models\ContentModuleModel;
@@ -19,6 +20,7 @@ class Auth extends BaseController
         private readonly ClientModel $clientModel = new ClientModel(),
         private readonly ContentModuleModel $contentModuleModel = new ContentModuleModel(),
         private readonly WelcomeMailer $welcomeMailer = new WelcomeMailer(),
+        private readonly PublicLeadMailer $publicLeadMailer = new PublicLeadMailer(),
     ) {
     }
 
@@ -158,6 +160,22 @@ class Auth extends BaseController
 
             if (!$welcomeResult['success']) {
                 log_message('warning', 'Welcome email could not be sent: {message}', ['message' => $welcomeResult['message']]);
+            }
+
+            $ownerNotification = $this->publicLeadMailer->sendLeadNotification([
+                'lead_id' => $userId,
+                'full_name' => (string) $this->request->getPost('name'),
+                'email' => (string) $this->request->getPost('email'),
+                'phone' => (string) $this->request->getPost('phone'),
+                'event_type' => 'registro_publico',
+                'event_date' => (string) $this->request->getPost('event_date'),
+                'package_interest' => 'demo',
+                'source' => 'public_register',
+                'message' => 'Nuevo registro público en plataforma.',
+            ]);
+
+            if (!$ownerNotification['success']) {
+                log_message('warning', 'Owner notification could not be sent: {message}', ['message' => $ownerNotification['message']]);
             }
 
             return redirect()->to(base_url('admin/events/edit/' . $eventId . '?highlight=template'))

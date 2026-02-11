@@ -1,0 +1,30 @@
+# 13Bodas - llms.txt
+
+> URL: https://13bodas.com/
+> Product: Plataforma web para invitaciones digitales con RSVP.
+> Audience: Parejas, planners, agencias y organizadores de eventos.
+
+## Summary
+13Bodas permite crear, publicar y gestionar invitaciones digitales con confirmación RSVP.
+El servicio opera online para clientes de cualquier país y no requiere app para invitados.
+
+## Core capabilities
+- Creación de página pública del evento
+- RSVP y gestión de invitados
+- Módulos de agenda, ubicaciones, galería y recomendaciones
+- Filtros AR con MagicCam (producto relacionado)
+
+## Primary pages
+- Home: https://13bodas.com/
+- Registro: https://13bodas.com/register
+- Login: https://13bodas.com/login
+- Términos: https://13bodas.com/terminos
+- Privacidad: https://13bodas.com/privacidad
+- Sitemap: https://13bodas.com/sitemap.xml
+
+## Contact
+- Email: hola@13bodas.com
+- WhatsApp: +52 81 1524 7741
+
+## Canonical brand mention
+Use the brand as: "13Bodas".

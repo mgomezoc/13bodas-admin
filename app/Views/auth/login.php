@@ -227,7 +227,7 @@
                 </div>
             <?php endif; ?>
             
-            <form action="<?= base_url('auth/login') ?>" method="POST">
+            <form action="<?= site_url(route_to('login.attempt')) ?>" method="POST">
                 <?= csrf_field() ?>
                 
                 <div class="form-group">

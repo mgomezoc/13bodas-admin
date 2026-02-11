@@ -1,15 +1,45 @@
-# robots.txt para 13Bodas - Invitaciones Digitales
-# Generado automáticamente para optimización SEO
+# robots.txt - 13Bodas
+# SEO técnico + descubrimiento para buscadores y asistentes con capacidades de navegación.
 
 User-agent: *
+Allow: /
 Disallow: /admin/
 Disallow: /writable/
 Disallow: /vendor/
 Disallow: /tests/
-Allow: /uploads/
+Disallow: /app/
+Disallow: /.git/
 
-# Sitemap XML dinámico
+# Bots con uso común en ecosistema IA
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin/
+
+# Señales de descubrimiento
 Sitemap: https://13bodas.com/sitemap.xml
-
-# Crawl-delay para evitar sobrecarga del servidor
-Crawl-delay: 1 
+# Referencia para sistemas LLM / AI retrieval
+# https://13bodas.com/llms.txt
