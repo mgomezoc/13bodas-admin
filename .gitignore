@@ -90,6 +90,7 @@ _modules/*
 .php-version
 .idea/
 *.iml
+*.zip
 /nbproject/
 /build/
 /nbbuild/

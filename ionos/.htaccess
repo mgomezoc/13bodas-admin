@@ -1,0 +1,34 @@
+# Activa rewrite
+RewriteEngine On
+RewriteBase /
+
+# (Opcional) Fuerza HTTPS + non-www
+# RewriteCond %{HTTPS} !=on [OR]
+# RewriteCond %{HTTP_HOST} ^www\.chartismx\.com$ [NC]
+# RewriteRule ^ https://chartismx.com%{REQUEST_URI} [L,R=301]
+
+# Quita trailing slash (no directorios)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ /$1 [L,R=301]
+
+# === EXCEPCIONES: deja pasar sitemap y robots a CI ===
+# Si los sirves con controlador (Sitemap::index)
+RewriteRule ^(sitemap\.xml|robots\.txt)$ index.php?/$1 [L]
+
+# Front Controller
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?/$1 [L,QSA]
+
+# Seguridad (Apache 2.4). OJO: ya NO bloqueamos .xml
+<FilesMatch "\.(env|json|lock|md|dist|yml|yaml|ini)$">
+  Require all denied
+</FilesMatch>
+
+# Si quieres ser más explícito (opcional):
+<Files "sitemap.xml">
+  Require all granted
+</Files>
+<Files "robots.txt">
+  Require all granted
+</Files>
