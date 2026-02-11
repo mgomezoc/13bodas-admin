@@ -9,21 +9,32 @@ use CodeIgniter\Router\RouteCollection;
 // =============================================================================
 // RUTAS PÚBLICAS DEL SITIO PRINCIPAL
 // =============================================================================
-$routes->get('/', 'Home::index');
-$routes->get('terminos', 'Home::terminos');
-$routes->get('privacidad', 'Home::privacidad');
-$routes->get('gracias', 'Home::gracias');
+$routes->get('/', 'Home::index', ['as' => 'home']);
+$routes->get('terminos', 'Home::terminos', ['as' => 'legal.terms']);
+$routes->get('privacidad', 'Home::privacidad', ['as' => 'legal.privacy']);
+$routes->get('gracias', 'Home::gracias', ['as' => 'home.thanks']);
+
+
+// Alias SEO/marketing para secciones de home (evita 404 por enlaces compartidos)
+$routes->get('paquetes', 'Home::index', ['as' => 'home.packages']);
+$routes->get('servicios', 'Home::index', ['as' => 'home.services']);
+$routes->get('faq', 'Home::index', ['as' => 'home.faq']);
+$routes->get('contacto', 'Home::index', ['as' => 'home.contact']);
 
 // Sitemap XML dinámico (SEO)
-$routes->get('sitemap.xml', 'Sitemap::index');
+$routes->get('sitemap.xml', 'Sitemap::index', ['as' => 'seo.sitemap']);
+
+// Login público (clientes)
+$routes->get('login', 'Auth::login', ['as' => 'login']);
+$routes->post('login', 'Auth::attemptLogin', ['as' => 'login.attempt']);
 
 // =============================================================================
 // RUTAS DE AUTENTICACIÓN (Admin)
 // =============================================================================
 $routes->group('admin', function ($routes) {
     $routes->get('login', 'Admin\Auth::login', ['as' => 'admin.login']);
-    $routes->post('login', 'Admin\Auth::attemptLogin');
-    $routes->get('logout', 'Admin\Auth::logout');
+    $routes->post('login', 'Admin\Auth::attemptLogin', ['as' => 'admin.login.attempt']);
+    $routes->get('logout', 'Admin\Auth::logout', ['as' => 'admin.logout']);
 });
 
 
@@ -243,12 +254,12 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 // =============================================================================
 // API DE LEADS (Para el formulario público del sitio)
 // =============================================================================
-$routes->post('api/leads', 'Api\Leads::store');
+$routes->post('api/leads', 'Api\Leads::store', ['as' => 'api.leads.store']);
 
 // =============================================================================
 // RUTAS PÚBLICAS DE INVITACIONES
 // =============================================================================
 $routes->get('i/(:segment)', 'Invitation::view/$1', ['as' => 'invitation.view']);
-$routes->get('i/(:segment)/rsvp', 'Invitation::rsvp/$1');
+$routes->get('i/(:segment)/rsvp', 'Invitation::rsvp/$1', ['as' => 'invitation.rsvp']);
 $routes->post('i/(:segment)/rsvp', 'RsvpController::submit/$1', ['as' => 'rsvp.submit']);
-$routes->get('i/(:segment)/rsvp/(:segment)', 'Invitation::rsvpWithCode/$1/$2');
+$routes->get('i/(:segment)/rsvp/(:segment)', 'Invitation::rsvpWithCode/$1/$2', ['as' => 'invitation.rsvp.code']);

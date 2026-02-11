@@ -26,7 +26,7 @@
     </p>
     <p>Puedes contactarnos a través de:</p>
     <ul>
-        <li>Email: <a href="mailto:hola@13bodas.com">hola@13bodas.com</a></li>
+        <li>Email: el formulario de contacto en la página principal</li>
         <li>WhatsApp: <a href="https://wa.me/528115247741" target="_blank" rel="noopener">+52 81 1524 7741</a></li>
     </ul>
     <p>
@@ -77,7 +77,7 @@
     </ul>
     <p>
         Si no deseas que tus datos se utilicen para finalidades secundarias, puedes manifestar tu
-        oposición escribiendo a <a href="mailto:hola@13bodas.com">hola@13bodas.com</a>.
+        oposición utilizando el formulario de contacto en la página principal.
     </p>
 </section>
 
@@ -130,8 +130,7 @@
         <li><strong>Oposición:</strong> oponerte al uso de tus datos para finalidades específicas</li>
     </ul>
     <p>
-        Para ejercer cualquiera de estos derechos, envía un correo a
-        <a href="mailto:hola@13bodas.com">hola@13bodas.com</a> con tu nombre completo,
+        Para ejercer cualquiera de estos derechos, utiliza el formulario de contacto en la página principal con tu nombre completo,
         medio de contacto, y descripción del derecho que deseas ejercer.
     </p>
 </section>
@@ -162,7 +161,7 @@
         Si tienes dudas, comentarios o inquietudes sobre este aviso de privacidad, puedes contactarnos en:
     </p>
     <ul>
-        <li>Email: <a href="mailto:hola@13bodas.com">hola@13bodas.com</a></li>
+        <li>Email: el formulario de contacto en la página principal</li>
         <li>WhatsApp: <a href="https://wa.me/528115247741" target="_blank" rel="noopener">+52 81 1524 7741</a></li>
     </ul>
 </section>

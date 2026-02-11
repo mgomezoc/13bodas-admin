@@ -136,7 +136,7 @@
         Si tienes dudas sobre estos términos, puedes contactarnos en:
     </p>
     <ul>
-        <li>Email: <a href="mailto:hola@13bodas.com">hola@13bodas.com</a></li>
+        <li>Formulario web: sección de contacto en la página principal</li>
         <li>WhatsApp: <a href="https://wa.me/528115247741" target="_blank" rel="noopener">+52 81 1524 7741</a></li>
     </ul>
     <p class="legal-update-date">

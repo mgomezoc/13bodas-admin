@@ -1,9 +1,9 @@
 <header class="header" id="header">
     <nav class="nav container" aria-label="Navegación principal">
-        <a href="<?= base_url('#inicio') ?>" class="nav-logo" aria-label="13Bodas - Inicio">
+        <a href="<?= site_url(route_to('home')) ?>#inicio" class="nav-logo" aria-label="13Bodas - Inicio">
             <img
-                src="<?= base_url('img/13bodas-logo-blanco-transparente.png') ?>"
-                alt="13Bodas - Invitaciones Digitales con Cuenta Regresiva y Filtros AR"
+                src="<?= esc(base_url('img/13bodas-logo-blanco-transparente.png')) ?>"
+                alt="13Bodas - Plataforma de invitaciones digitales"
                 width="140"
                 height="40"
                 fetchpriority="high"
@@ -16,11 +16,11 @@
 
         <div class="nav-menu" id="navMenu">
             <ul class="nav-list">
-                <li><a href="<?= base_url('#servicios') ?>" class="nav-link">Servicios</a></li>
-                <li><a href="<?= base_url('#magiccam') ?>" class="nav-link">MagicCam</a></li>
-                <li><a href="<?= base_url('#paquetes') ?>" class="nav-link">Paquetes</a></li>
-                <li><a href="<?= base_url('#proceso') ?>" class="nav-link">Proceso</a></li>
-                <li><a href="<?= base_url('#contacto') ?>" class="nav-cta">Cotizar Proyecto</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#servicios" class="nav-link">Plataforma</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#magiccam" class="nav-link">MagicCam</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#paquetes" class="nav-link">Planes</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#faq" class="nav-link">FAQ</a></li>
+                <li><a href="<?= site_url(route_to('register.index')) ?>" class="nav-cta">Crear cuenta gratis</a></li>
             </ul>
         </div>
     </nav>

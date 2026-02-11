@@ -9,22 +9,10 @@
                 </h2>
                 <p class="contact-description">
                     Cuéntanos de tu evento y recibe una cotización personalizada en menos de 24 horas.
-                    Sin compromiso, sin letra pequeña.
+                    Toda la comunicación se gestiona por formularios para dar mejor seguimiento a cada solicitud.
                 </p>
 
                 <div class="contact-info">
-                    <div class="contact-info-item">
-                        <div class="info-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <strong>Email</strong>
-                            <a href="mailto:hola@13bodas.com">hola@13bodas.com</a>
-                        </div>
-                    </div>
-
                     <div class="contact-info-item">
                         <div class="info-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -63,15 +51,28 @@
             </div>
 
             <div class="contact-form-wrapper" data-aos="fade-left">
+                <?php if (session()->getFlashdata('contact_error')): ?>
+                    <div class="alert alert-danger" role="alert" style="margin-bottom: 16px;">
+                        <?= esc((string) session()->getFlashdata('contact_error')) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (session()->getFlashdata('contact_success')): ?>
+                    <div class="alert alert-success" role="alert" style="margin-bottom: 16px;">
+                        <?= esc((string) session()->getFlashdata('contact_success')) ?>
+                    </div>
+                <?php endif; ?>
+
                 <form
-                    action="https://formspree.io/f/movzlzwa"
+                    action="<?= site_url(route_to('api.leads.store')) ?>"
                     method="POST"
                     class="contact-form"
                     id="contactForm"
                 >
+                    <?= csrf_field() ?>
                     <input type="hidden" name="_subject" value="Nueva solicitud desde 13Bodas.com">
                     <input type="hidden" name="_language" value="es">
-                    <input type="hidden" name="_next" value="<?= base_url('gracias') ?>">
+                    <input type="hidden" name="_next" value="<?= esc(base_url('gracias')) ?>">
 
                     <div class="form-group">
                         <label for="nombre">Nombre completo <span class="required">*</span></label>
@@ -139,7 +140,7 @@
                             Te responderemos en menos de 24 horas
                         </p>
                         <button type="submit" class="btn btn-primary btn-submit">
-                            Enviar Solicitud
+                            Solicitar asesoría
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M2 3l16 7-16 7V3zm2 11.5l9-4.5-9-4.5v9z"/>
                             </svg>

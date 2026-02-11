@@ -40,9 +40,9 @@
 
                 <div class="magiccam-cta">
                     <a href="https://magiccam.13bodas.com" class="btn btn-primary" target="_blank" rel="noopener">
-                        Probar Demo Interactiva
+                        Ver demo MagicCam
                     </a>
-                    <a href="#contacto" class="btn btn-ghost">Cotizar Filtro Custom</a>
+                    <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-ghost">Crear cuenta y probar</a>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
                 <div class="demo-wrapper">
                     <div class="demo-frame">
                         <img
-                            src="<?= base_url('img/demo-preview.png') ?>"
+                            src="<?= esc(base_url('img/demo-preview.png')) ?>"
                             alt="Cómo hacer una invitación con cuenta regresiva - Plantilla interactiva MagicCam AR para bodas"
                             class="demo-image"
                             loading="lazy"

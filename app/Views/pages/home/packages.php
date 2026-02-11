@@ -1,200 +1,80 @@
 <section id="paquetes" class="packages section-padding">
     <div class="container">
         <header class="section-header" data-aos="fade-up">
-            <span class="section-tag">Inversión</span>
+            <span class="section-tag">Planes</span>
             <h2 class="section-title">
-                Elige el paquete perfecto<br>
-                <span class="gradient-text">para tu evento</span>
+                Empieza gratis y escala<br>
+                <span class="gradient-text">según tu evento</span>
             </h2>
             <p class="section-description">
-                Todos los paquetes incluyen soporte técnico, entregas a tiempo y revisiones ilimitadas
+                Diseñado para parejas, planners y agencias que necesitan operar eventos de forma profesional
             </p>
         </header>
 
         <div class="packages-grid">
-            <!-- Essential -->
             <article class="package-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="package-header">
-                    <h3 class="package-name">Essential</h3>
-                    <p class="package-tagline">Perfecto para eventos íntimos</p>
+                    <h3 class="package-name">Starter</h3>
+                    <p class="package-tagline">Para comenzar en minutos</p>
                 </div>
                 <div class="package-price">
-                    <span class="price-label">Desde</span>
-                    <span class="price-value">Cotiza</span>
+                    <span class="price-label">Incluye</span>
+                    <span class="price-value">Prueba gratis</span>
                 </div>
                 <ul class="package-features">
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Invitación web One-Page
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Diseño responsive premium
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Cuenta regresiva animada
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Google Maps integrado
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Hasta 3 secciones de contenido
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Entrega en 7 días hábiles
-                    </li>
+                    <li>✓ Evento demo al registrarte</li>
+                    <li>✓ Página pública con diseño profesional</li>
+                    <li>✓ RSVP básico y lista de invitados</li>
+                    <li>✓ Configuración inicial en minutos</li>
+                    <li>✓ Soporte por email</li>
                 </ul>
-                <a href="#contacto" class="btn btn-outline">Solicitar Cotización</a>
+                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-outline">Comenzar gratis</a>
             </article>
 
-            <!-- Interactive (Popular) -->
             <article class="package-card package-card-popular" data-aos="fade-up" data-aos-delay="200">
-                <div class="package-badge">Más Elegido</div>
+                <div class="package-badge">Más elegido</div>
                 <div class="package-header">
-                    <h3 class="package-name">Interactive</h3>
-                    <p class="package-tagline">La experiencia completa AR</p>
+                    <h3 class="package-name">Growth</h3>
+                    <p class="package-tagline">Para eventos con alta interacción</p>
                 </div>
                 <div class="package-price">
-                    <span class="price-label">Desde</span>
-                    <span class="price-value">Cotiza</span>
+                    <span class="price-label">Activa</span>
+                    <span class="price-value">RSVP pro</span>
                 </div>
                 <ul class="package-features">
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        <strong>Todo lo de Essential</strong>
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        <strong>Filtro AR MagicCam personalizado</strong>
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Sistema RSVP avanzado
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Galería de fotos ilimitada
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Código QR personalizado
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Analytics de uso del filtro
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Hasta 6 secciones de contenido
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Entrega en 10-12 días hábiles
-                    </li>
+                    <li>✓ Todo lo de Starter</li>
+                    <li>✓ RSVP avanzado y preguntas personalizadas</li>
+                    <li>✓ Gestión por grupos y exportación</li>
+                    <li>✓ Módulos de galería, agenda y recomendaciones</li>
+                    <li>✓ Métricas para decisiones de logística</li>
                 </ul>
-                <a href="#contacto" class="btn btn-primary">Solicitar Cotización</a>
+                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-primary">Probar plataforma</a>
             </article>
 
-            <!-- Infinity -->
             <article class="package-card" data-aos="fade-up" data-aos-delay="300">
                 <div class="package-header">
-                    <h3 class="package-name">Infinity</h3>
-                    <p class="package-tagline">Eventos corporativos VIP</p>
+                    <h3 class="package-name">Scale</h3>
+                    <p class="package-tagline">Para planners y agencias</p>
                 </div>
                 <div class="package-price">
-                    <span class="price-label">Desde</span>
-                    <span class="price-value">Cotiza</span>
+                    <span class="price-label">Ideal para</span>
+                    <span class="price-value">Multi-evento</span>
                 </div>
                 <ul class="package-features">
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        <strong>Todo lo de Interactive</strong>
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Múltiples filtros AR (3+)
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Animaciones 3D avanzadas
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Diseño multi-idioma
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Integraciones custom (CRM, APIs)
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Dashboard analytics avanzado
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Soporte prioritario 24/7
-                    </li>
-                    <li>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm-2 15l-5-5 1.41-1.41L8 12.17l7.59-7.59L17 6l-9 9z"/>
-                        </svg>
-                        Consultoría estratégica incluida
-                    </li>
+                    <li>✓ Operación de múltiples eventos</li>
+                    <li>✓ Soporte para equipos de trabajo</li>
+                    <li>✓ Integraciones y dominios personalizados</li>
+                    <li>✓ MagicCam y activos interactivos</li>
+                    <li>✓ Onboarding asistido</li>
                 </ul>
-                <a href="#contacto" class="btn btn-outline">Solicitar Cotización</a>
+                <a href="#contacto" class="btn btn-outline">Hablar con ventas</a>
             </article>
         </div>
 
         <div class="packages-note" data-aos="fade-up">
             <p>
-                💡 <strong>¿No encuentras lo que buscas?</strong> Creamos soluciones a la medida.
-                <a href="#contacto">Cuéntanos tu idea →</a>
+                💡 <strong>¿Quieres validar rápido?</strong> Crea tu cuenta y explora la demo sin costo.
+                <a href="<?= site_url(route_to('register.index')) ?>">Registrarme ahora →</a>
             </p>
         </div>
     </div>
