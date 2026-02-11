@@ -40,7 +40,6 @@
                             WhatsApp: +52 81 1524 7741
                         </a>
                     </li>
-                    <li><a href="mailto:hola@13bodas.com">hola@13bodas.com</a></li>
                     <li>Soporte remoto internacional</li>
                     <li>
                         <a href="https://www.facebook.com/13bodas" target="_blank" rel="noopener">Facebook</a>

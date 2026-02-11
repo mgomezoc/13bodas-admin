@@ -33,7 +33,6 @@
     "contactPoint": {
         "@type": "ContactPoint",
         "contactType": "sales",
-        "email": "hola@13bodas.com",
         "telephone": "+52-81-1524-7741",
         "availableLanguage": ["es", "en"],
         "areaServed": "Worldwide"
@@ -100,6 +99,14 @@
             "acceptedAnswer": {
                 "@type": "Answer",
                 "text": "Sí. La plataforma funciona online y puedes administrar tu evento desde cualquier país."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "¿Qué significa RSVP en una invitación?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "RSVP significa por favor confirma tu asistencia. Te ayuda a saber quiénes asistirán para organizar mejor lugares, alimentos y logística."
             }
         },
         {

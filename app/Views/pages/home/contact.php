@@ -9,22 +9,10 @@
                 </h2>
                 <p class="contact-description">
                     Cuéntanos de tu evento y recibe una cotización personalizada en menos de 24 horas.
-                    Sin compromiso, sin letra pequeña.
+                    Toda la comunicación se gestiona por formularios para dar mejor seguimiento a cada solicitud.
                 </p>
 
                 <div class="contact-info">
-                    <div class="contact-info-item">
-                        <div class="info-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <strong>Email</strong>
-                            <a href="mailto:hola@13bodas.com">hola@13bodas.com</a>
-                        </div>
-                    </div>
-
                     <div class="contact-info-item">
                         <div class="info-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">

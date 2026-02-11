@@ -14,6 +14,13 @@ $routes->get('terminos', 'Home::terminos', ['as' => 'legal.terms']);
 $routes->get('privacidad', 'Home::privacidad', ['as' => 'legal.privacy']);
 $routes->get('gracias', 'Home::gracias', ['as' => 'home.thanks']);
 
+
+// Alias SEO/marketing para secciones de home (evita 404 por enlaces compartidos)
+$routes->get('paquetes', 'Home::index', ['as' => 'home.packages']);
+$routes->get('servicios', 'Home::index', ['as' => 'home.services']);
+$routes->get('faq', 'Home::index', ['as' => 'home.faq']);
+$routes->get('contacto', 'Home::index', ['as' => 'home.contact']);
+
 // Sitemap XML dinámico (SEO)
 $routes->get('sitemap.xml', 'Sitemap::index', ['as' => 'seo.sitemap']);
 

@@ -11,6 +11,15 @@
             </p>
         </header>
 
+
+        <div class="service-card" data-aos="fade-up" style="margin-bottom: 28px;">
+            <h3 class="service-title" style="margin-bottom: 8px;">¿Qué es RSVP?</h3>
+            <p class="service-text" style="margin:0;">
+                RSVP significa <strong>"por favor confirma tu asistencia"</strong>. En 13Bodas tus invitados confirman en línea
+                y tú ves quién asistirá para planear lugares, alimentos y logística sin llamadas ni hojas de cálculo.
+            </p>
+        </div>
+
         <div class="services-grid">
             <article class="service-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="service-icon">
