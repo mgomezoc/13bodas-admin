@@ -185,52 +185,52 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text with cascading fallback: copyPayload → defaults → hardcoded ---
-function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
+function liebeGetText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Guarda la fecha');
-$countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
-$ctaHeading = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
-$ctaSubheading = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
-$brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
-$groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
-$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Damas y Caballeros');
-$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'Sobre la pareja');
-$quoteText = getText(
+$heroTagline = liebeGetText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$countdownTitle = liebeGetText($copyPayload, $defaults, 'countdown_title', 'Guarda la fecha');
+$countdownSubtitle = liebeGetText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
+$ctaHeading = liebeGetText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
+$ctaSubheading = liebeGetText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
+$rsvpHeading = liebeGetText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
+$brideSectionTitle = liebeGetText($copyPayload, $defaults, 'bride_section_title', 'La novia');
+$groomSectionTitle = liebeGetText($copyPayload, $defaults, 'groom_section_title', 'El novio');
+$storyTitle = liebeGetText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$eventsTitle = liebeGetText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
+$galleryTitle = liebeGetText($copyPayload, $defaults, 'gallery_title', 'Galería');
+$registryTitle = liebeGetText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
+$partyTitle = liebeGetText($copyPayload, $defaults, 'party_title', 'Damas y Caballeros');
+$aboutTitle = liebeGetText($copyPayload, $defaults, 'about_title', 'Sobre la pareja');
+$quoteText = liebeGetText(
     $copyPayload,
     $defaults,
     'quote_text',
     'Ser profundamente amado por alguien te da fuerza, mientras que amar profundamente a alguien te da valentía.'
 );
-$saveDateText = getText(
+$saveDateText = liebeGetText(
     $copyPayload,
     $defaults,
     'save_date_text',
     'Gracias por acompañarnos en este día tan especial.'
 );
-$eventIntroTitle = getText($copyPayload, $defaults, 'event_intro_title', 'Celebra con nosotros');
-$eventIntroText = getText(
+$eventIntroTitle = liebeGetText($copyPayload, $defaults, 'event_intro_title', 'Celebra con nosotros');
+$eventIntroText = liebeGetText(
     $copyPayload,
     $defaults,
     'event_description',
     'Nos encantará verte ahí para compartir este momento con nosotros.'
 );
-$eventDetailsTitle = getText($copyPayload, $defaults, 'event_details_title', 'Un día muy especial...');
-$eventDetailsText = getText(
+$eventDetailsTitle = liebeGetText($copyPayload, $defaults, 'event_details_title', 'Un día muy especial...');
+$eventDetailsText = liebeGetText(
     $copyPayload,
     $defaults,
     'event_details_text',
     'Gracias por formar parte de nuestra historia.'
 );
-$eventAlertText = getText(
+$eventAlertText = liebeGetText(
     $copyPayload,
     $defaults,
     'event_alert_text',

@@ -174,24 +174,24 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text with cascading fallback: copyPayload → defaults → hardcoded ---
-function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
+function lovelyGetText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle    = getText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
-$countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
-$ctaHeading        = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
-$ctaSubheading     = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading       = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
-$brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
-$groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle        = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
-$partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$heroTagline       = lovelyGetText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$countdownTitle    = lovelyGetText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
+$countdownSubtitle = lovelyGetText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
+$ctaHeading        = lovelyGetText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
+$ctaSubheading     = lovelyGetText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
+$rsvpHeading       = lovelyGetText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
+$brideSectionTitle = lovelyGetText($copyPayload, $defaults, 'bride_section_title', 'La novia');
+$groomSectionTitle = lovelyGetText($copyPayload, $defaults, 'groom_section_title', 'El novio');
+$storyTitle        = lovelyGetText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$eventsTitle       = lovelyGetText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
+$galleryTitle      = lovelyGetText($copyPayload, $defaults, 'gallery_title', 'Galería');
+$registryTitle     = lovelyGetText($copyPayload, $defaults, 'registry_title', 'Regalos');
+$partyTitle        = lovelyGetText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));

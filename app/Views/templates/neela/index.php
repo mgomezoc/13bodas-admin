@@ -173,30 +173,30 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text with cascading fallback ---
-function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
+function neelaGetText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Save the Date');
-$countdownTitle    = getText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
-$countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
-$ctaHeading        = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
-$ctaSubheading     = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading       = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
-$brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
-$groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle        = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
-$partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
-$aboutTitle        = getText($copyPayload, $defaults, 'about_title', 'Nos casamos');
-$aboutSubtitle     = getText($copyPayload, $defaults, 'about_subtitle', 'Estamos muy felices de compartir contigo este día tan especial.');
-$timelineFooter    = getText($copyPayload, $defaults, 'timeline_footer', 'Aquí comienza nuestro para siempre');
-$giftDescription   = getText($copyPayload, $defaults, 'gift_description', 'Gracias por ser parte de nuestra historia. Si deseas apoyarnos, aquí tienes algunas opciones.');
-$locationTitle     = getText($copyPayload, $defaults, 'location_title', 'Ubicación');
-$rsvpSubmitLabel   = getText($copyPayload, $defaults, 'rsvp_submit', 'Enviar');
+$heroTagline       = neelaGetText($copyPayload, $defaults, 'hero_tagline', 'Save the Date');
+$countdownTitle    = neelaGetText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
+$countdownSubtitle = neelaGetText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
+$ctaHeading        = neelaGetText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
+$ctaSubheading     = neelaGetText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
+$rsvpHeading       = neelaGetText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
+$brideSectionTitle = neelaGetText($copyPayload, $defaults, 'bride_section_title', 'La novia');
+$groomSectionTitle = neelaGetText($copyPayload, $defaults, 'groom_section_title', 'El novio');
+$storyTitle        = neelaGetText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$eventsTitle       = neelaGetText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
+$galleryTitle      = neelaGetText($copyPayload, $defaults, 'gallery_title', 'Galería');
+$registryTitle     = neelaGetText($copyPayload, $defaults, 'registry_title', 'Regalos');
+$partyTitle        = neelaGetText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$aboutTitle        = neelaGetText($copyPayload, $defaults, 'about_title', 'Nos casamos');
+$aboutSubtitle     = neelaGetText($copyPayload, $defaults, 'about_subtitle', 'Estamos muy felices de compartir contigo este día tan especial.');
+$timelineFooter    = neelaGetText($copyPayload, $defaults, 'timeline_footer', 'Aquí comienza nuestro para siempre');
+$giftDescription   = neelaGetText($copyPayload, $defaults, 'gift_description', 'Gracias por ser parte de nuestra historia. Si deseas apoyarnos, aquí tienes algunas opciones.');
+$locationTitle     = neelaGetText($copyPayload, $defaults, 'location_title', 'Ubicación');
+$rsvpSubmitLabel   = neelaGetText($copyPayload, $defaults, 'rsvp_submit', 'Enviar');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));
