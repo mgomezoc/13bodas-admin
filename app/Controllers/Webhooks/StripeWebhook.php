@@ -14,21 +14,49 @@ class StripeWebhook extends BaseController
 
     public function handle(): ResponseInterface
     {
-        $payload = $this->request->getBody();
-        $signature = (string) $this->request->getHeaderLine('Stripe-Signature');
+        $correlationId = bin2hex(random_bytes(8));
 
-        if ($payload === '' || $signature === '') {
-            return $this->response->setStatusCode(400)->setBody('Bad Request');
+        // CORRECCIÓN CRÍTICA: Usamos el flujo de entrada directo de PHP.
+        // Esto evita que el framework altere el payload (trim, encoding, etc.)
+        // lo cual es la causa #1 de fallos de firma en Stripe.
+        $payload = @file_get_contents('php://input');
+
+        $signature = trim($this->request->getHeaderLine('Stripe-Signature'));
+
+        if (empty($payload) || empty($signature)) {
+            log_message('warning', '[{correlationId}] Stripe webhook rechazado: Falta payload o firma.', [
+                'correlationId' => $correlationId,
+            ]);
+            return $this->response->setStatusCode(400)->setBody('Bad Request: Missing data');
         }
 
+        // Logs para depuración (puedes comentarlos en producción)
+        log_message('debug', "[{correlationId}] Inicio Webhook. Payload: {bytes} bytes. Firma: {sig}...", [
+            'correlationId' => $correlationId,
+            'bytes'         => strlen($payload),
+            'sig'           => substr($signature, 0, 15)
+        ]);
+
         try {
-            if ($this->paymentService()->processWebhook($payload, $signature)) {
+            $processed = $this->paymentService()->processWebhook($payload, $signature, $correlationId);
+
+            if ($processed) {
                 return $this->response->setStatusCode(200)->setBody('OK');
             }
 
+            // Si llegamos aquí, falló la verificación en el Provider
             return $this->response->setStatusCode(400)->setBody('Invalid signature');
+        } catch (\InvalidArgumentException $exception) {
+            log_message('warning', '[{correlationId}] Validación fallida: {message}', [
+                'correlationId' => $correlationId,
+                'message'       => $exception->getMessage(),
+            ]);
+            return $this->response->setStatusCode(400)->setBody('Bad Request');
         } catch (\Throwable $exception) {
-            log_message('error', 'Stripe webhook error: {message}', ['message' => $exception->getMessage()]);
+            log_message('error', '[{correlationId}] Error interno: {message}', [
+                'correlationId' => $correlationId,
+                'message'       => $exception->getMessage(),
+            ]);
             return $this->response->setStatusCode(500)->setBody('Internal Server Error');
         }
     }

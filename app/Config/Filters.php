@@ -73,5 +73,11 @@ class Filters extends BaseFilters
     /**
      * List of filter aliases that should run on any before or after URI patterns
      */
-    public array $filters = [];
+    public array $filters = [
+        'csrf' => [
+            'except' => [
+                'webhooks/stripe',
+            ],
+        ],
+    ];
 }

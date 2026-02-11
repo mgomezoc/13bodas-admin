@@ -79,6 +79,7 @@
 
 <?= $this->section('scripts') ?>
 <script>
+const CAN_MANUAL_MARK_PAID = <?= json_encode(in_array('superadmin', session()->get('user_roles') ?? [], true) || in_array('admin', session()->get('user_roles') ?? [], true)) ?>;
 let currentFilter = '';
 
 // Parámetros de consulta con filtro
@@ -127,6 +128,11 @@ function serviceStatusFormatter(value, row) {
 
 // Formatear acciones
 function actionsFormatter(value, row) {
+    const showMarkPaidButton = CAN_MANUAL_MARK_PAID && Number(row.is_paid ?? 0) !== 1;
+    const markPaidButton = showMarkPaidButton
+        ? `<button type="button" class="btn btn-sm btn-outline-success" onclick="markPaidSwal('${row.id}')" title="Marcar como pagado"><i class="bi bi-cash-coin"></i></button>`
+        : '';
+
     return `
         <div class="action-buttons">
             <a href="${BASE_URL}i/${row.slug}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Ver invitación">
@@ -138,11 +144,70 @@ function actionsFormatter(value, row) {
             <a href="${BASE_URL}admin/events/edit/${row.id}" class="btn btn-sm btn-outline-primary" title="Editar">
                 <i class="bi bi-pencil"></i>
             </a>
+            ${markPaidButton}
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteEventSwal('${row.id}')" title="Eliminar">
                 <i class="bi bi-trash"></i>
             </button>
         </div>
     `;
+}
+
+function markPaidSwal(eventId) {
+    Swal.fire({
+        title: 'Marcar evento como pagado',
+        text: 'Esta acción activará el evento manualmente y dejará un registro de auditoría.',
+        input: 'text',
+        inputLabel: 'Motivo (opcional)',
+        inputPlaceholder: 'Ej. Validado por transferencia bancaria',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, marcar pagado',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        const payload = new URLSearchParams();
+        payload.append(CSRF_NAME, CSRF_TOKEN);
+        payload.append('reason', (result.value || '').trim());
+
+        fetch(`${BASE_URL}admin/events/mark-paid/${eventId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: payload.toString(),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'No se pudo marcar el evento como pagado.',
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    icon: data.already_processed ? 'info' : 'success',
+                    title: data.already_processed ? 'Sin cambios' : 'Éxito',
+                    text: data.message,
+                }).then(() => {
+                    $('#eventsTable').bootstrapTable('refresh');
+                });
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor.',
+                });
+            });
+    });
 }
 
 // Filtros de estado

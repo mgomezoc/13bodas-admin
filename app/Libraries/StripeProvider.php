@@ -12,7 +12,8 @@ use Stripe\Webhook;
 class StripeProvider implements PaymentProviderInterface
 {
     private StripeClient $stripe;
-    private string $webhookSecret;
+    /** @var list<string> */
+    private array $webhookSecrets;
     private string $successUrl;
     private string $cancelUrl;
 
@@ -28,7 +29,7 @@ class StripeProvider implements PaymentProviderInterface
         }
 
         $this->stripe = new StripeClient($secretKey);
-        $this->webhookSecret = trim((string) env('STRIPE_WEBHOOK_SECRET', ''));
+        $this->webhookSecrets = $this->parseWebhookSecrets((string) env('STRIPE_WEBHOOK_SECRET', ''));
 
         $this->successUrl = $this->resolveAbsoluteUrl(
             trim((string) env('STRIPE_SUCCESS_URL', route_to('checkout.success') !== '' ? site_url(route_to('checkout.success')) : base_url('checkout/success')))
@@ -75,17 +76,31 @@ class StripeProvider implements PaymentProviderInterface
 
     public function verifyWebhook(string $payload, string $signature): bool
     {
-        if ($this->webhookSecret === '') {
+        if ($this->webhookSecrets === []) {
             throw new \RuntimeException('Falta STRIPE_WEBHOOK_SECRET en tu .env para validar webhooks de Stripe.');
         }
 
-        try {
-            Webhook::constructEvent($payload, $signature, $this->webhookSecret);
-            return true;
-        } catch (SignatureVerificationException|\UnexpectedValueException $exception) {
-            log_message('error', 'Stripe webhook signature verification failed: {message}', ['message' => $exception->getMessage()]);
-            return false;
+        foreach ($this->webhookSecrets as $webhookSecret) {
+            try {
+                // Intenta construir el evento. Si la firma es válida, esto pasará.
+                Webhook::constructEvent($payload, $signature, $webhookSecret);
+
+                return true;
+            } catch (SignatureVerificationException | \UnexpectedValueException $e) {
+                // CORRECCIÓN: Logueamos el mensaje exacto de la excepción para saber POR QUÉ falló
+                // Ej: "No signatures found matching..." o "Timestamp outside tolerance..."
+                log_message('error', 'Stripe Signature Error con secreto [...' . substr($webhookSecret, -4) . ']: ' . $e->getMessage());
+
+                // Continuamos al siguiente secreto si hay más configurados
+                continue;
+            }
         }
+
+        log_message('error', 'Stripe webhook signature verification failed for all configured secrets (count={count})', [
+            'count' => count($this->webhookSecrets),
+        ]);
+
+        return false;
     }
 
     public function getCheckoutSessionStatus(string $sessionId): array
@@ -113,12 +128,17 @@ class StripeProvider implements PaymentProviderInterface
         $eventType = (string) ($eventData['type'] ?? '');
 
         if ($eventType !== 'checkout.session.completed') {
-            throw new \RuntimeException('Unsupported event type: ' . $eventType);
+            return [
+                'should_process' => false,
+                'provider_event_id' => (string) ($eventData['id'] ?? ''),
+            ];
         }
 
         $sessionData = $eventData['data']['object'] ?? [];
 
         return [
+            'should_process' => true,
+            'provider_event_id' => (string) ($eventData['id'] ?? ''),
             'event_id' => $sessionData['metadata']['event_id'] ?? null,
             'payment_reference' => (string) ($sessionData['payment_intent'] ?? ($sessionData['id'] ?? '')),
             'amount' => ((int) ($sessionData['amount_total'] ?? 0)) / 100,
@@ -172,5 +192,26 @@ class StripeProvider implements PaymentProviderInterface
         $separator = str_contains($url, '?') ? '&' : '?';
 
         return $url . $separator . $query;
+    }
+
+    /**
+     * Permite uno o más secrets separados por coma o salto de línea.
+     * Útil para rotación y para entornos locales con Stripe CLI.
+     *
+     * @return list<string>
+     */
+    private function parseWebhookSecrets(string $rawWebhookSecrets): array
+    {
+        $parts = preg_split('/[\r\n,]+/', $rawWebhookSecrets) ?: [];
+
+        $secrets = [];
+        foreach ($parts as $part) {
+            $candidate = trim($part);
+            if ($candidate !== '') {
+                $secrets[] = $candidate;
+            }
+        }
+
+        return $secrets;
     }
 }

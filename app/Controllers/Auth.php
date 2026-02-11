@@ -58,9 +58,12 @@ class Auth extends BaseController
             'user_id' => $user['id'],
             'user_name' => $user['full_name'] ?? $user['email'],
             'user_email' => $user['email'],
+            'user_roles' => array_column($this->userModel->getUserRoles((string) $user['id']), 'name'),
+            'client_id' => $this->clientModel->getByUserId((string) $user['id'])['id'] ?? null,
             'isLoggedIn' => true,
         ];
 
+        session()->regenerate();
         session()->set($sessionData);
         $this->userModel->updateLastLogin((string) $user['id']);
 

@@ -36,7 +36,7 @@ $routes->group('checkout', static function ($routes) {
     $routes->get('(:segment)', 'Checkout::index/$1', ['filter' => 'auth', 'as' => 'checkout.index']);
     $routes->post('create-session/(:segment)', 'Checkout::createSession/$1', ['filter' => 'auth', 'as' => 'checkout.create_session']);
     $routes->get('success', 'Checkout::success', ['as' => 'checkout.success']); // SIN FILTRO AUTH - Stripe redirect
-    $routes->get('cancel', 'Checkout::cancel', ['filter' => 'auth', 'as' => 'checkout.cancel']);
+    $routes->get('cancel', 'Checkout::cancel', ['as' => 'checkout.cancel']);
 });
 
 // Webhook Stripe (sin CSRF)
@@ -91,6 +91,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
         $routes->get('edit/(:segment)', 'Admin\Events::edit/$1');
         $routes->post('update/(:segment)', 'Admin\Events::update/$1');
         $routes->post('update-settings/(:segment)', 'Admin\Events::updateSettings/$1', ['as' => 'admin.events.update_settings']);
+        $routes->post('mark-paid/(:segment)', 'Admin\Events::markPaid/$1', ['as' => 'admin.events.mark_paid']);
         $routes->post('delete/(:segment)', 'Admin\Events::delete/$1');
         $routes->post('check-slug', 'Admin\Events::checkSlug');
         $routes->get('preview/(:segment)', 'Admin\Events::preview/$1');

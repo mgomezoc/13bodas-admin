@@ -190,21 +190,34 @@ class Invitation extends BaseController
 
         try {
             $guests = $db->table('guests')
-                ->where('event_id', $event['id'])
-                ->orderBy('created_at', 'ASC')
+                ->select('guests.*')
+                ->join('guest_groups', 'guest_groups.id = guests.group_id', 'inner')
+                ->where('guest_groups.event_id', $event['id'])
+                ->orderBy('guests.created_at', 'ASC')
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
+            log_message('warning', 'Invitation::view guests query failed event={eventId} error={error}', [
+                'eventId' => (string) ($event['id'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             $guests = [];
         }
 
         try {
             $rsvpResponses = $db->table('rsvp_responses')
-                ->where('event_id', $event['id'])
-                ->orderBy('responded_at', 'ASC')
+                ->select('rsvp_responses.*')
+                ->join('guests', 'guests.id = rsvp_responses.guest_id', 'inner')
+                ->join('guest_groups', 'guest_groups.id = guests.group_id', 'inner')
+                ->where('guest_groups.event_id', $event['id'])
+                ->orderBy('rsvp_responses.responded_at', 'ASC')
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
+            log_message('warning', 'Invitation::view rsvp_responses query failed event={eventId} error={error}', [
+                'eventId' => (string) ($event['id'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             $rsvpResponses = [];
         }
 
@@ -221,10 +234,14 @@ class Invitation extends BaseController
         try {
             $weddingPartyMembers = $db->table('wedding_party_members')
                 ->where('event_id', $event['id'])
-                ->orderBy('sort_order', 'ASC')
+                ->orderBy('display_order', 'ASC')
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
+            log_message('warning', 'Invitation::view wedding_party_members query failed event={eventId} error={error}', [
+                'eventId' => (string) ($event['id'] ?? ''),
+                'error' => $e->getMessage(),
+            ]);
             $weddingPartyMembers = [];
         }
 

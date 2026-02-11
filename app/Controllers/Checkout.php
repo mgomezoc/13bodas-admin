@@ -87,7 +87,7 @@ class Checkout extends BaseController
     {
         $sessionId = trim((string) $this->request->getGet('session_id'));
         $eventIdFromQuery = trim((string) $this->request->getGet('event_id'));
-        
+
         log_message('info', 'Checkout::success CALLED session={s} event={e}', [
             's' => $sessionId,
             'e' => $eventIdFromQuery,
@@ -99,11 +99,11 @@ class Checkout extends BaseController
 
         try {
             $finalization = $this->paymentService()->finalizeCheckoutSession($sessionId);
-            $eventId = (string) ($finalization['event_id'] ?? $eventIdFromQuery);
+            $eventId = (string) ($finalization['event_id'] ?? '');
 
             log_message('info', 'Checkout::success session={sessionId} event={eventId} paid={paid} processed={processed}', [
                 'sessionId' => $sessionId,
-                'eventId' => $eventId,
+                'eventId' => $eventId !== '' ? $eventId : $eventIdFromQuery,
                 'paid' => ($finalization['is_paid'] ?? false) ? '1' : '0',
                 'processed' => ($finalization['already_processed'] ?? false) ? '1' : '0',
             ]);
@@ -118,7 +118,7 @@ class Checkout extends BaseController
                 'isPaid' => false,
                 'paymentStatus' => (string) ($finalization['payment_status'] ?? 'unknown'),
                 'eventId' => $eventId,
-                'errorMessage' => 'Stripe aún no confirma el pago. Si ya pagaste, recarga esta página en unos segundos.',
+                'errorMessage' => 'Stripe aún no confirma el pago. Si ya pagaste, recarga esta página en unos segundos para reintentar la verificación.',
             ]);
         } catch (\Throwable $exception) {
             log_message('error', 'Checkout::success validation error: {message}', ['message' => $exception->getMessage()]);
@@ -127,7 +127,7 @@ class Checkout extends BaseController
                 'sessionId' => $sessionId,
                 'isPaid' => false,
                 'paymentStatus' => 'unknown',
-                'eventId' => $eventIdFromQuery,
+                'eventId' => '',
                 'errorMessage' => 'No fue posible verificar el estado del pago en este momento.',
             ]);
         }
@@ -148,7 +148,8 @@ class Checkout extends BaseController
 
     private function canAccessEvent(string $eventId): bool
     {
-        $roles = session()->get('user_roles') ?? [];
+        $roles = session()->get('user_roles');
+        $roles = is_array($roles) ? $roles : [];
 
         if (in_array('superadmin', $roles, true) || in_array('admin', $roles, true) || in_array('staff', $roles, true)) {
             return true;
