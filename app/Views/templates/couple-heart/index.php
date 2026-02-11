@@ -186,33 +186,33 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text with cascading fallback: copyPayload → defaults → hardcoded ---
-function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
+function coupleHeartGetText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle = getText($copyPayload, $defaults, 'countdown_title', 'Cuenta regresiva');
-$countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
-$ctaHeading = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
-$ctaSubheading = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
-$brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
-$groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$heroTagline = coupleHeartGetText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$countdownTitle = coupleHeartGetText($copyPayload, $defaults, 'countdown_title', 'Cuenta regresiva');
+$countdownSubtitle = coupleHeartGetText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
+$ctaHeading = coupleHeartGetText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
+$ctaSubheading = coupleHeartGetText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
+$rsvpHeading = coupleHeartGetText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
+$brideSectionTitle = coupleHeartGetText($copyPayload, $defaults, 'bride_section_title', 'La novia');
+$groomSectionTitle = coupleHeartGetText($copyPayload, $defaults, 'groom_section_title', 'El novio');
+$storyTitle = coupleHeartGetText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
 $eventsTitle = 'Detalles del evento';
-$agendaTitle = getText($copyPayload, $defaults, 'agenda_title', 'Agenda');
-$galleryTitle = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
-$partyTitle = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
-$aboutTitle = getText($copyPayload, $defaults, 'about_title', 'La pareja');
-$eventIntroText = getText(
+$agendaTitle = coupleHeartGetText($copyPayload, $defaults, 'agenda_title', 'Agenda');
+$galleryTitle = coupleHeartGetText($copyPayload, $defaults, 'gallery_title', 'Galería');
+$registryTitle = coupleHeartGetText($copyPayload, $defaults, 'registry_title', 'Regalos');
+$partyTitle = coupleHeartGetText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$aboutTitle = coupleHeartGetText($copyPayload, $defaults, 'about_title', 'La pareja');
+$eventIntroText = coupleHeartGetText(
     $copyPayload,
     $defaults,
     'event_description',
     ($templateMeta['description'] ?? 'Nos encantará verte ahí para compartir este momento con nosotros.')
 );
-$faqTitle = getText($copyPayload, $defaults, 'faq_title', 'Preguntas frecuentes');
+$faqTitle = coupleHeartGetText($copyPayload, $defaults, 'faq_title', 'Preguntas frecuentes');
 
 $brideName = esc($event['bride_name'] ?? ($couplePayload['bride']['name'] ?? ''));
 $groomName = esc($event['groom_name'] ?? ($couplePayload['groom']['name'] ?? ''));

@@ -184,23 +184,23 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text helper ---
-function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
+function feelingsGetText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle    = getText($copyPayload, $defaults, 'countdown_title', 'Faltan');
-$coupleTitle_txt   = getText($copyPayload, $defaults, 'couple_section_title', 'La pareja');
-$storyTitle        = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Momentos capturados');
-$eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$rsvpHeading       = getText($copyPayload, $defaults, 'rsvp_heading', '¿Nos acompañas?');
-$registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
-$partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
-$faqTitle          = getText($copyPayload, $defaults, 'faq_title', 'Preguntas frecuentes');
-$locationTitle     = getText($copyPayload, $defaults, 'location_title', 'Ubicación');
-$guestSummaryTitle = getText($copyPayload, $defaults, 'guest_summary_title', 'Resumen de invitados');
+$heroTagline       = feelingsGetText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$countdownTitle    = feelingsGetText($copyPayload, $defaults, 'countdown_title', 'Faltan');
+$coupleTitle_txt   = feelingsGetText($copyPayload, $defaults, 'couple_section_title', 'La pareja');
+$storyTitle        = feelingsGetText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$galleryTitle      = feelingsGetText($copyPayload, $defaults, 'gallery_title', 'Momentos capturados');
+$eventsTitle       = feelingsGetText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
+$rsvpHeading       = feelingsGetText($copyPayload, $defaults, 'rsvp_heading', '¿Nos acompañas?');
+$registryTitle     = feelingsGetText($copyPayload, $defaults, 'registry_title', 'Mesa de regalos');
+$partyTitle        = feelingsGetText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$faqTitle          = feelingsGetText($copyPayload, $defaults, 'faq_title', 'Preguntas frecuentes');
+$locationTitle     = feelingsGetText($copyPayload, $defaults, 'location_title', 'Ubicación');
+$guestSummaryTitle = feelingsGetText($copyPayload, $defaults, 'guest_summary_title', 'Resumen de invitados');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? 'Gracias por ser parte de nuestra historia'));

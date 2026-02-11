@@ -175,26 +175,26 @@ if ($modFaq && !empty($modFaq['content_payload'])) {
 $faqs = !empty($faqs) ? $faqs : ($faqPayload['items'] ?? []);
 
 // --- Dynamic text with cascading fallback: copyPayload → defaults → hardcoded ---
-function getText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
+function oliviaGetText(array $copyPayload, array $defaults, string $key, string $hardcoded = ''): string
 {
     return esc($copyPayload[$key] ?? ($defaults[$key] ?? $hardcoded));
 }
 
-$heroTagline       = getText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
-$countdownTitle    = getText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
-$countdownSubtitle = getText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
-$ctaHeading        = getText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
-$ctaSubheading     = getText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
-$rsvpHeading       = getText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
-$brideSectionTitle = getText($copyPayload, $defaults, 'bride_section_title', 'La novia');
-$groomSectionTitle = getText($copyPayload, $defaults, 'groom_section_title', 'El novio');
-$storyTitle        = getText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
-$eventsTitle       = getText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
-$galleryTitle      = getText($copyPayload, $defaults, 'gallery_title', 'Galería');
-$registryTitle     = getText($copyPayload, $defaults, 'registry_title', 'Regalos');
-$partyTitle        = getText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
-$whenWhereTitle    = getText($copyPayload, $defaults, 'whenwhere_title', 'Cuándo y dónde');
-$whenWhereMeta     = getText($copyPayload, $defaults, 'whenwhere_meta', 'Questions');
+$heroTagline       = oliviaGetText($copyPayload, $defaults, 'hero_tagline', 'Nos casamos');
+$countdownTitle    = oliviaGetText($copyPayload, $defaults, 'countdown_title', 'Falta poco para…');
+$countdownSubtitle = oliviaGetText($copyPayload, $defaults, 'countdown_subtitle', 'Nuestra celebración');
+$ctaHeading        = oliviaGetText($copyPayload, $defaults, 'cta_heading', 'Te invitamos a…');
+$ctaSubheading     = oliviaGetText($copyPayload, $defaults, 'cta_subheading', 'Celebrar con nosotros');
+$rsvpHeading       = oliviaGetText($copyPayload, $defaults, 'rsvp_heading', 'Confirma tu asistencia');
+$brideSectionTitle = oliviaGetText($copyPayload, $defaults, 'bride_section_title', 'La novia');
+$groomSectionTitle = oliviaGetText($copyPayload, $defaults, 'groom_section_title', 'El novio');
+$storyTitle        = oliviaGetText($copyPayload, $defaults, 'story_title', 'Nuestra historia');
+$eventsTitle       = oliviaGetText($copyPayload, $defaults, 'events_title', 'Detalles del evento');
+$galleryTitle      = oliviaGetText($copyPayload, $defaults, 'gallery_title', 'Galería');
+$registryTitle     = oliviaGetText($copyPayload, $defaults, 'registry_title', 'Regalos');
+$partyTitle        = oliviaGetText($copyPayload, $defaults, 'party_title', 'Cortejo nupcial');
+$whenWhereTitle    = oliviaGetText($copyPayload, $defaults, 'whenwhere_title', 'Cuándo y dónde');
+$whenWhereMeta     = oliviaGetText($copyPayload, $defaults, 'whenwhere_meta', 'Questions');
 
 $brideBio = esc($couplePayload['bride']['bio']
     ?? ($defaults['bride_bio'] ?? ($defaults['bride_bio_default'] ?? 'Gracias por ser parte de nuestra historia. Te esperamos para celebrar juntos.')));
@@ -288,8 +288,8 @@ foreach ($weddingParty as $member) {
     $partyByCategory[$cat][] = $member;
 }
 
-$storySubtitle = getText($copyPayload, $defaults, 'story_subtitle', 'Our love.');
-$storyHighlight = getText($copyPayload, $defaults, 'story_highlight', '');
+$storySubtitle = oliviaGetText($copyPayload, $defaults, 'story_subtitle', 'Our love.');
+$storyHighlight = oliviaGetText($copyPayload, $defaults, 'story_highlight', '');
 
 $storyParagraphs = [];
 if (!empty($storyPayload['paragraphs']) && is_array($storyPayload['paragraphs'])) {
