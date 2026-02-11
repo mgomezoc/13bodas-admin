@@ -1,15 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
+
+use App\Libraries\StructuredDataBuilder;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Home extends BaseController
 {
+    public function __construct(private StructuredDataBuilder $structuredDataBuilder = new StructuredDataBuilder())
+    {
+    }
+
     /**
      * Página principal
      */
     public function index(): string
     {
-        return view('pages/home');
+        $schemas = $this->structuredDataBuilder->homeSchemas(base_url('/'));
+
+        return view('pages/home', [
+            'homeStructuredDataScripts' => $this->structuredDataBuilder->renderScripts($schemas),
+        ]);
     }
 
     /**
@@ -35,4 +48,32 @@ class Home extends BaseController
     {
         return view('pages/gracias');
     }
+
+
+    public function llms(): ResponseInterface
+    {
+        return $this->serveTextFile(FCPATH . 'llms.txt');
+    }
+
+    public function llmsFull(): ResponseInterface
+    {
+        return $this->serveTextFile(FCPATH . 'llms-full.txt');
+    }
+
+    private function serveTextFile(string $path): ResponseInterface
+    {
+        if (!is_file($path)) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $content = file_get_contents($path);
+        if ($content === false) {
+            return $this->response->setStatusCode(500);
+        }
+
+        return $this->response
+            ->setContentType('text/plain; charset=UTF-8')
+            ->setBody($content);
+    }
+
 }

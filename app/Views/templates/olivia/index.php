@@ -361,6 +361,7 @@ $logoUrl = $assetsBase . '/' . ltrim($logoImage, '/');
 <?php if (!empty($isDemoMode)): ?>
     <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
 <?php endif; ?>
+<?= $jsonLdEvent ?? '' ?>
 </head>
 
 <body>

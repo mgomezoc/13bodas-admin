@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\GuestInvitationService;
+use App\Libraries\StructuredDataBuilder;
 use App\Models\EventModel;
 use App\Models\EventFaqItemModel;
 use App\Models\EventScheduleItemModel;
@@ -16,8 +17,10 @@ use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Invitation extends BaseController
 {
-    public function __construct(private GuestInvitationService $invitationService = new GuestInvitationService())
-    {
+    public function __construct(
+        private GuestInvitationService $invitationService = new GuestInvitationService(),
+        private StructuredDataBuilder $structuredDataBuilder = new StructuredDataBuilder(),
+    ) {
     }
 
     public function view(string $slug): string
@@ -372,6 +375,10 @@ class Invitation extends BaseController
         }
 
         // Preparar datos para la vista
+        $eventSchemaScript = $this->structuredDataBuilder->renderScript(
+            $this->structuredDataBuilder->eventSchema($event, base_url('i/' . $slug))
+        );
+
         $data = [
             'event'           => $event,
             'modules'         => $modules,
@@ -395,6 +402,7 @@ class Invitation extends BaseController
             'selectedGuest'   => $selectedGuest,
             'isDemoMode'      => $isDemoMode,
             'isPaidActive'    => $isPaidActive,
+            'jsonLdEvent'     => $eventSchemaScript,
         ];
 
         /* debug
