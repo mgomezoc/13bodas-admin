@@ -6,7 +6,9 @@
                     src="<?= esc(base_url('img/13bodas-logo-blanco-transparente.png')) ?>"
                     alt="13Bodas"
                     width="120"
-                    height="auto"
+                    height="34"
+                    loading="lazy"
+                    decoding="async"
                 >
                 <p class="footer-tagline">
                     Plataforma para crear invitaciones digitales y gestionar RSVP desde cualquier país.

@@ -39,7 +39,8 @@ class Sitemap extends BaseController
 
         try {
             $publicEvents = $this->eventModel
-                ->where('is_public', 1)
+                ->where('visibility', 'public')
+                ->where('service_status', 'active')
                 ->findAll();
 
             foreach ($publicEvents as $event) {
@@ -66,7 +67,7 @@ class Sitemap extends BaseController
 
         return $this->response
             ->setContentType('application/xml; charset=UTF-8')
-            ->setBody(implode('', $xmlLines));
+            ->setBody(implode(PHP_EOL, $xmlLines));
     }
 
     /**
@@ -77,14 +78,14 @@ class Sitemap extends BaseController
         $lastmodNode = '';
 
         if (isset($urlData['lastmod']) && $urlData['lastmod'] !== '') {
-            $lastmodNode = '<lastmod>' . esc($urlData['lastmod']) . '</lastmod>';
+            $lastmodNode = '<lastmod>' . esc($urlData['lastmod'], 'xml') . '</lastmod>';
         }
 
         return '<url>'
-            . '<loc>' . esc($urlData['loc']) . '</loc>'
+            . '<loc>' . esc($urlData['loc'], 'xml') . '</loc>'
             . $lastmodNode
-            . '<changefreq>' . esc($urlData['changefreq']) . '</changefreq>'
-            . '<priority>' . esc($urlData['priority']) . '</priority>'
+            . '<changefreq>' . esc($urlData['changefreq'], 'xml') . '</changefreq>'
+            . '<priority>' . esc($urlData['priority'], 'xml') . '</priority>'
             . '</url>';
     }
 }

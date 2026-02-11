@@ -62,6 +62,8 @@
                             alt="Vista previa de invitación digital en 13Bodas"
                             class="phone-content"
                             loading="eager"
+                            fetchpriority="high"
+                            decoding="async"
                             width="375"
                             height="812"
                         >

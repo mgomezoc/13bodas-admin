@@ -480,6 +480,7 @@ $groomSocial = parseSocialLinks($couplePayload['groom']['social_links'] ?? ($cou
 <?php if (!empty($isDemoMode)): ?>
     <link rel="stylesheet" href="<?= base_url('assets/css/demo-watermark.css') ?>">
 <?php endif; ?>
+<?= $jsonLdEvent ?? '' ?>
 </head>
 
 <body id="page-top" data-spy="scroll" data-target=".navbar-custom">

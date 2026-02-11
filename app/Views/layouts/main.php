@@ -52,8 +52,7 @@
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
+    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -100,7 +99,7 @@
     <?= $this->renderSection('footer') ?>
 
     <!-- Scripts -->
-    <script src="<?= esc(base_url('js/app.js')) ?>"></script>
+    <script defer src="<?= esc(base_url('js/app.js')) ?>"></script>
     <?= $this->renderSection('scripts') ?>
 </body>
 </html>

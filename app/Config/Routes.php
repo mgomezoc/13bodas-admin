@@ -24,6 +24,10 @@ $routes->get('contacto', 'Home::index', ['as' => 'home.contact']);
 // Sitemap XML dinámico (SEO)
 $routes->get('sitemap.xml', 'Sitemap::index', ['as' => 'seo.sitemap']);
 
+// Recursos GEO para descubrimiento por asistentes IA
+$routes->get('llms.txt', 'Home::llms', ['as' => 'seo.llms']);
+$routes->get('llms-full.txt', 'Home::llmsFull', ['as' => 'seo.llms_full']);
+
 // Login público (clientes)
 $routes->get('login', 'Auth::login', ['as' => 'login']);
 $routes->post('login', 'Auth::attemptLogin', ['as' => 'login.attempt']);
