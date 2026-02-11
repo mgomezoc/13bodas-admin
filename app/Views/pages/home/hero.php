@@ -54,9 +54,12 @@
                 <div class="phone-frame">
                     <div class="phone-notch"></div>
                     <div class="phone-screen">
+                        <?php $heroImagePath = file_exists(FCPATH . 'img/home-hero-preview.png')
+                            ? 'img/home-hero-preview.png'
+                            : 'img/demo-preview.png'; ?>
                         <img
-                            src="<?= esc(base_url('img/demo-preview.png')) ?>"
-                            alt="Panel de invitación digital con RSVP en 13Bodas"
+                            src="<?= esc(base_url($heroImagePath)) ?>"
+                            alt="Vista previa de invitación digital en 13Bodas"
                             class="phone-content"
                             loading="eager"
                             width="375"
