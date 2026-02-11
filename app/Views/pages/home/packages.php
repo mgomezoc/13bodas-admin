@@ -28,7 +28,7 @@
                     <li>✓ Configuración inicial en minutos</li>
                     <li>✓ Soporte por email</li>
                 </ul>
-                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-outline">Comenzar gratis</a>
+                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-outline" data-track-cta="ver_paquetes" data-position="pricing" data-package-type="essential">Comenzar gratis</a>
             </article>
 
             <article class="package-card package-card-popular" data-aos="fade-up" data-aos-delay="200">
@@ -48,7 +48,7 @@
                     <li>✓ Módulos de galería, agenda y recomendaciones</li>
                     <li>✓ Métricas para decisiones de logística</li>
                 </ul>
-                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-primary">Probar plataforma</a>
+                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-primary" data-track-cta="ver_paquetes" data-position="pricing" data-package-type="interactive">Probar plataforma</a>
             </article>
 
             <article class="package-card" data-aos="fade-up" data-aos-delay="300">
@@ -67,14 +67,14 @@
                     <li>✓ MagicCam y activos interactivos</li>
                     <li>✓ Onboarding asistido</li>
                 </ul>
-                <a href="#contacto" class="btn btn-outline">Hablar con ventas</a>
+                <a href="#contacto" class="btn btn-outline" data-track-cta="solicitar_demo_ar" data-position="pricing" data-package-type="infinity">Hablar con ventas</a>
             </article>
         </div>
 
         <div class="packages-note" data-aos="fade-up">
             <p>
                 💡 <strong>¿Quieres validar rápido?</strong> Crea tu cuenta y explora la demo sin costo.
-                <a href="<?= site_url(route_to('register.index')) ?>">Registrarme ahora →</a>
+                <a href="<?= site_url(route_to('register.index')) ?>" data-track-cta="ver_paquetes" data-position="pricing">Registrarme ahora →</a>
             </p>
         </div>
     </div>

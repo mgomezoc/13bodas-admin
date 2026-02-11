@@ -39,13 +39,13 @@
             </div>
 
             <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
-                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-primary">
+                <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-primary" data-track-cta="crear_cuenta_gratis" data-position="hero">
                     Crear cuenta gratis
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 3.5L8.5 5l5 5-5 5L10 16.5l6.5-6.5z"/>
                     </svg>
                 </a>
-                <a href="#magiccam" class="btn btn-secondary">Ver demo en vivo</a>
+                <a href="#magiccam" class="btn btn-secondary" data-track-cta="solicitar_demo_ar" data-position="hero">Ver demo en vivo</a>
             </div>
         </div>
 

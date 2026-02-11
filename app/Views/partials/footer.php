@@ -21,7 +21,7 @@
                     <li><a href="<?= site_url(route_to('home')) ?>#servicios">Funciones</a></li>
                     <li><a href="<?= site_url(route_to('home')) ?>#paquetes">Planes</a></li>
                     <li><a href="<?= site_url(route_to('register.index')) ?>">Registro gratis</a></li>
-                    <li><a href="https://magiccam.13bodas.com" target="_blank" rel="noopener">Demo MagicCam</a></li>
+                    <li><a href="https://magiccam.13bodas.com" target="_blank" rel="noopener" data-track-cta="solicitar_demo_ar" data-position="footer" data-ar-interaction="open">Demo MagicCam</a></li>
                 </ul>
             </div>
 
@@ -38,13 +38,13 @@
                 <h4>Contacto</h4>
                 <ul>
                     <li>
-                        <a href="https://wa.me/528115247741" target="_blank" rel="noopener">
+                        <a href="https://wa.me/528115247741" target="_blank" rel="noopener" data-social="whatsapp">
                             WhatsApp: +52 81 1524 7741
                         </a>
                     </li>
                     <li>Soporte remoto internacional</li>
                     <li>
-                        <a href="https://www.facebook.com/13bodas" target="_blank" rel="noopener">Facebook</a>
+                        <a href="https://www.facebook.com/13bodas" target="_blank" rel="noopener" data-social="facebook">Facebook</a>
                     </li>
                 </ul>
             </div>

@@ -39,10 +39,10 @@
                 </div>
 
                 <div class="magiccam-cta">
-                    <a href="https://magiccam.13bodas.com" class="btn btn-primary" target="_blank" rel="noopener">
+                    <a href="https://magiccam.13bodas.com" class="btn btn-primary" target="_blank" rel="noopener" data-track-cta="solicitar_demo_ar" data-position="hero" data-ar-interaction="open">
                         Ver demo MagicCam
                     </a>
-                    <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-ghost">Crear cuenta y probar</a>
+                    <a href="<?= site_url(route_to('register.index')) ?>" class="btn btn-ghost" data-track-cta="ver_paquetes" data-position="hero">Crear cuenta y probar</a>
                 </div>
             </div>
 
