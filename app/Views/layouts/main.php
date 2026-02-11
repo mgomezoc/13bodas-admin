@@ -56,16 +56,44 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Google Analytics -->
-    <?php if (ENVIRONMENT === 'production'): ?>
+    <!-- Google Analytics 4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SBKT31SXZX"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
+        window.__gaMeasurementId = 'G-SBKT31SXZX';
+        window.__gaDebugMode = <?= ENVIRONMENT === 'production' ? 'false' : 'true' ?>;
+
         function gtag(){dataLayer.push(arguments);}
+
+        gtag('consent', 'default', {
+            ad_storage: 'denied',
+            analytics_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied'
+        });
+
+        try {
+            const storedConsent = localStorage.getItem('13bodas_cookie_consent');
+            if (storedConsent === 'granted') {
+                gtag('consent', 'update', {
+                    analytics_storage: 'granted',
+                    ad_storage: 'denied',
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied'
+                });
+            }
+        } catch (error) {
+            // no-op, analytics consent falls back to denied
+        }
+
         gtag('js', new Date());
-        gtag('config', 'G-SBKT31SXZX');
+        gtag('config', 'G-SBKT31SXZX', {
+            anonymize_ip: true,
+            cookie_flags: 'SameSite=None;Secure',
+            send_page_view: true,
+            debug_mode: window.__gaDebugMode
+        });
     </script>
-    <?php endif; ?>
 
     <!-- GSAP -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -94,6 +122,19 @@
     <main id="main-content">
         <?= $this->renderSection('content') ?>
     </main>
+
+    <aside class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Preferencias de cookies" hidden>
+        <div class="cookie-banner__content">
+            <p>
+                Usamos Google Analytics 4 para medir conversiones y mejorar tu experiencia. Puedes aceptar, rechazar o eliminar tu consentimiento cuando quieras.
+            </p>
+            <div class="cookie-banner__actions">
+                <button type="button" class="btn btn-outline" id="cookieRejectBtn">Rechazar</button>
+                <button type="button" class="btn btn-primary" id="cookieAcceptBtn">Aceptar analytics</button>
+                <button type="button" class="btn btn-ghost" id="cookieDeleteBtn">Eliminar datos analytics</button>
+            </div>
+        </div>
+    </aside>
 
     <!-- Footer -->
     <?= $this->renderSection('footer') ?>

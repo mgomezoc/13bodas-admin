@@ -16,11 +16,11 @@
 
         <div class="nav-menu" id="navMenu">
             <ul class="nav-list">
-                <li><a href="<?= site_url(route_to('home')) ?>#servicios" class="nav-link">Plataforma</a></li>
-                <li><a href="<?= site_url(route_to('home')) ?>#magiccam" class="nav-link">MagicCam</a></li>
-                <li><a href="<?= site_url(route_to('home')) ?>#paquetes" class="nav-link">Planes</a></li>
-                <li><a href="<?= site_url(route_to('home')) ?>#faq" class="nav-link">FAQ</a></li>
-                <li><a href="<?= site_url(route_to('register.index')) ?>" class="nav-cta">Crear cuenta gratis</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#servicios" class="nav-link" data-track-nav="servicios">Plataforma</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#magiccam" class="nav-link" data-track-nav="magiccam">MagicCam</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#paquetes" class="nav-link" data-track-nav="paquetes">Planes</a></li>
+                <li><a href="<?= site_url(route_to('home')) ?>#faq" class="nav-link" data-track-nav="faq">FAQ</a></li>
+                <li><a href="<?= site_url(route_to('register.index')) ?>" class="nav-cta" data-track-cta="ver_paquetes" data-position="hero">Crear cuenta gratis</a></li>
             </ul>
         </div>
     </nav>

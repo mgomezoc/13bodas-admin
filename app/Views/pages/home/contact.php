@@ -41,7 +41,7 @@
                 <div class="contact-social">
                     <strong>Síguenos:</strong>
                     <div class="social-links">
-                        <a href="https://www.facebook.com/13bodas" target="_blank" rel="noopener" aria-label="Facebook">
+                        <a href="https://www.facebook.com/13bodas" target="_blank" rel="noopener" aria-label="Facebook" data-social="facebook">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z"/>
                             </svg>
@@ -139,7 +139,7 @@
                             </svg>
                             Te responderemos en menos de 24 horas
                         </p>
-                        <button type="submit" class="btn btn-primary btn-submit">
+                        <button type="submit" class="btn btn-primary btn-submit" data-track-cta="solicitar_demo_ar" data-position="footer">
                             Solicitar asesoría
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M2 3l16 7-16 7V3zm2 11.5l9-4.5-9-4.5v9z"/>
