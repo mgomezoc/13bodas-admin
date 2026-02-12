@@ -75,7 +75,8 @@ class Checkout extends BaseController
                 'error_id' => $errorId,
             ];
 
-            if ($isDebugEnabled) {
+            // Solo exponer detalles técnicos en entorno de desarrollo
+            if (ENVIRONMENT === 'development') {
                 $response['debug_detail'] = $exception->getMessage();
             }
 

@@ -22,8 +22,8 @@ class AddPaymentsHardening extends Migration
                     'null' => false,
                 ],
                 'payment_provider' => [
-                    'type' => 'VARCHAR',
-                    'constraint' => 30,
+                    'type' => 'ENUM',
+                    'constraint' => ['stripe', 'paypal', 'mercadopago', 'manual'],
                     'null' => false,
                 ],
                 'payment_reference' => [
@@ -78,9 +78,10 @@ class AddPaymentsHardening extends Migration
                     'type' => 'VARCHAR',
                     'constraint' => 120,
                     'null' => true,
+                    'comment' => 'ID del evento en el proveedor (ej: checkout session, payment intent)',
                 ],
                 'webhook_payload' => [
-                    'type' => 'LONGTEXT',
+                    'type' => 'JSON',
                     'null' => true,
                 ],
                 'notes' => [
