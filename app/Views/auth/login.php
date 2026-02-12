@@ -8,7 +8,8 @@
     <title>Iniciar Sesión | Admin 13Bodas</title>
     
     <!-- Favicons -->
-    <link rel="icon" type="image/svg+xml" href="<?= base_url('img/favicon.svg') ?>">
+    <link rel="icon" href="<?= base_url('favicon.ico') ?>" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="<?= base_url('img/13bodas-logo-invitaciones-digitales.svg') ?>">
     <meta name="theme-color" content="#0D1F33">
 
     <!-- Fonts -->

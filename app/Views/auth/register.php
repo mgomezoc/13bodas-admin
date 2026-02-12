@@ -7,24 +7,37 @@
     <meta name="robots" content="noindex, nofollow">
     <title>Crear Cuenta | 13Bodas</title>
 
-    <link rel="icon" type="image/svg+xml" href="<?= base_url('img/favicon.svg') ?>">
+    <link rel="icon" href="<?= base_url('favicon.ico') ?>" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="<?= base_url('img/13bodas-logo-invitaciones-digitales.svg') ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/44d0a6ee3c.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --brand-dark: #141722;
-            --brand-accent: #c89d67;
-            --brand-primary: #2563eb;
-            --brand-muted: #6b7280;
+            --color-primary-50: #EBF5FF;
+            --color-primary-200: #ADCFFF;
+            --color-primary-400: #4A90D9;
+            --color-primary-500: #2E6DB8;
+            --color-primary-600: #1B5297;
+            --color-primary-900: #0D1F33;
+            --color-gray-100: #F1F4F7;
+            --color-gray-200: #E4E8EC;
+            --color-gray-300: #CDD3DA;
+            --color-gray-500: #6B7785;
+            --color-gray-700: #2D3748;
+            --color-gray-800: #1A202C;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow-lg: 0 20px 40px rgba(15, 31, 52, 0.18);
         }
 
         body {
             margin: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: radial-gradient(circle at top right, #2b3245 0%, #141722 50%, #0f1119 100%);
+            background: radial-gradient(circle at 10% 10%, #234a70 0%, #142d47 45%, #0d1f33 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -33,111 +46,169 @@
         }
 
         .register-container {
-            width: 100%;
-            max-width: 980px;
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 20px;
+            width: min(1100px, 100%);
+            background: #fff;
+            border-radius: var(--radius-xl);
             overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+            box-shadow: var(--shadow-lg);
             display: grid;
             grid-template-columns: 360px 1fr;
+            border: 1px solid rgba(255,255,255,.16);
         }
 
         .register-aside {
-            background: linear-gradient(160deg, #171c2c 0%, #10131d 100%);
             color: #fff;
             padding: 42px 32px;
+            background:
+                radial-gradient(120% 70% at 0% 0%, rgba(74,144,217,.38) 0%, rgba(74,144,217,0) 60%),
+                linear-gradient(160deg, #142d47 0%, #0d1f33 100%);
         }
 
         .register-aside img {
-            width: 120px;
-            margin-bottom: 24px;
+            width: 138px;
+            margin-bottom: 26px;
         }
 
         .register-aside h1 {
-            font-size: 1.7rem;
+            font-size: 2rem;
+            line-height: 1.1;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .register-aside p {
-            color: #c9ceda;
-            margin-bottom: 22px;
+            color: rgba(255,255,255,.82);
+            margin-bottom: 28px;
+            font-size: 1rem;
         }
 
         .register-benefits {
             list-style: none;
             padding: 0;
             margin: 0;
+            display: grid;
+            gap: 14px;
         }
 
         .register-benefits li {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: flex-start;
-            color: #d7dcef;
-            margin-bottom: 14px;
-            font-size: 0.95rem;
+            color: rgba(255,255,255,.93);
+            font-size: 0.98rem;
+            line-height: 1.45;
         }
 
         .register-benefits i {
-            color: var(--brand-accent);
+            margin-top: 3px;
+            color: #9ed0ff;
+            font-size: 0.95rem;
         }
 
         .register-form-wrap {
-            padding: 36px;
+            padding: 38px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
         }
 
         .form-title {
-            font-size: 1.65rem;
+            font-size: 2rem;
             font-weight: 700;
-            color: #111827;
-            margin-bottom: 4px;
+            color: var(--color-gray-800);
+            margin-bottom: 6px;
         }
 
         .form-subtitle {
-            color: var(--brand-muted);
-            margin-bottom: 26px;
+            color: var(--color-gray-500);
+            margin-bottom: 24px;
         }
 
         .form-label {
             font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 6px;
+            color: var(--color-gray-700);
+            margin-bottom: 7px;
+            font-size: .94rem;
         }
 
         .form-control {
-            border-radius: 10px;
-            border-color: #d3d8e2;
-            min-height: 46px;
+            border-radius: 12px;
+            border: 1.5px solid var(--color-gray-300);
+            min-height: 48px;
+            background: #fff;
+            padding: .625rem .9rem;
+        }
+
+        .form-control::placeholder {
+            color: #9ba5b0;
         }
 
         .form-control:focus {
-            border-color: var(--brand-primary);
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+            border-color: var(--color-primary-400);
+            box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.16);
         }
 
         .form-check-input {
-            width: 1.1rem;
-            height: 1.1rem;
-            margin-top: 0.15rem;
+            width: 1.05rem;
+            height: 1.05rem;
+            margin-top: .2rem;
+            border-color: var(--color-gray-300);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--color-primary-500);
+            border-color: var(--color-primary-500);
+        }
+
+        .form-check-label {
+            color: var(--color-gray-700);
+        }
+
+        .form-check-label a {
+            color: var(--color-primary-600);
+            font-weight: 500;
         }
 
         .btn-register {
-            min-height: 48px;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+            min-height: 50px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
             border: none;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.03rem;
+            letter-spacing: .01em;
+            box-shadow: 0 10px 20px rgba(27, 82, 151, 0.22);
         }
 
         .btn-register:hover {
-            background: linear-gradient(90deg, #1e40af 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #255ea0, #174783);
+            transform: translateY(-1px);
+        }
+
+        .text-muted {
+            color: var(--color-gray-500) !important;
+        }
+
+        .text-muted a {
+            color: var(--color-primary-600);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            border-left: 4px solid;
+            font-size: .92rem;
+        }
+
+        .alert-danger {
+            background: #FFF5F5;
+            border-left-color: #E53E3E;
+            color: #B83232;
         }
 
         label.error {
             color: #dc2626;
-            font-size: 0.85rem;
+            font-size: .82rem;
             margin-top: 6px;
             display: block;
         }
@@ -150,10 +221,14 @@
         @media (max-width: 991.98px) {
             .register-container {
                 grid-template-columns: 1fr;
-                max-width: 680px;
+                max-width: 700px;
             }
 
             .register-aside {
+                padding: 28px;
+            }
+
+            .register-form-wrap {
                 padding: 28px;
             }
         }
@@ -164,11 +239,11 @@
         <aside class="register-aside">
             <img src="<?= base_url('img/13bodas-logo-blanco-transparente.png') ?>" alt="13Bodas">
             <h1>Tu evento, listo en minutos</h1>
-            <p>Regístrate y crea tu invitación digital en modo DEMO para comenzar a personalizarla.</p>
+            <p>Regístrate y lanza tu invitación digital con una experiencia clara, moderna y lista para personalizar.</p>
             <ul class="register-benefits">
-                <li><i class="bi bi-check2-circle"></i><span>Editor completo del evento desde tu panel.</span></li>
-                <li><i class="bi bi-check2-circle"></i><span>Activa cuando estés listo con pago único de $800 MXN.</span></li>
-                <li><i class="bi bi-check2-circle"></i><span>Acceso inmediato para elegir template y diseñar tu invitación.</span></li>
+                <li><i class="fa-solid fa-circle-check"></i><span>Editor completo del evento desde tu panel.</span></li>
+                <li><i class="fa-solid fa-bolt"></i><span>Activa cuando estés listo con pago único de $800 MXN.</span></li>
+                <li><i class="fa-solid fa-wand-magic-sparkles"></i><span>Acceso inmediato para elegir template y diseñar tu invitación.</span></li>
             </ul>
         </aside>
 
@@ -178,7 +253,7 @@
 
             <?php if (session()->has('error')): ?>
                 <div class="alert alert-danger" role="alert">
-                    <i class="bi bi-exclamation-circle me-1"></i>
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
                     <?= esc((string) session('error')) ?>
                 </div>
             <?php endif; ?>

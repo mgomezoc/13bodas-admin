@@ -14,25 +14,25 @@ $isAdmin = in_array('superadmin', $userRoles, true) || in_array('admin', $userRo
 $isClient = in_array('client', $userRoles, true) && !$isAdmin;
 
 $tabs = [
-    'informacion' => ['icon' => 'bi-info-circle', 'label' => 'Información', 'priority' => 1, 'url' => base_url("admin/events/edit/{$eventId}")],
-    'invitados' => ['icon' => 'bi-people', 'label' => 'Invitados', 'priority' => 1, 'url' => base_url("admin/events/{$eventId}/guests")],
-    'grupos' => ['icon' => 'bi-collection', 'label' => 'Grupos', 'priority' => 1, 'url' => base_url("admin/events/{$eventId}/groups")],
-    'confirmaciones' => ['icon' => 'bi-check-circle', 'label' => 'Confirmaciones', 'priority' => 1, 'url' => base_url("admin/events/{$eventId}/rsvp")],
-    'galeria' => ['icon' => 'bi-images', 'label' => 'Galería', 'priority' => 2, 'url' => base_url("admin/events/{$eventId}/gallery")],
-    'regalos' => ['icon' => 'bi-gift', 'label' => 'Regalos', 'priority' => 2, 'url' => base_url("admin/events/{$eventId}/registry")],
-    'menu' => ['icon' => 'bi-card-list', 'label' => 'Menú', 'priority' => 2, 'url' => base_url("admin/events/{$eventId}/menu")],
-    'cortejo' => ['icon' => 'bi-heart', 'label' => 'Cortejo', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/party")],
-    'ubicaciones' => ['icon' => 'bi-geo-alt', 'label' => 'Ubicaciones', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/locations")],
-    'agenda' => ['icon' => 'bi-calendar-event', 'label' => 'Agenda', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/schedule")],
-    'timeline' => ['icon' => 'bi-clock-history', 'label' => 'Historia', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/timeline")],
-    'faq' => ['icon' => 'bi-question-circle', 'label' => 'FAQ', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/faq")],
-    'recomendaciones' => ['icon' => 'bi-star', 'label' => 'Recomendaciones', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/recommendations")],
-    'preguntas-rsvp' => ['icon' => 'bi-ui-checks', 'label' => 'Preguntas RSVP', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/rsvp-questions")],
-    'modulos' => ['icon' => 'bi-grid', 'label' => 'Módulos', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/modules")],
+    'informacion' => ['icon' => 'fa-solid fa-circle-info', 'label' => 'Información', 'priority' => 1, 'url' => base_url("admin/events/edit/{$eventId}")],
+    'invitados' => ['icon' => 'fa-solid fa-users', 'label' => 'Invitados', 'priority' => 1, 'url' => base_url("admin/events/{$eventId}/guests")],
+    'grupos' => ['icon' => 'fa-solid fa-layer-group', 'label' => 'Grupos', 'priority' => 1, 'url' => base_url("admin/events/{$eventId}/groups")],
+    'confirmaciones' => ['icon' => 'fa-solid fa-circle-check', 'label' => 'Confirmaciones', 'priority' => 1, 'url' => base_url("admin/events/{$eventId}/rsvp")],
+    'galeria' => ['icon' => 'fa-solid fa-image', 'label' => 'Galería', 'priority' => 2, 'url' => base_url("admin/events/{$eventId}/gallery")],
+    'regalos' => ['icon' => 'fa-solid fa-gift', 'label' => 'Regalos', 'priority' => 2, 'url' => base_url("admin/events/{$eventId}/registry")],
+    'menu' => ['icon' => 'fa-solid fa-utensils', 'label' => 'Menú', 'priority' => 2, 'url' => base_url("admin/events/{$eventId}/menu")],
+    'cortejo' => ['icon' => 'fa-solid fa-heart', 'label' => 'Cortejo', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/party")],
+    'ubicaciones' => ['icon' => 'fa-solid fa-location-dot', 'label' => 'Ubicaciones', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/locations")],
+    'agenda' => ['icon' => 'fa-solid fa-calendar-days', 'label' => 'Agenda', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/schedule")],
+    'timeline' => ['icon' => 'fa-solid fa-timeline', 'label' => 'Historia', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/timeline")],
+    'faq' => ['icon' => 'fa-solid fa-circle-question', 'label' => 'FAQ', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/faq")],
+    'recomendaciones' => ['icon' => 'fa-solid fa-star', 'label' => 'Recomendaciones', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/recommendations")],
+    'preguntas-rsvp' => ['icon' => 'fa-solid fa-list-check', 'label' => 'Preguntas RSVP', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/rsvp-questions")],
+    'modulos' => ['icon' => 'fa-solid fa-table-cells-large', 'label' => 'Módulos', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/modules")],
 ];
 
 if ($isAdmin || $isClient) {
-    $tabs['dominios'] = ['icon' => 'bi-globe2', 'label' => 'Dominios', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/domains")];
+    $tabs['dominios'] = ['icon' => 'fa-solid fa-globe', 'label' => 'Dominios', 'priority' => 3, 'url' => base_url("admin/events/{$eventId}/domains")];
 }
 
 if ($isClient) {
@@ -52,7 +52,7 @@ $orderedTabs = array_filter(
                 <a class="nav-link <?= $active === $key ? 'active' : '' ?>"
                    href="<?= esc($tab['url']) ?>"
                    data-section="<?= esc($key) ?>">
-                    <i class="bi <?= esc($tab['icon']) ?>"></i>
+                    <i class="<?= esc($tab['icon']) ?>" aria-hidden="true"></i>
                     <span class="tab-label"><?= esc($tab['label']) ?></span>
                 </a>
             </li>

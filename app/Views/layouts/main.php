@@ -41,12 +41,10 @@
     <meta name="twitter:site" content="@13bodas">
 
     <!-- Favicons -->
-    <link rel="icon" type="image/png" href="<?= esc(base_url('favicon-96x96.png')) ?>" sizes="96x96">
-    <link rel="icon" type="image/svg+xml" href="<?= esc(base_url('favicon.svg')) ?>">
+    <link rel="icon" href="<?= esc(base_url('favicon.ico')) ?>" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="<?= esc(base_url('img/13bodas-logo-invitaciones-digitales.svg')) ?>">
     <link rel="shortcut icon" href="<?= esc(base_url('favicon.ico')) ?>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= esc(base_url('apple-touch-icon.png')) ?>">
     <meta name="apple-mobile-web-app-title" content="13Bodas">
-    <link rel="manifest" href="<?= esc(base_url('site.webmanifest')) ?>">
     <meta name="theme-color" content="#0D1F33">
 
     <!-- Preconnect -->

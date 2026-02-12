@@ -10,13 +10,17 @@
     <title><?= $this->renderSection('title') ?> | 13Bodas Admin</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="<?= base_url('img/favicon.svg') ?>">
+    <link rel="icon" href="<?= base_url('favicon.ico') ?>" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="<?= base_url('img/13bodas-logo-invitaciones-digitales.svg') ?>">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/44d0a6ee3c.js" crossorigin="anonymous"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
