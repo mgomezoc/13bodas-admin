@@ -47,14 +47,14 @@
     <link rel="apple-touch-icon" sizes="180x180" href="<?= esc(base_url('apple-touch-icon.png')) ?>">
     <meta name="apple-mobile-web-app-title" content="13Bodas">
     <link rel="manifest" href="<?= esc(base_url('site.webmanifest')) ?>">
-    <meta name="theme-color" content="#0a0510">
+    <meta name="theme-color" content="#0D1F33">
 
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 
     <!-- Google Analytics 4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SBKT31SXZX"></script>
@@ -100,7 +100,9 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <!-- Styles -->
+    <link rel="stylesheet" href="<?= esc(base_url('css/variables.css')) ?>">
     <link rel="stylesheet" href="<?= esc(base_url('css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= esc(base_url('css/responsive.css')) ?>">
     
     <?= $this->renderSection('styles') ?>
 

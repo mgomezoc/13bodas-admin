@@ -21,7 +21,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
@@ -29,8 +29,7 @@
 
     <!-- Flatpickr CSS -->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" rel="stylesheet">
-
+    
     <!-- Bootstrap Table CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.1/dist/bootstrap-table.min.css" rel="stylesheet">
 
@@ -38,7 +37,9 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
     <!-- Admin Custom CSS -->
+    <link rel="stylesheet" href="<?= base_url('css/variables.css') ?>">
     <link rel="stylesheet" href="<?= base_url('css/admin.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/admin-components.css') ?>">
 
     <?= $this->renderSection('styles') ?>
 </head>
@@ -57,7 +58,7 @@
         <aside class="admin-sidebar" id="sidebar">
             <div class="sidebar-header">
                 <a href="<?= base_url('admin/dashboard') ?>" class="sidebar-logo">
-                    <img src="<?= base_url('img/13bodas-logo-blanco-transparente.png') ?>" alt="13Bodas" height="35">
+                    <img src="<?= base_url('img/13bodas-logo-invitaciones-digitales.png') ?>" alt="13Bodas" height="35">
                 </a>
                 <button class="btn-close-sidebar d-lg-none" id="closeSidebar">
                     <i class="bi bi-x-lg"></i>

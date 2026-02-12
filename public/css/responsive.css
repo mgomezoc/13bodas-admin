@@ -1,0 +1,33 @@
+@media (max-width: 1024px) {
+  .services-grid,.packages-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  .section-padding { padding: var(--space-10) 0; }
+  .nav-toggle { display: inline-flex; }
+  .nav-menu {
+    position: fixed;
+    top: 74px;
+    right: 0;
+    width: min(90vw, 320px);
+    height: calc(100vh - 74px);
+    background: var(--color-white);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--transition-base);
+    padding: var(--space-6);
+  }
+  .nav-menu.show { transform: translateX(0); }
+  .nav-list { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+  .hero { min-height: 50vh; }
+  .hero-container,.magiccam-grid,.contact-grid { grid-template-columns: 1fr; }
+  .services-grid,.packages-grid,.process-steps,.footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; }
+}
+
+@media print {
+  .header,.footer,.admin-sidebar,.admin-topbar,.cookie-banner { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+}

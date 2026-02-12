@@ -2,7 +2,7 @@
     <nav class="nav container" aria-label="Navegación principal">
         <a href="<?= site_url(route_to('home')) ?>#inicio" class="nav-logo" aria-label="13Bodas - Inicio">
             <img
-                src="<?= esc(base_url('img/13bodas-logo-blanco-transparente.png')) ?>"
+                src="<?= esc(base_url('img/13bodas-logo-invitaciones-digitales.png')) ?>"
                 alt="13Bodas - Plataforma de invitaciones digitales"
                 width="140"
                 height="40"
