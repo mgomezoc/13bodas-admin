@@ -7,7 +7,7 @@
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; }
-        .header { background: linear-gradient(135deg, #0a0510 0%, #1a1520 100%); color: #d4a574; padding: 30px; text-align: center; }
+        .header { background: linear-gradient(135deg, #0D1F33 0%, #142D47 100%); color: #d4a574; padding: 30px; text-align: center; }
         .content { padding: 30px; }
         .info-box { background: #f8f9fa; border-left: 4px solid #d4a574; padding: 15px; margin: 20px 0; }
         .btn { display: inline-block; background: #d4a574; color: #fff !important; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin-top: 20px; }

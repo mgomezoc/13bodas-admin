@@ -8,7 +8,7 @@
 <meta name="keywords" content="plataforma invitaciones digitales, RSVP online, software para eventos, wedding website builder, invitaciones digitales internacionales, registro de invitados, invitación digital con cuenta regresiva">
 <meta name="application-name" content="13Bodas">
 <meta name="format-detection" content="telephone=no">
-<meta name="theme-color" content="#0a0510">
+<meta name="theme-color" content="#0D1F33">
 <?= $this->endSection() ?>
 
 <?= $this->section('robots') ?>index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1<?= $this->endSection() ?>

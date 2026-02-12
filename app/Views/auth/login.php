@@ -9,7 +9,7 @@
     
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="<?= base_url('img/favicon.svg') ?>">
-    <meta name="theme-color" content="#0a0510">
+    <meta name="theme-color" content="#0D1F33">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,13 +18,13 @@
 
     <style>
         :root {
-            --bg-dark: #0a0510;
+            --bg-dark: #0D1F33;
             --bg-card: rgba(255, 255, 255, 0.03);
             --border-color: rgba(255, 255, 255, 0.1);
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.7);
-            --primary-cyan: #00f5ff;
-            --primary-purple: #a855f7;
+            --primary-accent: #4A90D9;
+            --primary-accent-dark: #1B3A5C;
             --error: #ef4444;
             --success: #22c55e;
         }
@@ -127,8 +127,8 @@
         
         .form-input:focus {
             outline: none;
-            border-color: var(--primary-cyan);
-            box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1);
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.18);
         }
         
         .form-input::placeholder {
@@ -152,11 +152,11 @@
         }
         
         .remember-label input {
-            accent-color: var(--primary-cyan);
+            accent-color: var(--primary-accent);
         }
         
         .forgot-link {
-            color: var(--primary-cyan);
+            color: var(--primary-accent);
             text-decoration: none;
             transition: opacity 0.3s;
         }
@@ -168,10 +168,10 @@
         .btn-login {
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-purple));
+            background: linear-gradient(135deg, var(--primary-accent), var(--primary-accent-dark));
             border: none;
             border-radius: 0.75rem;
-            color: var(--bg-dark);
+            color: #ffffff;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -180,7 +180,7 @@
         
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(27, 82, 151, 0.26);
         }
         
         .btn-login:active {
@@ -198,7 +198,7 @@
         }
         
         .back-link:hover {
-            color: var(--primary-cyan);
+            color: var(--primary-accent);
         }
     </style>
 </head>
@@ -217,13 +217,13 @@
             
             <?php if (session()->getFlashdata('error')): ?>
                 <div class="alert alert-error">
-                    <?= session()->getFlashdata('error') ?>
+                    <?= esc((string) session()->getFlashdata('error')) ?>
                 </div>
             <?php endif; ?>
             
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success">
-                    <?= session()->getFlashdata('success') ?>
+                    <?= esc((string) session()->getFlashdata('success')) ?>
                 </div>
             <?php endif; ?>
             
@@ -238,7 +238,7 @@
                         name="email" 
                         class="form-input" 
                         placeholder="tu@email.com"
-                        value="<?= old('email') ?>"
+                        value="<?= esc((string) old('email')) ?>"
                         required
                         autofocus
                     >

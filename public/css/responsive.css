@@ -1,33 +1,112 @@
 @media (max-width: 1024px) {
-  .services-grid,.packages-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .services-grid,
+  .packages-grid,
+  .process-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
-  .section-padding { padding: var(--space-10) 0; }
-  .nav-toggle { display: inline-flex; }
+  .section-padding {
+    padding: var(--space-10) 0;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+  }
+
   .nav-menu {
     position: fixed;
-    top: 74px;
+    top: 76px;
     right: 0;
-    width: min(90vw, 320px);
-    height: calc(100vh - 74px);
+    width: min(90vw, 340px);
+    height: calc(100vh - 76px);
     background: var(--color-white);
     box-shadow: var(--shadow-lg);
+    border-left: 1px solid var(--color-gray-200);
     transform: translateX(100%);
     transition: transform var(--transition-base);
     padding: var(--space-6);
+    overflow-y: auto;
   }
-  .nav-menu.show { transform: translateX(0); }
-  .nav-list { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
-  .hero { min-height: 50vh; }
-  .hero-container,.magiccam-grid,.contact-grid { grid-template-columns: 1fr; }
-  .services-grid,.packages-grid,.process-steps,.footer-grid { grid-template-columns: 1fr; }
-  .footer-bottom { flex-direction: column; }
+
+  .nav-menu.is-open {
+    transform: translateX(0);
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    width: 100%;
+  }
+
+  .hero {
+    min-height: 52vh;
+  }
+
+  .hero-container,
+  .magiccam-grid,
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: clamp(1.95rem, 8vw, 2.6rem);
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+
+  .services-grid,
+  .packages-grid,
+  .process-steps,
+  .footer-grid,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .package-card.featured {
+    transform: none;
+  }
+
+  .form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-submit {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cookie-banner {
+    width: calc(100% - 16px);
+    bottom: 8px;
+  }
 }
 
 @media print {
-  .header,.footer,.admin-sidebar,.admin-topbar,.cookie-banner { display: none !important; }
-  body { background: #fff !important; color: #000 !important; }
+  .header,
+  .footer,
+  .admin-sidebar,
+  .admin-topbar,
+  .cookie-banner {
+    display: none !important;
+  }
+
+  body {
+    color: #000 !important;
+    background: #fff !important;
+  }
 }

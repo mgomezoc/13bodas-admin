@@ -13,7 +13,7 @@
     <link rel="icon" type="image/svg+xml" href="<?= base_url('img/favicon.svg') ?>">
     <link rel="icon" type="image/png" sizes="32x32" href="<?= base_url('img/favicon-32x32.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('img/apple-touch-icon.png') ?>">
-    <meta name="theme-color" content="#0a0510">
+    <meta name="theme-color" content="#0D1F33">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

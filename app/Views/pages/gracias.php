@@ -77,7 +77,7 @@
     
     .gracias-icon {
         margin-bottom: 2rem;
-        color: var(--primary-cyan, #00f5ff);
+        color: var(--color-primary-500, #2E6DB8);
     }
     
     .gracias-icon svg {
@@ -129,7 +129,7 @@
     }
     
     .info-text a {
-        color: var(--primary-cyan, #00f5ff);
+        color: var(--color-primary-500, #2E6DB8);
         text-decoration: underline;
     }
     
