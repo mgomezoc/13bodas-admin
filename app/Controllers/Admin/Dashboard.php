@@ -1,17 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\PaymentService;
 use App\Models\ClientModel;
 use App\Models\EventModel;
 use App\Models\LeadModel;
 use App\Models\GuestModel;
+use CodeIgniter\HTTP\RedirectResponse;
+use Throwable;
 
 class Dashboard extends BaseController
 {
-    public function index()
+    public function index(): string|RedirectResponse
     {
+        $checkoutRedirect = $this->handleCheckoutReturn();
+        if ($checkoutRedirect instanceof RedirectResponse) {
+            return $checkoutRedirect;
+        }
+
         $session = session();
         $userRoles = $session->get('user_roles') ?? [];
         $isClient = in_array('client', $userRoles) && !in_array('admin', $userRoles) && !in_array('superadmin', $userRoles);
@@ -101,5 +111,36 @@ class Dashboard extends BaseController
         $data['invitation_url'] = base_url('i/' . $event['slug']);
 
         return view('admin/dashboard/client', $data);
+    }
+
+    private function handleCheckoutReturn(): ?RedirectResponse
+    {
+        $sessionId = trim((string) $this->request->getGet('session_id'));
+        if ($sessionId === '') {
+            return null;
+        }
+
+        try {
+            $finalization = (new PaymentService())->finalizeCheckoutSession($sessionId);
+            $eventId = trim((string) ($finalization['event_id'] ?? (string) $this->request->getGet('event_id')));
+
+            if (($finalization['is_paid'] ?? false) !== true) {
+                return redirect()->route('admin.events.index')
+                    ->with('warning', 'Stripe aún no confirma el pago. Recarga la página en unos segundos.');
+            }
+
+            if ($eventId !== '') {
+                return redirect()->to(site_url(route_to('admin.events.view', $eventId)))
+                    ->with('success', 'Pago confirmado. Tu evento fue activado correctamente.');
+            }
+
+            return redirect()->route('admin.events.index')
+                ->with('success', 'Pago confirmado. Tu evento fue activado correctamente.');
+        } catch (Throwable $exception) {
+            log_message('error', 'Dashboard::handleCheckoutReturn error: {message}', ['message' => $exception->getMessage()]);
+
+            return redirect()->route('admin.events.index')
+                ->with('error', 'No fue posible confirmar el pago desde el dashboard.');
+        }
     }
 }
