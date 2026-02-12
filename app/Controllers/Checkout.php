@@ -110,6 +110,12 @@ class Checkout extends BaseController
             ]);
 
             if (($finalization['is_paid'] ?? false) === true) {
+                // CORREGIDO: Redirigir al evento específico, no al dashboard general
+                $redirectEventId = $eventId !== '' ? $eventId : $eventIdFromQuery;
+                if ($redirectEventId !== '') {
+                    return redirect()->to(site_url(route_to('admin.events.view', $redirectEventId)))
+                        ->with('success', '¡Pago exitoso! Tu evento ha sido activado correctamente.');
+                }
                 return redirect()->route('admin.events.index')
                     ->with('success', 'Pago confirmado. Tu evento fue activado correctamente.');
             }

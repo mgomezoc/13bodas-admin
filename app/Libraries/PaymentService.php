@@ -313,8 +313,24 @@ class PaymentService
             'paid_until' => $paidUntil,
         ];
 
-        if (!$this->eventModel->update($eventId, $updateData)) {
-            throw new \RuntimeException('Failed to activate event: ' . $eventId);
+        // CRÍTICO: También actualizar el campo 'active' si existe en la tabla
+        $db = \Config\Database::connect();
+        $tableName = $this->eventModel->getTable();
+        
+        // Verificar si el campo 'active' existe en la tabla
+        if ($db->fieldExists('active', $tableName)) {
+            $db->table($tableName)
+                ->where('id', $eventId)
+                ->update(array_merge($updateData, ['active' => 'Y']));
+            
+            log_message('info', 'PaymentService::activateEvent updated active=Y for event={eventId}', [
+                'eventId' => $eventId
+            ]);
+        } else {
+            // Si no existe el campo 'active', usar el método normal del modelo
+            if (!$this->eventModel->update($eventId, $updateData)) {
+                throw new \RuntimeException('Failed to activate event: ' . $eventId);
+            }
         }
     }
 

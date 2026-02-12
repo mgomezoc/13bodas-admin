@@ -41,6 +41,7 @@ class EventModel extends Model
         'paid_until',
         'payment_provider',
         'payment_reference',
+        'active', // Campo para compatibilidad con versiones anteriores de la BD
     ];
 
     protected $useTimestamps = true;

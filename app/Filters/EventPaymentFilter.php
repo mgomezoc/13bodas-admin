@@ -25,8 +25,11 @@ class EventPaymentFilter implements FilterInterface
 
         $isPaid = (int) ($event['is_paid'] ?? 0) === 1;
         $isValid = empty($event['paid_until']) || strtotime((string) $event['paid_until']) > time();
+        
+        // También verificar campo 'active' si existe
+        $isActive = !isset($event['active']) || $event['active'] === 'Y' || $event['active'] === 1;
 
-        if ($isPaid && $isValid) {
+        if ($isPaid && $isValid && $isActive) {
             return null;
         }
 
