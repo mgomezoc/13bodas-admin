@@ -15,6 +15,10 @@ $routes->get('privacidad', 'Home::privacidad', ['as' => 'legal.privacy']);
 $routes->get('gracias', 'Home::gracias', ['as' => 'home.thanks']);
 
 
+$routes->get('proyectos', 'Projects::index', ['as' => 'projects.index']);
+$routes->get('proyectos/(:segment)', 'Projects::show/$1', ['as' => 'projects.show']);
+
+
 // Alias SEO/marketing para secciones de home (evita 404 por enlaces compartidos)
 $routes->get('paquetes', 'Home::index', ['as' => 'home.packages']);
 $routes->get('servicios', 'Home::index', ['as' => 'home.services']);

@@ -32,6 +32,7 @@
 <?= $this->section('content') ?>
 <?= $this->include('pages/home/hero') ?>
 <?= $this->include('pages/home/services') ?>
+<?= $this->include('pages/home/projects') ?>
 <?= $this->include('pages/home/magiccam') ?>
 <?= $this->include('pages/home/packages') ?>
 <?= $this->include('pages/home/process') ?>
