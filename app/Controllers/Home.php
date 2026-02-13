@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\ProjectShowcaseService;
 use App\Libraries\StructuredDataBuilder;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Home extends BaseController
 {
-    public function __construct(private StructuredDataBuilder $structuredDataBuilder = new StructuredDataBuilder())
-    {
+    public function __construct(
+        private StructuredDataBuilder $structuredDataBuilder = new StructuredDataBuilder(),
+        private ProjectShowcaseService $projectShowcaseService = new ProjectShowcaseService()
+    ) {
     }
 
     /**
@@ -22,6 +25,7 @@ class Home extends BaseController
 
         return view('pages/home', [
             'homeStructuredDataScripts' => $this->structuredDataBuilder->renderScripts($schemas),
+            'featuredProjects' => $this->projectShowcaseService->getProjects(6),
         ]);
     }
 
